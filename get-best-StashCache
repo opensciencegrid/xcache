@@ -115,5 +115,5 @@ for s in Sites:
 if debug:
     print "#",minsite, mindist,"km"
 
-print 'export STORAGEPREFIX='+minsite
+print 'export STASHPREFIX='+minsite
 

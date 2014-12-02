@@ -19,11 +19,11 @@ set r=`grep export getBestStashCache | awk -F "STORAGEPREFIX=" '{print $2}'`
 echo "$r"
 if ( $r =~ "" ) then
     if ( $deb > 0 ) then
-        echo "problem in getting best redirector. Setting it to atlas-xrd-us.usatlas.org."
+        echo "problem in getting best redirector. Setting it to data.ci-connect.net."
     endif
-    setenv STORAGEPREFIX "root://data.ci-connect.net/"
+    setenv STASHPREFIX "root://data.ci-connect.net/"
 else
-    setenv STORAGEPREFIX $r/
+    setenv STASHPREFIX $r
 endif
 
 eval "rm -f getBestStashCache"

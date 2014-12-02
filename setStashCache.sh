@@ -15,14 +15,14 @@ red=$($StashToolsDir/get-best-StashCache)
 sc=$?
 
 if [ $deb -eq 1 ]; then
-    echo "$red/"
+    echo "$red"
 fi
 
 if [ $sc -eq 0 ]; then
-    eval "$red/"
+    eval "$red"
 else
     if [ $deb -eq 1 ]; then
-    	echo "problem in getting best redirector. Setting it to atlas-xrd-us.usatlas.org."
+    	echo "problem in getting best redirector. Setting it to data.ci-connect.net."
     fi
-    export STORAGEPREFIX="root://data.ci-connect.net/"
+    export STASHPREFIX="root://data.ci-connect.net/"
 fi
