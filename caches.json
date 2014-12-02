@@ -1,0 +1,5 @@
+[ 
+    {"name":"student02.ci-connect.net", "status":1, "longitude":123.123, "latitude":123.123}, 
+    {"name":"student02.ci-connect.net", "status":0, "longitude":123.123, "latitude":123.123}, 
+    {"name":"data.ci-connect.net", "status":1, "longitude":123.123, "latitude":123.123}
+]
