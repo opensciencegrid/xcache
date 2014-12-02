@@ -68,13 +68,13 @@ class site:
 	self.longitude=lo
 	self.latitude=la
     def prn(self):
-        print "#", self.name, "\tlong:",self.longitude,"\t lat:",self.latitude,"/",self.status
+        print "#", self.name, "\tlong:",self.longitude,"\t lat:",self.latitude,"\tstatus:",self.status
 
 Sites=dict()
 worked=0
 try:
     url="https://raw.githubusercontent.com/OSGConnect/StashCache/master/caches.json"
-    if debug: print "# getting FAX endpoints status from FSB ..."
+    if debug: print "# getting StashCache endpoints coordinates and statuses from GitHub ..."
     response=urllib2.Request(url,None)
     opener = urllib2.build_opener()
     f = opener.open(response, timeout=40)
@@ -82,135 +82,38 @@ try:
     for si in data:
         n=si['name']
         s=site(n)
-        if si['dir']: s.direct=5 
+        s.status=si['status'] 
+        s.coo(si['longitude'],si['latitude'])
+        s.prn()
         Sites[n]=s
     worked=1
 except urllib2.HTTPError:
-	if debug: print "# Can't connect to SSBrepeater."
+	if debug: print "# Can't connect to GitHub."
 except:
-    if debug: print "# Can't connect to SSBrepeater.", sys.exc_info()[0]
+    if debug: print "# Can't connect to GitHub.", sys.exc_info()[0]
 
-if debug>2: 
-    for s in Sites: 
+
+# calculating distances to "green" endpoints
+mindist=40000
+minsite=''
+
+for s in Sites:
+    if not Sites[s].status==1: continue
+    dlon = math.radians(lon - Sites[s].longitude)
+    dlat = math.radians(lat - Sites[s].latitude)
+    a = pow(math.sin(dlat/2),2) + math.cos(math.radians(Sites[s].latitude)) * math.cos(math.radians(lat)) * pow(math.sin(dlon/2),2)
+    c = 2 * math.atan2( math.sqrt(a), math.sqrt(1-a) )
+    d = 6373 * c # 6373 is the radius of the Earth in km
+    if debug>1:
         Sites[s].prn()
+        print "#",d,"km"
+    if d<mindist:
+        mindist=d
+        minsite=Sites[s].name
 
-# if not worked:
-#     if debug: print "# getting FAX endpoints status from SSB..."
-#     url="http://dashb-atlas-ssb.cern.ch/dashboard/request.py/getplotdata?time=custom&dateFrom="+ str(today) +"&dateTo="+ str(tomorrow) +"&batch=1&columnid=10083"
-#     # print url
-#     try:
-#         response=urllib2.Request(url,None)
-#         opener = urllib2.build_opener()
-#         f = opener.open(response, timeout=40)
-#         data = json.load(f)
-#         data=data["csvdata"]
-#         for si in data:
-#             n=si['VOName']
-#             if n not in Sites:
-#                 s=site(n)
-#                 Sites[n]=s
-#                 Sites[n].direct=si['COLOR']
-#     except urllib2.HTTPError:
-#         print "# Can't connect to SSB."
-#         sys.exit(2)
-#     except:
-#         print "# Can't connect to SSB.", sys.exc_info()[0]
-#         sys.exit(21)
-#
-#
-#
-#
-# worked=0
-# try:
-#     if debug: print "# getting FAX endpoints coordinates from AGISrepeater..."
-#     req = urllib2.Request("http://waniotest.appspot.com/agis", None)
-#     opener = urllib2.build_opener()
-#     f = opener.open(req, timeout=20)
-#     res=json.load(f)
-#     for s in res:
-#            na=s["name"]
-#         if na in Sites:
-#             Sites[na].coo(s["longitude"],s["latitude"])
-#     if debug>2: print '#', s["name"],s["rc_site"], s["latitude"], s["longitude"]
-#     worked=1
-# except urllib2.HTTPError:
-#     if debug:
-#         print "# Can't connect to AGISrepeater to get coordinates of endpoints."
-# except:
-#     if debug:
-#         print "# Can't connect to AGISrepeater to get coordinates of endpoints:", sys.exc_info()[0]
-#
-# if not worked:
-#     try:
-#         if debug: print "# getting FAX endpoints coordinates from AGIS..."
-#         req = urllib2.Request("http://atlas-agis-api.cern.ch/request/site/query/list/?json&vo_name=atlas&state=ACTIVE", None)
-#         opener = urllib2.build_opener()
-#         f = opener.open(req, timeout=20)
-#         res=json.load(f)
-#         for s in res:
-#             na=s["name"]
-#             if na in Sites:
-#                 Sites[na].coo(s["longitude"],s["latitude"])
-#         if debug>2: print '#', s["name"],s["rc_site"], s["latitude"], s["longitude"]
-#     except urllib2.HTTPError:
-#             print "# Can't connect to AGIS to get coordinates of endpoints."
-#             sys.exit(3)
-#     except:
-#         print "# Can't connect to AGIS to get coordinates of endpoints:", sys.exc_info()[0]
-#         sys.exit(31)
-#
-#
-# # calculating distances to "green" endpoints
-# mindist=40000
-# minsite=''
-#
-# for s in Sites:
-#     if not Sites[s].direct==5: continue
-#     dlon = math.radians(lon - Sites[s].longitude)
-#     dlat = math.radians(lat - Sites[s].latitude)
-#     a = pow(math.sin(dlat/2),2) + math.cos(math.radians(Sites[s].latitude)) * math.cos(math.radians(lat)) * pow(math.sin(dlon/2),2)
-#     c = 2 * math.atan2( math.sqrt(a), math.sqrt(1-a) )
-#     d = 6373 * c # 6373 is the radius of the Earth in km
-#     if debug>1:
-#         Sites[s].prn()
-#         print "#",d,"km"
-#     if d<mindist:
-#         mindist=d
-#         minsite=Sites[s].name
-#
-#
-# if debug:
-#     print "#",minsite, mindist,"km"
-#
-# worked=0
-# try:
-#     print "# looking up endpoint address in AGISrepeater..."
-#     req = urllib2.Request("http://waniotest.appspot.com/agis?rc_site="+minsite, None)
-#     opener = urllib2.build_opener()
-#     f = opener.open(req, timeout=20)
-#     res=json.load(f)
-#     if debug: print "# found corresponding endpoint: ",res[0]["endpoint"]
-#     print 'export STORAGEPREFIX='+res[0]["endpoint"]
-#     worked=1
-# except urllib2.HTTPError:
-#     print "# Can't connect to AGIS to get endpoint address."
-#     sys.exit(4)
-# except:
-#     print "# Can't connect to AGIS to get endpoint address.", sys.exc_info()[0]
-#     sys.exit(41)
-#
-# if not worked:
-#     try:
-#         print "# looking up endpoint address in AGIS..."
-#         req = urllib2.Request("http://atlas-agis-api.cern.ch/request/service/query/get_se_services/?json&state=ACTIVE&flavour=XROOTD&rc_site="+minsite, None)
-#         opener = urllib2.build_opener()
-#         f = opener.open(req, timeout=20)
-#         res=json.load(f)
-#         if debug: print "# found corresponding endpoint: ",res[0]["endpoint"]
-#         print 'export STORAGEPREFIX='+res[0]["endpoint"]
-#     except urllib2.HTTPError:
-#         print "# Can't connect to AGIS to get endpoint address."
-#         sys.exit(4)
-#     except:
-#         print "# Can't connect to AGIS to get endpoint address.", sys.exc_info()[0]
-#         sys.exit(41)
+
+if debug:
+    print "#",minsite, mindist,"km"
+
+print 'export STORAGEPREFIX='+minsite
+
