@@ -9,4 +9,4 @@ source ./setStashCache.(c)sh will determine what is the closest StashCache to th
 
 After that a user can access the file in the following way:
 
-xrdcp $STASHPREFIX/stash/filename localfilename
+xrdcp $STASHPREFIX/user/ivukotic/xAOD_mc.pool.root xAOD_mc.pool.root
