@@ -11,7 +11,7 @@ if [ "$StashToolsDir" = "" ]; then
     StashToolsDir="./"
 fi
 
-red=$($StashToolsDir/fax-get-best-StashCache)
+red=$($StashToolsDir/get-best-StashCache)
 sc=$?
 
 if [ $deb -eq 1 ]; then
@@ -24,5 +24,5 @@ else
     if [ $deb -eq 1 ]; then
     	echo "problem in getting best redirector. Setting it to atlas-xrd-us.usatlas.org."
     fi
-    export STORAGEPREFIX="root://atlas-xrd-us.usatlas.org/"
+    export STORAGEPREFIX="root://data.ci-connect.net/"
 fi

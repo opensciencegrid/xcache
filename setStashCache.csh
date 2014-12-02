@@ -11,7 +11,7 @@ if ( $StashToolsDir =~ "" ) then
     set StashToolsDir = "./"
 endif
 
-$StashToolsDir/fax-get-best-StashCache > getBestStashCache
+$StashToolsDir/get-best-StashCache > getBestStashCache
 
 cat getBestStashCache
 
@@ -21,7 +21,7 @@ if ( $r =~ "" ) then
     if ( $deb > 0 ) then
         echo "problem in getting best redirector. Setting it to atlas-xrd-us.usatlas.org."
     endif
-    setenv STORAGEPREFIX "root://atlas-xrd-us.usatlas.org/"
+    setenv STORAGEPREFIX "root://data.ci-connect.net/"
 else
     setenv STORAGEPREFIX $r/
 endif
