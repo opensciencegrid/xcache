@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#set prefix to proper format
+myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
+
+#try pulling from closest cache
+#if xrdcp doesn't finish in 30 minutes, stop
+timeout 30m xrdcp -d 2 -f $myprefix://$1 $2 > /dev/null 2>&1
+
+res=$?
+
+#check to see if the pull worked, and file exists and has non-zero size
+#if not, pull from trunk
+myfile=$(echo $1 | rev | cut -d/ -f1 | rev)
+if [ $res -ne 0 -o ! -s $2/$myfile ]
+then
+    echo "Pull from $STASHPREFIX failed."
+    echo "Trying to pull from trunk."
+    timeout 30m xrdcp -d 2 -f root://data.ci-connect.net://$1 $2 > /dev/null 2>&1
+    res=$?
+    if [ $res -ne 0 ]
+    then
+	echo "Stashcp failed"
+    else
+	echo "Pull from trunk was successful."
+    fi
+else
+    echo "Pull from $STASHPREFIX was successful."
+fi
