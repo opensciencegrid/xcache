@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#Usage: stashcp <wanted file> <location to be copied to>
+
 #set prefix to proper format
 myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
 
