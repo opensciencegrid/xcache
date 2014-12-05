@@ -1,5 +1,5 @@
 [ 
     {"name":"root://student02.ci-connect.net/", "status":1, "longitude":-87.603, "latitude":41.78}, 
-    {"name":"root://iut2-waniotest.iu.edu/", "status":0, "longitude":-86.456, "latitude":39.25}, 
+    {"name":"root://iut2-waniotest.mwt2.org/", "status":1, "longitude":-86.456, "latitude":39.25}, 
     {"name":"root://data.ci-connect.net/", "status":1, "longitude":-87.603, "latitude":41.78}
 ]
