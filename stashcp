@@ -7,7 +7,7 @@ myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
 
 #try pulling from closest cache
 #if xrdcp doesn't finish in 30 minutes, stop
-timeout 30m xrdcp -d 2 -f $myprefix://$1 $2 > /dev/null 2>&1
+timeout 30m xrdcp -v -d 2 -f $myprefix://$1 $2
 
 res=$?
 
@@ -18,7 +18,7 @@ if [ $res -ne 0 -o ! -s $2/$myfile ]
 then
     echo "Pull from $STASHPREFIX failed."
     echo "Trying to pull from trunk."
-    timeout 30m xrdcp -d 2 -f root://data.ci-connect.net://$1 $2 > /dev/null 2>&1
+    timeout 30m xrdcp -v -d 2 -f root://data.ci-connect.net://$1 $2
     res=$?
     if [ $res -ne 0 ]
     then
