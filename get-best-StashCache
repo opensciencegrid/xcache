@@ -47,8 +47,8 @@ if not worked:
         sys.exit(1)
 
 #Anna's debugging code
-print "My lat/lon: ", lat, lon
-print "My IP: ", ip
+print "My lat/lon:", lat, lon
+print "My IP:", ip
 
 n = datetime.datetime.utcnow()
 one_day = datetime.timedelta(days=1)
