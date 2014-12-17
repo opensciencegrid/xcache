@@ -33,9 +33,7 @@ try:
 except:
     if debug: 
         print "# Can't determine client coordinates using geoip.mwt2.org ", sys.exc_info()[0]
-##Anna's debugging
-worked = 0       
-##
+
 if not worked:
     try:
         req = urllib2.Request("http://freegeoip.net/json/", None)
