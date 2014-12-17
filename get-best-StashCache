@@ -33,7 +33,9 @@ try:
 except:
     if debug: 
         print "# Can't determine client coordinates using geoip.mwt2.org ", sys.exc_info()[0]
-        
+##Anna's debugging
+worked = 0       
+##
 if not worked:
     try:
         req = urllib2.Request("http://freegeoip.net/json/", None)
@@ -49,6 +51,7 @@ if not worked:
 #Anna's debugging code
 print "My lat/lon:", lat, lon
 print "My IP:", ip
+#
 
 n = datetime.datetime.utcnow()
 one_day = datetime.timedelta(days=1)
