@@ -46,7 +46,7 @@ if not worked:
         sys.exit(1)
 
 #Anna's debugging code
-print lat, lon
+print "My lat/lon: ", lat, lon
 
 n = datetime.datetime.utcnow()
 one_day = datetime.timedelta(days=1)
