@@ -2,5 +2,5 @@
     {"name":"root://student02.ci-connect.net/", "status":1, "longitude":-87.603, "latitude":41.78}, 
     {"name":"root://iut2-waniotest.mwt2.org/", "status":1, "longitude":-86.456, "latitude":39.25}, 
     {"name":"root://data.ci-connect.net/", "status":1, "longitude":-87.603, "latitude":41.78},
-    {"name":"root://ec2-54-81-227-165.compute-1.amazonaws.com/", "status":1, "longitude":-77.093102, "latitude":38.893447}
+    {"name":"root://ec2-54-225-34-102.compute-1.amazonaws.com/", "status":1, "longitude":-77.093102, "latitude":38.893447}
 ]
