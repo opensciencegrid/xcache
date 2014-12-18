@@ -27,10 +27,14 @@ then
     res=$?
     if [ $res -ne 0 ]
     then
-	echo "Stashcp failed."
+		echo "Stashcp failed."
     else
-	echo "Pull from trunk was successful."
+		echo "Pull from trunk was successful."
+		FILESIZE=$(stat -c%s "$2/$1")
+		echo "File size: $FILESIZE"
     fi
 else
     echo "Pull from $STASHPREFIX was successful."
+	FILESIZE=$(stat -c%s "$2/$1")
+	echo "File size: $FILESIZE"
 fi
