@@ -5,7 +5,7 @@
 #set prefix to proper format
 myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
 
-if [ ${#myprefix} -eq 0 ]
+if [ ${#myprefix} -lt 6 ]
 then
     myprefix="root://data.ci-connect.net/"
 fi
