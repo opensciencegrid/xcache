@@ -10,8 +10,6 @@ then
     myprefix="root://data.ci-connect.net/"
 fi
 
-echo "I think my prefix is $myprefix"
-
 #try pulling from closest cache
 #if xrdcp doesn't finish in 30 minutes, stop
 timeout 30m xrdcp -v -d 2 -f $myprefix://$1 $2 2>&1
