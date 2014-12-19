@@ -10,7 +10,7 @@ then
     myprefix="root://data.ci-connect.net/"
 fi
 
-echo $myprefix
+echo "I think my prefix is $myprefix"
 
 #try pulling from closest cache
 #if xrdcp doesn't finish in 30 minutes, stop
