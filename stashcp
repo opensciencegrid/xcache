@@ -2,7 +2,7 @@
 
 #Usage: stashcp <wanted file> <location to be copied to>
 
-echo $STASHPREFIX
+echo "I think my STASHPREFIX is $STASHPREFIX"
 
 #set prefix to proper format
 myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
@@ -25,7 +25,7 @@ res=$?
 myfile=$(echo $1 | rev | cut -d/ -f1 | rev)
 if [ $res -ne 0 ]
 then
-    echo "Pull from $STASHPREFIX failed."
+    echo "Pull from $myprefix failed."
     echo "Trying to pull from trunk."
     timeout 30m xrdcp -v -d 2 -f root://data.ci-connect.net://$1 $2 2>&1
     res=$?
@@ -36,5 +36,5 @@ then
 		echo "Pull from trunk was successful."
     fi
 else
-    echo "Pull from $STASHPREFIX was successful."
+    echo "Pull from $myprefix was successful."
 fi
