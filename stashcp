@@ -41,8 +41,7 @@ if [ $doflag -eq 1 ]
 then
     timeout 30m xrdcp -v -d 2 -f $myprefix://$file $loc 2>&1
 else
-    timeout 30m $(xrdcp -f $myprefix://$file $loc > /dev/null 2>&1)
-    echo "I did this"
+    timeout 30m xrdcp -f $myprefix://$file $loc > /dev/null 2>&1
 fi
 res=$?
 
@@ -55,8 +54,10 @@ then
     then
 	echo "Pull from $myprefix failed."
 	echo "Trying to pull from trunk."
+	timeout 30m xrdcp -v -d 2 -f root://data.ci-connect.net://$file $loc 2>&1
+    else
+	timeout 30m xrdcp -v -d 2 -f root://data.ci-connect.net://$file $loc > /dev/null 2>&1
     fi
-    timeout 30m xrdcp -v -d 2 -f root://data.ci-connect.net://$file $loc 2>&1
     res=$?
     if [ $res -ne 0 ]
     then		
