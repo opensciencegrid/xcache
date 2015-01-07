@@ -25,9 +25,10 @@ done
 
 if [ $debug -eq 2 ]
 then
-	xrdargs="-d 2 -v"
+	#xrdargs="-d 2 -v"
+	xrdargs="-s"
 else
-	xrdargs="-v"
+	xrdargs="-s"
 fi
 
 #set prefix to proper format
