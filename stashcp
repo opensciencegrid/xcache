@@ -22,7 +22,7 @@ if [ ${#myprefix} -lt 6 ]
 then
     myprefix="root://data.ci-connect.net/"
 fi
-if [ doflag -eq1 ]
+if [ $doflag -eq 1 ]
 then
     echo "I think my STASHPREFIX is $STASHPREFIX"
     echo "I think my prefix is $myprefix"
@@ -39,16 +39,19 @@ res=$?
 myfile=$(echo $1 | rev | cut -d/ -f1 | rev)
 if [ $res -ne 0 ]
 then
-    echo "Pull from $myprefix failed."
-    echo "Trying to pull from trunk."
+    if [ $doflag -eq 1 ]
+    then
+	echo "Pull from $myprefix failed."
+	echo "Trying to pull from trunk."
+    fi
     timeout 30m xrdcp -v -d 2 -f root://data.ci-connect.net://$1 $2 2>&1
     res=$?
     if [ $res -ne 0 ]
     then
 		echo "Stashcp failed."
-    else
+    elif [ $doflag -eq 1 ]
 		echo "Pull from trunk was successful."
     fi
-else
+elif [ $doflag -eq 1 ]
     echo "Pull from $myprefix was successful."
 fi
