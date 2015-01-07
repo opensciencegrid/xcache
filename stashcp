@@ -50,7 +50,7 @@ fi
 #pull here
 for file in "${files[@]}"
 do
-	echo $file
+	echo "$file\n"
 done
 
 ##res=$?
