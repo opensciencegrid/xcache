@@ -49,10 +49,6 @@ else
 	loc=$loc/$dirname
 	mkdir -p $loc
 fi
-for file in ${files[@]}
-do 
-	echo ${#file}
-done
 
 #pull here
 ##for file in "${files[@]}"
