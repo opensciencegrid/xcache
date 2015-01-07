@@ -2,7 +2,7 @@
 
 #Usage: stashcp [-d] -s <source> -l <location to be copied to>
 
-debug=-1
+debug=0
 file=""
 loc="."
 recursive=0
