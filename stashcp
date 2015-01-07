@@ -6,14 +6,11 @@ debug=-1
 file=""
 loc="."
 recursive=0
-while getopts ":drs:l:" opt; do
+while getopts ":ds:l:" opt; do
     case $opt in 
 	d)
 	    debug=2
 	    ;;
-	r)
-		recursive=1
-		;;
 	s)
 	    source=$OPTARG
 	    ;;
