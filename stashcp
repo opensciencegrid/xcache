@@ -47,6 +47,7 @@ else
 	files=$(xrdfs $myprefix ls $source)
 	dirname=$(echo $source | rev | cut -d/ -f1 | rev)
 	loc=$loc/$dirname
+	echo $loc
 	mkdir -p $loc
 fi
 
