@@ -68,7 +68,6 @@ fi
 #pull here
 for file in ${files[@]}
 do
-	echo $file
 	timeout 30m xrdcp $xrdargs -f $myprefix://$file $loc
 	res=$?
 	
@@ -77,7 +76,6 @@ do
 	myfile=$(echo $file | rev | cut -d/ -f1 | rev)
 	if [ $res -ne 0 ] || [ ! -s $loc/$myfile ]
 	then
-		stat $loc/$myfile
 		if [ $debug -eq 2 ]
 		then		
 			echo "Pull from $myprefix failed."
