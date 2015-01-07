@@ -64,13 +64,15 @@ fi
 #pull here
 for file in ${files[@]}; do
 	fisdir=$(xrdfs $myprefix stat $file | grep "IsDir" | wc -l)
-	if [ $fisdir -ne 0 ] && [ $recursive -eq 1 ]; then
-		if [ $debug -eq 2 ]; then
-			fl="-d"
-		else
-			fl=""
+	if [ $fisdir -ne 0 ]; then
+		if [ $recursive -eq 1 ]; then
+			if [ $debug -eq 2 ]; then
+				fl="-d"
+			else
+				fl=""
+			fi
+			bash ./stashcp $fl -s $file -l $loc
 		fi
-		bash ./stashcp $fl -s $file -l $loc
 		continue
 	fi
 	timeout 30m xrdcp $xrdargs -f $myprefix://$file $loc
