@@ -1,13 +1,20 @@
 #!/bin/bash
 
-#Usage: stashcp <wanted file> <location to be copied to>
+#Usage: stashcp [-d] -f <wanted file> -l <location to be copied to>
 
 doflag=0
-
-while getopts ":d" opt; do
+file=""
+loc="."
+while getopts ":df:l:" opt; do
     case $opt in 
 	d)
 	    doflag=1
+	    ;;
+	f)
+	    file=$OPTARG
+	    ;;
+	l)
+	    loc=$OPTARG
 	    ;;
 	\?)
 	    echo "Invalid option: -$OPTARG" >&2
@@ -30,8 +37,13 @@ fi
 
 #try pulling from closest cache
 #if xrdcp doesn't finish in 30 minutes, stop
-timeout 30m xrdcp -v -d 2 -f $myprefix://$1 $2 2>&1
-
+if [ $doflag -eq 1 ]
+then
+    timeout 30m xrdcp -v -d 2 -f $myprefix://$file $loc 2>&1
+else
+    timeout 30m $(xrdcp -f $myprefix://$file $loc > /dev/null 2>&1)
+    echo "I did this"
+fi
 res=$?
 
 #check to see if the pull worked, and file exists and has non-zero size
@@ -44,14 +56,16 @@ then
 	echo "Pull from $myprefix failed."
 	echo "Trying to pull from trunk."
     fi
-    timeout 30m xrdcp -v -d 2 -f root://data.ci-connect.net://$1 $2 2>&1
+    timeout 30m xrdcp -v -d 2 -f root://data.ci-connect.net://$file $loc 2>&1
     res=$?
     if [ $res -ne 0 ]
-    then
-		echo "Stashcp failed."
+    then		
+	echo "Stashcp failed."
     elif [ $doflag -eq 1 ]
-		echo "Pull from trunk was successful."
+    then
+	echo "Pull from trunk was successful."
     fi
 elif [ $doflag -eq 1 ]
+then
     echo "Pull from $myprefix was successful."
 fi
