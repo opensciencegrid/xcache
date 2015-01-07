@@ -76,7 +76,7 @@ do
 	#if not, pull from trunk
 	if [ $res -ne 0 ] || [ ! -s $loc/$file ]
 	then
-		echo $( -s $loc/$file )
+		echo $([ -s $loc/$file ])
 		if [ $debug -eq 2 ]
 		then		
 			echo "Pull from $myprefix failed."
