@@ -67,6 +67,7 @@ fi
 #pull here
 for file in ${files[@]}
 do
+	echo $file
 	timeout 30m xrdcp $xrdargs -f $myprefix://$source $loc
 	res=$?
 	
