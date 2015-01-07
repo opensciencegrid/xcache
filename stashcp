@@ -51,7 +51,7 @@ else
 fi
 for file in ${files[@]}
 do 
-	echo $file
+	echo ${#file}
 done
 
 #pull here
