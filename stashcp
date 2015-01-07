@@ -5,7 +5,8 @@
 debug=0
 file=""
 loc="."
-while getopts ":ds:l:" opt; do
+recursive=0
+while getopts ":drs:l:" opt; do
     case $opt in 
 	d)
 	    debug=2
@@ -13,6 +14,9 @@ while getopts ":ds:l:" opt; do
 	s)
 	    source=$OPTARG
 	    ;;
+	r)
+		recursive=1
+		;;
 	l)
 	    loc=$OPTARG
 	    ;;
@@ -60,7 +64,7 @@ fi
 #pull here
 for file in ${files[@]}; do
 	fisdir=$(xrdfs $myprefix stat $file | grep "IsDir" | wc -l)
-	if [ $fisdir -ne 0 ]; then
+	if [ $fisdir -ne 0 ] && [ $recursive -eq 1 ]; then
 		if [ $debug -eq 2 ]; then
 			fl="-d"
 		else
