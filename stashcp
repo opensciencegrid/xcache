@@ -74,7 +74,7 @@ do
 	
 	#check to see if the pull worked, and file exists and has non-zero size
 	#if not, pull from trunk
-	if [ $res -ne 0 ] || ![ -s $loc/$file ]
+	if [ $res -ne 0 ] || [ !-s $loc/$file ]
 	then
 		if [ $debug -eq 2 ]
 		then		
