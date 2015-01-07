@@ -23,6 +23,13 @@ while getopts ":ds:l:" opt; do
     esac
 done
 
+if [ $debug -eq 2 ]
+then
+	xrdargs="-d 2 -v"
+else
+	xrdargs="-s"
+fi
+
 #set prefix to proper format
 myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
 
@@ -60,7 +67,7 @@ fi
 #pull here
 for file in ${files[@]}
 do
-	timeout 30m xrdcp -d $debug -f $myprefix://$source $loc
+	timeout 30m xrdcp $xrdargs -f $myprefix://$source $loc
 	res=$?
 	
 	#check to see if the pull worked, and file exists and has non-zero size
@@ -72,7 +79,7 @@ do
 			echo "Pull from $myprefix failed."
 			echo "Trying to pull from trunk."
 		fi
-		timeout 30m xrdcp -d $debug -f root://data.ci-connect.net://$file $loc 2>&1
+		timeout 30m xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1
 		res=$?
 		if [ $res -ne 0 ]
 		then				
