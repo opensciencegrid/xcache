@@ -46,9 +46,12 @@ then
 else
 	files=$(xrdfs $myprefix ls $source)
 fi
-echo $files
 
 #pull here
+for file in "${files[@]}"
+do
+	echo $file
+done
 
 ##res=$?
 
