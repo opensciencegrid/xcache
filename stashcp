@@ -39,6 +39,7 @@ fi
 #if xrdcp doesn't finish in 30 minutes, stop
 #check to see if chosen path is a file or directory
 isdir=$(xrdfs $myprefix stat $source | grep "IsDir" | wc -l)
+echo $isdir
 if [ isdir -eq 0 ]
 then
 	files=($source)
