@@ -66,7 +66,7 @@ for file in ${files[@]}; do
 		else
 			fl=""
 		fi
-		stashcp $fl -s $file -l $loc
+		bash ./stashcp $fl -s $file -l $loc
 		continue
 	fi
 	timeout 30m xrdcp $xrdargs -f $myprefix://$file $loc
