@@ -47,13 +47,13 @@ else
 	files=$(xrdfs $myprefix ls $source)
 	dirname=$(echo $source | rev | cut -d/ -f1 | rev)
 	loc=$loc/$dirname
-	mkdir $loc
+	mkdir -p $loc
 fi
 
 #pull here
 for file in "${files[@]}"
 do
-	echo $file
+	echo ${#file}
 	timeout 30m xrdcp -d $debug -f $myprefix://$source $loc
 	res=$?
 	
