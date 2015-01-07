@@ -1,17 +1,17 @@
 #!/bin/bash
 
-#Usage: stashcp [-d] -f <wanted file> -l <location to be copied to>
+#Usage: stashcp [-d] -s <source> -l <location to be copied to>
 
-doflag=0
+debug=-1
 file=""
 loc="."
-while getopts ":df:l:" opt; do
+while getopts ":ds:l:" opt; do
     case $opt in 
 	d)
-	    doflag=1
+	    debug=2
 	    ;;
-	f)
-	    file=$OPTARG
+	s)
+	    source=$OPTARG
 	    ;;
 	l)
 	    loc=$OPTARG
@@ -29,7 +29,7 @@ if [ ${#myprefix} -lt 6 ]
 then
     myprefix="root://data.ci-connect.net/"
 fi
-if [ $doflag -eq 1 ]
+if [ $debug -eq 2 ]
 then
     echo "I think my STASHPREFIX is $STASHPREFIX"
     echo "I think my prefix is $myprefix"
@@ -37,36 +37,40 @@ fi
 
 #try pulling from closest cache
 #if xrdcp doesn't finish in 30 minutes, stop
-if [ $doflag -eq 1 ]
+#check to see if chosen path is a file or directory
+isdir=$(xrdfs $myprefix stat $source) | grep "IsDir" | wc -l
+if [ isdir -eq 0 ]
 then
-    timeout 30m xrdcp -v -d 2 -f $myprefix://$file $loc 2>&1
+	files=($source)
 else
-    timeout 30m xrdcp -f $myprefix://$file $loc > /dev/null 2>&1
+	files=$(xrdfs $myprefix ls $source)
 fi
-res=$?
+echo $files
 
-#check to see if the pull worked, and file exists and has non-zero size
-#if not, pull from trunk
-myfile=$(echo $1 | rev | cut -d/ -f1 | rev)
-if [ $res -ne 0 ]
-then
-    if [ $doflag -eq 1 ]
-    then
-	echo "Pull from $myprefix failed."
-	echo "Trying to pull from trunk."
-	timeout 30m xrdcp -v -d 2 -f root://data.ci-connect.net://$file $loc 2>&1
-    else
-	timeout 30m xrdcp -v -d 2 -f root://data.ci-connect.net://$file $loc > /dev/null 2>&1
-    fi
-    res=$?
-    if [ $res -ne 0 ]
-    then		
-	echo "Stashcp failed."
-    elif [ $doflag -eq 1 ]
-    then
-	echo "Pull from trunk was successful."
-    fi
-elif [ $doflag -eq 1 ]
-then
-    echo "Pull from $myprefix was successful."
-fi
+#pull here
+
+##res=$?
+
+###check to see if the pull worked, and file exists and has non-zero size
+###if not, pull from trunk
+##myfile=$(echo $1 | rev | cut -d/ -f1 | rev)
+##if [ $res -ne 0 ]
+##then
+##    if [ $debug -eq 2 ]
+##    then
+##		echo "Pull from $myprefix failed."
+##		echo "Trying to pull from trunk."
+##	fi
+##	timeout 30m xrdcp -d $debug -f root://data.ci-connect.net://$file $loc 2>&1
+##  res=$?
+##    if [ $res -ne 0 ]
+##    then		
+##		echo "Stashcp failed."
+##    elif [ $debug -eq 2 ]
+##    then
+##		echo "Pull from trunk was successful."
+##    fi
+##elif [ $debug -eq 2 ]
+##then
+##    echo "Pull from $myprefix was successful."
+##fi
