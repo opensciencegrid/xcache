@@ -58,8 +58,7 @@ do
 	
 	#check to see if the pull worked, and file exists and has non-zero size
 	#if not, pull from trunk
-	myfile=$(echo $source | rev | cut -d/ -f1 | rev)
-	if [ $res -ne 0 ] && [ -s $loc/$myfile ]
+	if [ $res -ne 0 ]
 	then
 		if [ $debug -eq 2 ]
 		then		
