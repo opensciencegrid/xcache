@@ -58,7 +58,7 @@ do
 	
 	#check to see if the pull worked, and file exists and has non-zero size
 	#if not, pull from trunk
-	if [ $res -ne 0 ]
+	if [ $res -ne 0 ] || ![ -s $loc/$file ]
 	then
 		if [ $debug -eq 2 ]
 		then		
@@ -69,7 +69,7 @@ do
 		res=$?
 		if [ $res -ne 0 ]
 		then				
-			echo "Stashcp of $myfile failed."
+			echo "Stashcp of $file failed."
 		elif [ $debug -eq 2 ]
 		then
 			echo "Pull from trunk was successful."
