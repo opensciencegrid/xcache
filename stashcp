@@ -44,6 +44,8 @@ if [ $isdir -eq 0 ]
 then
 	files=($source)
 else
+	lc=$(echo "${source: -1}")
+	echo $lc
 	files=$(xrdfs $myprefix ls $source)
 	dirname=$(echo $source | rev | cut -d/ -f1 | rev)
 	loc=$loc/$dirname
