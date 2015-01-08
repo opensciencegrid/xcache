@@ -78,8 +78,6 @@ fi
 
 #pull here
 for file in ${files[@]}; do
-	echo "$file"
-	echo "Start of dl: date"
 	fisdir=$(xrdfs $myprefix stat $file | grep "IsDir" | wc -l)
 	if [ $fisdir -ne 0 ]; then
 		if [ $recursive -eq 1 ]; then
@@ -112,7 +110,5 @@ for file in ${files[@]}; do
 		fi
 	elif [ $debug -eq 2 ]; then		
 		echo "Pull of $myfile from $myprefix was successful."
-	fi
-	echo "End of dl: date"
-	echo ""
+	ficase 
 done
