@@ -6,5 +6,7 @@ source ./setStashCache.sh
 arrFiles=$(echo $1 | tr "," "\n") 
 for f in $arrFiles; do
     echo $f
+    echo "DL start: $(date)"
     bash ./stashcp -d -s $f -l $2
+    echo "DL end: $(date)"
 done 
