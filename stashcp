@@ -46,7 +46,7 @@ if [ $debug -eq 2 ]; then
 else
 	xrdargs="-s"
 fi
-echo "$xdargs"
+echo "$xrdargs"
 
 #set prefix to proper format
 myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
