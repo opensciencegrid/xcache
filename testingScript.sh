@@ -3,10 +3,8 @@
 source /cvmfs/oasis.opensciencegrid.org/osg/modules/lmod/5.6.2/init/bash
 module load xrootd/4.1.1 2>&1
 source ./setStashCache.sh
-echo $1
-arrFiles=$(echo $1 | tr "," "\n")
-echo $arrFiles 
+arrFiles=$(echo $1 | tr "," "\n") 
 for f in $arrFiles; do
-    echo "$f"
+    echo $f
     bash ./stashcp -d -s $f -l $2
 done 
