@@ -78,9 +78,7 @@ fi
 
 #pull here
 for file in ${files[@]}; do
-	if [ $debug -eq 2 ]; then
-		echo $file
-	done
+	echo "$file"
 	fisdir=$(xrdfs $myprefix stat $file | grep "IsDir" | wc -l)
 	if [ $fisdir -ne 0 ]; then
 		if [ $recursive -eq 1 ]; then
