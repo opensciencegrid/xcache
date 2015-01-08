@@ -18,8 +18,7 @@ def main():
     subprocess.Popen("module load xrootd/4.1.1 2>&1")
     subprocess.Popen("source ./setStashCache.sh")
     for f in files:
-        subprocess.Popen("bash ./stashcp {!s} {!s}".format(f, loc))
-    
+        subprocess.Popen("bash ./stashcp -d -s {!s} -l {!s}".format(f, loc))
     
 if __name__ == "__main__":
     main()
