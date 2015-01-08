@@ -33,11 +33,6 @@ while getopts ":drhs:l:" opt; do
 	l)
 	    loc=$OPTARG
 	    ;;
-	:) 
-	    printf "Missing arguments" >&2
-	    echo "$usage" >&2
-	    exit 1
-	    ;;
 	\?)
 	    echo "Invalid option: -$OPTARG" >&2
 	    echo "$usage" >&2
@@ -83,6 +78,9 @@ fi
 
 #pull here
 for file in ${files[@]}; do
+	if [ $debug -eq 2 ]; then
+		echo $file
+	done
 	fisdir=$(xrdfs $myprefix stat $file | grep "IsDir" | wc -l)
 	if [ $fisdir -ne 0 ]; then
 		if [ $recursive -eq 1 ]; then
