@@ -10,7 +10,7 @@ debug=0
 file=""
 loc="."
 recursive=0
-while getopts ":drhs:l:" opt; do
+while getopts "drhs:l:" opt; do
     case $opt in 
 	h)
 	    echo "$usage"
