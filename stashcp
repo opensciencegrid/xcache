@@ -46,6 +46,7 @@ if [ $debug -eq 2 ]; then
 else
 	xrdargs="-s"
 fi
+echo $xdargs
 
 #set prefix to proper format
 myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
@@ -86,11 +87,11 @@ for file in ${files[@]}; do
 			else
 				fl=""
 			fi
-			bash ./stashcp $fl -s $file -l $loc 1>&2
+			bash ./stashcp $fl -s $file -l $loc 
 		fi
 		continue
 	fi
-	timeout 30m xrdcp $xrdargs -f $myprefix://$file $loc 1>&2
+	timeout 30m xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
 	res=$?
 	
 	#check to see if the pull worked, and file exists and has non-zero size
