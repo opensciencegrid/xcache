@@ -86,12 +86,11 @@ for file in ${files[@]}; do
 			else
 				fl=""
 			fi
-			bash ./stashcp $fl -s $file -l $loc 2>&1
+			bash ./stashcp $fl -s $file -l $loc 1>&2
 		fi
 		continue
 	fi
-	echo "timeout 30m xrdcp $xrdargs -f $myprefix://$file $loc 2>&1"
-	timeout 30m xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
+	timeout 30m xrdcp $xrdargs -f $myprefix://$file $loc 1>&2
 	res=$?
 	
 	#check to see if the pull worked, and file exists and has non-zero size
