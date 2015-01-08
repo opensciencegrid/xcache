@@ -1,6 +1,10 @@
 #!/bin/bash
 
-#Usage: stashcp [-dr] -s <source> -l <location to be copied to>
+usage="$(basename "$0") [-d] [-r] [-h] -s <source> -l <location to be copied to>
+
+	-d: show debugging information
+	-r: recursively copy
+	-h: show this help text"
 
 debug=0
 file=""
@@ -8,6 +12,10 @@ loc="."
 recursive=0
 while getopts ":drs:l:" opt; do
     case $opt in 
+	h)
+		echo "$usage"
+		exit
+		;;
 	d)
 	    debug=2
 	    ;;
@@ -22,6 +30,8 @@ while getopts ":drs:l:" opt; do
 	    ;;
 	\?)
 	    echo "Invalid option: -$OPTARG" >&2
+		echo "$usage"
+		exit 1
 	    ;;
     esac
 done
