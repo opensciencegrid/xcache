@@ -1,6 +1,6 @@
 #!/bin/bash
 
-usage="$(basename "$0") [-d] [-r] [-h] -s <source> -l <location to be copied to>
+usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
 
 	-d: show debugging information
 	-r: recursively copy
@@ -31,6 +31,7 @@ while getopts ":drs:l:" opt; do
 	:) 
 		printf "Missing arguments" >&2
 		echo "$usage" >&2
+		exit 1
 		;;
 	\?)
 	    echo "Invalid option: -$OPTARG" >&2
@@ -39,7 +40,6 @@ while getopts ":drs:l:" opt; do
 	    ;;
     esac
 done
-shift $((OPTIND - 1))
 
 if [ $debug -eq 2 ]; then
 	xrdargs="-d 2 -v"
