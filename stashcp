@@ -42,7 +42,7 @@ while getopts ":drhs:l:" opt; do
 done
 
 if [ $debug -eq 2 ]; then
-	xrdargs="-v -d 2"
+	xrdargs="-d 2 --verbose"
 else
 	xrdargs="-s"
 fi
