@@ -1,4 +1,4 @@
-import getopt, sys
+import getopt, sys, subprocess
 
 def main():
     try:
@@ -11,10 +11,15 @@ def main():
     for opt, arg in opts:
         if opt == "-f":
             fileString = arg
-        elif opt == "-l"
+        elif opt == "-l":
             loc = arg
     files = fileString.split(",")
-    print files
+    subprocess.Popen("source /cvmfs/oasis.opensciencegrid.org/osg/modules/lmod/5.6.2/init/bash")
+    subprocess.Popen("module load xrootd/4.1.1 2>&1")
+    subprocess.Popen("source ./setStashCache.sh")
+    for f in files:
+        subprocess.Popen("bash ./stashcp {!s} {!s}".format(f, loc))
+    
     
 if __name__ == "__main__":
     main()
