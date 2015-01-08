@@ -13,9 +13,9 @@ recursive=0
 while getopts ":drs:l:" opt; do
     case $opt in 
 	h)
-		echo "$usage"
-		exit
-		;;
+	    echo "$usage"
+	    exit
+	    ;;
 	d)
 	    debug=2
 	    ;;
@@ -23,20 +23,20 @@ while getopts ":drs:l:" opt; do
 	    source=$OPTARG
 	    ;;
 	r)
-		recursive=1
-		;;
+	    recursive=1
+	    ;;
 	l)
 	    loc=$OPTARG
 	    ;;
 	:) 
-		printf "Missing arguments" >&2
-		echo "$usage" >&2
-		exit 1
-		;;
+	    printf "Missing arguments" >&2
+	    echo "$usage" >&2
+	    exit 1
+	    ;;
 	\?)
 	    echo "Invalid option: -$OPTARG" >&2
-		echo "$usage" >&2
-		exit 1
+	    echo "$usage" >&2
+	    exit 1
 	    ;;
     esac
 done
