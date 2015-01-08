@@ -89,7 +89,7 @@ for file in ${files[@]}; do
 			else
 				fl=""
 			fi
-			bash ./stashcp $fl -s $file -l $loc
+			bash ./stashcp $fl -s $file -l $loc 2>&1
 		fi
 		continue
 	fi
