@@ -58,8 +58,8 @@ if [ $debug -eq 2 ]; then
     echo "I think my prefix is $myprefix"
 fi
 
-check to see if chosen path is a file or directory
-isdir=$(xrdfs $myprefix stat $source | grep "IsDir" | wc -l)
+#check to see if chosen path is a file or directory
+#isdir=$(xrdfs $myprefix stat $source | grep "IsDir" | wc -l)
 #if [ $isdir -eq 0 ]; then
 #	files=($source)
 #else
