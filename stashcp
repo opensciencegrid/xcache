@@ -89,25 +89,25 @@ for file in ${files[@]}; do
 		fi
 		continue
 	fi
-	timeout 30m xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
-	res=$?
+	#timeout 30m xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
+	#res=$?
 	
-	#check to see if the pull worked, and file exists and has non-zero size
-	#if not, pull from trunk
-	myfile=$(echo $file | rev | cut -d/ -f1 | rev)
-	if [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then
-		if [ $debug -eq 2 ]; then		
-			echo "Pull from $myprefix failed."
-			echo "Trying to pull from trunk."
-		fi
-		timeout 30m xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1
-		res=$?
-		if [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then				
-			echo "Stashcp of $file failed."
-		elif [ $debug -eq 2 ]; then
-			echo "Pull from trunk was successful."
-		fi
-	elif [ $debug -eq 2 ]; then		
-		echo "Pull of $myfile from $myprefix was successful."
-	fi
+	##check to see if the pull worked, and file exists and has non-zero size
+	##if not, pull from trunk
+	#myfile=$(echo $file | rev | cut -d/ -f1 | rev)
+	#if [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then
+	#	if [ $debug -eq 2 ]; then		
+	#		echo "Pull from $myprefix failed."
+	#		echo "Trying to pull from trunk."
+	#	fi
+	#	timeout 30m xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1
+	#	res=$?
+	#	if [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then				
+	#		echo "Stashcp of $file failed."
+	#	elif [ $debug -eq 2 ]; then
+	#		echo "Pull from trunk was successful."
+	#	fi
+	#elif [ $debug -eq 2 ]; then		
+	#	echo "Pull of $myfile from $myprefix was successful."
+	#fi
 done
