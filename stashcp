@@ -43,40 +43,37 @@ done
 
 echo "$(date): Got opts"
 
-#if [ $debug -eq 2 ]; then
-#	xrdargs="-d 2 -v"
-#else
-#	xrdargs="-s"
-#fi
+if [ $debug -eq 2 ]; then
+	xrdargs="-d 2 -v"
+else
+	xrdargs="-s"
+fi
 
 #set prefix to proper format
-#myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
-
-
-
-#if [ ${#myprefix} -lt 6 ]; then
-#    myprefix="root://data.ci-connect.net"
-#fi
-#if [ $debug -eq 2 ]; then
-#    echo "I think my STASHPREFIX is $STASHPREFIX"
-#    echo "I think my prefix is $myprefix"
-#fi
+myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
+if [ ${#myprefix} -lt 6 ]; then
+    myprefix="root://data.ci-connect.net"
+fi
+if [ $debug -eq 2 ]; then
+    echo "I think my STASHPREFIX is $STASHPREFIX"
+    echo "I think my prefix is $myprefix"
+fi
 
 #check to see if chosen path is a file or directory
-#isdir=$(xrdfs $myprefix stat $source | grep "IsDir" | wc -l)
-#if [ $isdir -eq 0 ]; then
-#	files=($source)
-#else
-#	files=$(xrdfs $myprefix ls $source)
-#	lc=$(echo "${source: -1}")
-#	if [ $lc == "/" ]; then
-#		dirname=$(echo $source | rev | cut -d/ -f2 | rev)
-#	else
-#		dirname=$(echo $source | rev | cut -d/ -f1 | rev)
-#	fi
-#	loc=$loc/$dirname
-#	mkdir -p $loc
-#fi
+isdir=$(xrdfs $myprefix stat $source | grep "IsDir" | wc -l)
+if [ $isdir -eq 0 ]; then
+	files=($source)
+else
+	files=$(xrdfs $myprefix ls $source)
+	lc=$(echo "${source: -1}")
+	if [ $lc == "/" ]; then
+		dirname=$(echo $source | rev | cut -d/ -f2 | rev)
+	else
+		dirname=$(echo $source | rev | cut -d/ -f1 | rev)
+	fi
+	loc=$loc/$dirname
+	mkdir -p $loc
+fi
 
 #try pulling from closest cache
 #if xrdcp doesn't finish in 30 minutes, stop
