@@ -41,22 +41,26 @@ while getopts ":drhs:l:" opt; do
     esac
 done
 
-if [ $debug -eq 2 ]; then
-	xrdargs="-d 2 -v"
-else
-	xrdargs="-s"
-fi
+echo "$(date): Got opts"
+
+#if [ $debug -eq 2 ]; then
+#	xrdargs="-d 2 -v"
+#else
+#	xrdargs="-s"
+#fi
 
 #set prefix to proper format
-myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
+#myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
 
-if [ ${#myprefix} -lt 6 ]; then
-    myprefix="root://data.ci-connect.net"
-fi
-if [ $debug -eq 2 ]; then
-    echo "I think my STASHPREFIX is $STASHPREFIX"
-    echo "I think my prefix is $myprefix"
-fi
+
+
+#if [ ${#myprefix} -lt 6 ]; then
+#    myprefix="root://data.ci-connect.net"
+#fi
+#if [ $debug -eq 2 ]; then
+#    echo "I think my STASHPREFIX is $STASHPREFIX"
+#    echo "I think my prefix is $myprefix"
+#fi
 
 #check to see if chosen path is a file or directory
 #isdir=$(xrdfs $myprefix stat $source | grep "IsDir" | wc -l)
