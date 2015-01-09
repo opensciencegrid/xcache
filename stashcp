@@ -89,7 +89,7 @@ for file in ${files[@]}; do
 		fi
 		continue
 	fi
-	timeout 30m xrdcp $xrdargs -f $myprefix://$file $loc 
+	timeout 30m xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
 	res=$?
 	
 	#check to see if the pull worked, and file exists and has non-zero size
