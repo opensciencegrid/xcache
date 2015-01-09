@@ -111,5 +111,5 @@ for file in ${files[@]}; do
 		fi
 	elif [ $debug -eq 2 ]; then		
 		echo "Pull of $myfile from $myprefix was successful."
-	ficase 
+	fi
 done
