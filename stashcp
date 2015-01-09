@@ -42,9 +42,9 @@ while getopts ":drhs:l:" opt; do
 done
 
 if [ $debug -eq 2 ]; then
-	xrdargs="-d 2 -v"
+	xrdargs="-d 2 -v -N"
 else
-	xrdargs="-s "
+	xrdargs="-s"
 fi
 
 #set prefix to proper format
@@ -90,7 +90,6 @@ for file in ${files[@]}; do
 		continue
 	fi
 	timeout 30m xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
-	echo "timeout 30m xrdcp $xrdargs -f $myprefix://$file $loc 2>&1"
 	res=$?
 	
 	#check to see if the pull worked, and file exists and has non-zero size
