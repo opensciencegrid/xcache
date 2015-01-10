@@ -59,7 +59,10 @@ if [ $debug -eq 2 ]; then
     echo "I think my prefix is $myprefix"
 fi
 
+xrdfs root://data.ci-connect.net stat user/olsona/public/RandomData/
+
 #check to see if chosen path is a file or directory
+echo "xrdfs $myprefix stat $source"
 isdir=$(xrdfs $myprefix stat $source | grep "IsDir" | wc -l)
 echo $isdir
 
