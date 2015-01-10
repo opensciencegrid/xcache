@@ -59,6 +59,9 @@ if [ $debug -eq 2 ]; then
     echo "I think my prefix is $myprefix"
 fi
 
+xrdfs root://data.ci-connect.net stat user/olsona/public/RandomData/
+
+
 #check to see if chosen path is a file or directory
 isdir=$(xrdfs $myprefix stat $source | grep "IsDir" | wc -l)
 if [ $isdir -eq 0 ]; then
@@ -74,8 +77,6 @@ else
 	loc=$loc/$dirname
 	mkdir -p $loc
 fi
-
-xrdfs root://data.ci-connect.net stat user/olsona/public/RandomData/
 
 #try pulling from closest cache
 #if xrdcp doesn't finish in 30 minutes, stop
