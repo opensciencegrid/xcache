@@ -115,5 +115,5 @@ for file in ${files[@]}; do
 	elif [ $debug -eq 2 ]; then		
 		echo "Pull of $myfile from $myprefix was successful."
 	fi
-	stat --printf="%s" $loc/$myfile
+	echo $(stat --printf="%s" $loc/$myfile)
 done
