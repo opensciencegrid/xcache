@@ -41,7 +41,7 @@ while getopts ":drhs:l:" opt; do
     esac
 done
 
-echo "$(date): Got opts"
+#echo "$(date): Got opts"
 
 if [ $debug -eq 2 ]; then
 	xrdargs="-d 2 --nopbar"
