@@ -103,6 +103,7 @@ for file in ${files[@]}; do
 		fi
 		continue
 	fi
+	echo "timeout 30m xrdcp $xrdargs -f $myprefix://$file $loc 2>&1"
 	timeout 30m xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
 	res=$?
 	dl1=$(date)
