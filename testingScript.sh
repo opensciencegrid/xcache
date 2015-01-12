@@ -11,4 +11,5 @@ for f in $arrFiles; do
     echo "DL start: $(date)"
     bash ./stashcp -d -s $f -l $2 2>&1
     echo "DL end: $(date)"
+	stat --printf="%s" $2/$f
 done 
