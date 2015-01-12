@@ -44,7 +44,7 @@ done
 echo "$(date): Got opts"
 
 if [ $debug -eq 2 ]; then
-	xrdargs="-d 2 -v"
+	xrdargs="-d 2 --nopbar"
 else
 	xrdargs="-s"
 fi
@@ -86,9 +86,9 @@ for file in ${files[@]}; do
 	if [ $fisdir -ne 0 ]; then
 		if [ $recursive -eq 1 ]; then
 			if [ $debug -eq 2 ]; then
-				fl="-d --nopbar"
+				fl="-d"
 			else
-				fl="--nopbar"
+				fl=""
 			fi
 			bash ./stashcp $fl -s $file -l $loc 
 		fi
