@@ -53,13 +53,14 @@ fi
 lcs=$(echo "${source: -1}")
 if [ $lcs == "/" ]; then
 	myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
-	echo "Changing my prefix to" $myprefix
+	echo "Changing $STASHPREFIX to $myprefix"
 else
 	myprefix=$STASHPREFIX
+	echo "Keeping the $myprefix"
 fi
 if [ ${#myprefix} -lt 3 ]; then
     myprefix="root://data.ci-connect.net"
-	echo "Empty prefix; changing to" $myprefix
+	echo "Empty prefix; changing to $myprefix"
 fi
 if [ $debug -eq 2 ]; then
     echo "I think my STASHPREFIX is $STASHPREFIX"
@@ -74,7 +75,7 @@ isdir=$(xrdfs root://data.ci-connect.net stat $source | grep "IsDir" | wc -l)
 if [ $isdir -eq 0 ]; then
 	files=($source)
 else
-	files=$(xrdfs $myprefix ls $source)
+	files=$(xrdfs root://data.ci-connect.net ls $source)
 	lc=$(echo "${source: -1}")
 	if [ $lc == "/" ]; then
 		dirname=$(echo $source | rev | cut -d/ -f2 | rev)
@@ -90,7 +91,7 @@ fi
 for file in ${files[@]}; do
 	st1=$(date)
 	echo "Pulling $file"
-	fisdir=$(xrdfs $myprefix stat $file | grep "IsDir" | wc -l)
+	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
 	if [ $fisdir -ne 0 ]; then
 		if [ $recursive -eq 1 ]; then
 			if [ $debug -eq 2 ]; then
