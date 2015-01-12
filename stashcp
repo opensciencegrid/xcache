@@ -62,9 +62,9 @@ fi
 xrdfs root://data.ci-connect.net stat user/olsona/public/RandomData/
 
 #check to see if chosen path is a file or directory
-echo "xrdfs $myprefix stat $source"
+#echo "xrdfs $myprefix stat $source"
 isdir=$(xrdfs root://data.ci-connect.net stat $source | grep "IsDir" | wc -l)
-echo $isdir
+#echo $isdir
 
 if [ $isdir -eq 0 ]; then
 	files=($source)
@@ -83,6 +83,7 @@ fi
 #try pulling from closest cache
 #if xrdcp doesn't finish in 30 minutes, stop
 for file in ${files[@]}; do
+	echo "Pulling $file"
 	fisdir=$(xrdfs $myprefix stat $file | grep "IsDir" | wc -l)
 	if [ $fisdir -ne 0 ]; then
 		if [ $recursive -eq 1 ]; then
