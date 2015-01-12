@@ -9,5 +9,4 @@ arrFiles=$(echo $1 | tr "," "\n")
 for f in $arrFiles; do
     echo $f
     bash ./stashcp -d -s $f -l $2 2>&1
-    echo "DL end: $(date)"
 done 
