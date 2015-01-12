@@ -51,6 +51,7 @@ fi
 
 #set prefix to proper format
 lcs=$(echo "${source: -1}")
+echo $lcs
 if [ $lcs == "/" ]; then
 	myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
 	echo "Changing $STASHPREFIX to $myprefix"
