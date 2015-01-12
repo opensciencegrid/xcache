@@ -81,6 +81,8 @@ fi
 #try pulling from closest cache
 #if xrdcp doesn't finish in 30 minutes, stop
 for file in ${files[@]}; do
+	st=$(date)
+	echo $st
 	echo "Pulling $file"
 	fisdir=$(xrdfs $myprefix stat $file | grep "IsDir" | wc -l)
 	if [ $fisdir -ne 0 ]; then
@@ -96,7 +98,7 @@ for file in ${files[@]}; do
 	fi
 	timeout 30m xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
 	res=$?
-	
+	echo $st
 	##check to see if the pull worked, and file exists and has non-zero size
 	##if not, pull from trunk
 	myfile=$(echo $file | rev | cut -d/ -f1 | rev)
