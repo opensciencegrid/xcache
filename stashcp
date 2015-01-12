@@ -44,24 +44,20 @@ done
 echo "$(date): Got opts"
 
 if [ $debug -eq 2 ]; then
-	xrdargs="-d 1 --nopbar"
+	xrdargs="-d 2 --nopbar"
 else
 	xrdargs="-s"
 fi
 
 #set prefix to proper format
 lcs=$(echo "${STASHPREFIX: -1}")
-echo $lcs
 if [ $lcs == "/" ]; then
 	myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
-	echo "Changing $STASHPREFIX to $myprefix"
 else
 	myprefix=$STASHPREFIX
-	echo "Keeping the $myprefix"
 fi
 if [ ${#myprefix} -lt 3 ]; then
     myprefix="root://data.ci-connect.net"
-	echo "Empty prefix; changing to $myprefix"
 fi
 if [ $debug -eq 2 ]; then
     echo "I think my STASHPREFIX is $STASHPREFIX"
