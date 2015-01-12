@@ -111,9 +111,10 @@ for file in ${files[@]}; do
 			echo "Stashcp of $file failed."
 		elif [ $debug -eq 2 ]; then
 			echo "Pull from trunk was successful."
+			echo $(stat --printf="%s" $loc/$myfile)
 		fi
 	elif [ $debug -eq 2 ]; then		
 		echo "Pull of $myfile from $myprefix was successful."
+		echo $(stat --printf="%s" $loc/$myfile)
 	fi
-	echo $(stat --printf="%s" $loc/$myfile)
 done
