@@ -54,9 +54,12 @@ lcs=$(echo "${source: -1}")
 if [ $lcs == "/" ]; then
 	myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
 	echo "Changing my prefix to" $myprefix
+else
+	myprefix=$STASHPREFIX
 fi
-if [ ${#myprefix} -lt 6 ]; then
+if [ ${#myprefix} -lt 3 ]; then
     myprefix="root://data.ci-connect.net"
+	echo "Empty prefix; changing to" $myprefix
 fi
 if [ $debug -eq 2 ]; then
     echo "I think my STASHPREFIX is $STASHPREFIX"
