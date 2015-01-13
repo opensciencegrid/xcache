@@ -9,4 +9,6 @@ arrFiles=$(echo $1 | tr "," "\n")
 for f in $arrFiles; do
     echo $f
     bash ./stashcp -d -s $f -l $2 2>&1
+    file=$(echo $f | rev | cut -d'/' -f1 | rev)
+    rm $2/$file
 done 
