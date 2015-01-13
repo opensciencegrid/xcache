@@ -57,6 +57,7 @@ else
 	myprefix=$STASHPREFIX
 fi
 if [ ${#myprefix} -lt 3 ]; then
+	echo "Nonexistent prefix!"
     myprefix="root://data.ci-connect.net"
 fi
 if [ $debug -eq 2 ]; then
