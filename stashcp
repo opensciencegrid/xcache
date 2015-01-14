@@ -116,7 +116,7 @@ for file in ${files[@]}; do
 	myfile=$(echo $file | rev | cut -d/ -f1 | rev)
 	if [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then
 		if [ $debug -eq 2 ]; then		
-			echo "Pull from $myprefix failed."
+			echo "Pull of $file from $myprefix failed."
 			echo "Command: timeout $tm xrdcp $xrdargs -f $myprefix://$file $loc 2>&1"
 			echo "Trying to pull from trunk."
 		fi
