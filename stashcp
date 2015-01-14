@@ -74,6 +74,9 @@ sz=$(xrdfs root://data.ci-connect.net stat $source | grep "Size" | cut -d':' -f2
 #echo $sz
 mb=$((sz/1000000))
 tm=$((300+mb))
+if [ $debug -eq 2 ]; then
+	echo "Time limit is $tm seconds"
+fi
 if [ $isdir -eq 0 ]; then
 	files=($source)
 else
