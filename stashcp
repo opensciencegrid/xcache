@@ -71,7 +71,8 @@ fi
 dfsOut=$(xrdfs root://data.ci-connect.net stat $source)
 isdir=$(xrdfs root://data.ci-connect.net stat $source | grep "IsDir" | wc -l)
 sz=$(xrdfs root://data.ci-connect.net stat $source | grep "Size" | cut -d':' -f2)
-#echo $sz
+echo $(xrdfs root://data.ci-connect.net stat $source | grep "Size")
+echo $sz
 mb=$((sz/1000000))
 tm=$((300+mb))
 if [ $debug -eq 2 ]; then
