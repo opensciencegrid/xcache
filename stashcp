@@ -117,6 +117,7 @@ for file in ${files[@]}; do
 	if [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then
 		if [ $debug -eq 2 ]; then		
 			echo "Pull from $myprefix failed."
+			echo "Command: timeout $tm xrdcp $xrdargs -f $myprefix://$file $loc 2>&1"
 			echo "Trying to pull from trunk."
 		fi
 		st2=$(date)
@@ -125,6 +126,7 @@ for file in ${files[@]}; do
 		dl2=$(date)
 		if [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then				
 			echo "Stashcp of $file failed."
+			echo "Command:timeout $tm xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1"
 		elif [ $debug -eq 2 ]; then
 			echo "Pull from trunk was successful."
 			echo $(stat --printf="%s" $loc/$myfile)
