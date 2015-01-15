@@ -114,13 +114,13 @@ for file in ${files[@]}; do
 	##check to see if the pull worked, and file exists and has non-zero size
 	##if not, pull from trunk
 	myfile=$(echo $file | rev | cut -d/ -f1 | rev)
-	elif [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then
+	if [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then
 		if [ $debug -eq 2 ]; then	
 			#if [ $res -ne 0 ]; then
 			#	echo "$myprefix timeout."
 			#fi		
 			echo "Pull of $file from $myprefix failed."
-			echo "Command: timeout $tm xrdcp $xrdargs -f $myprefix://$file $loc 2>&1"
+			echo "Command: xrdcp $xrdargs -f $myprefix://$file $loc 2>&1"
 			echo "Trying to pull from trunk."
 		fi
 		st2=$(date +%s%3N)
@@ -133,7 +133,7 @@ for file in ${files[@]}; do
 			#	echo "Trunk timeout."
 			#fi			
 			echo "Stashcp of $file failed."
-			echo "Command: timeout $tm xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1"
+			echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1"
 		elif [ $debug -eq 2 ]; then
 			echo "Pull from trunk was successful."
 			size=$(stat --printf="%s" $loc/$myfile)
