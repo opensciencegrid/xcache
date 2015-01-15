@@ -94,7 +94,7 @@ fi
 #try pulling from closest cache
 #if xrdcp doesn't finish in 30 minutes, stop
 for file in ${files[@]}; do
-	st1=$(date)
+	st1=$(date +%s%3N)
 	echo "Pulling $file"
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
 	if [ $fisdir -ne 0 ]; then
@@ -110,7 +110,7 @@ for file in ${files[@]}; do
 	fi
 	timeout $tm xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
 	res=$?
-	dl1=$(date)
+	dl1=$(date +%s%3N)
 	##check to see if the pull worked, and file exists and has non-zero size
 	##if not, pull from trunk
 	myfile=$(echo $file | rev | cut -d/ -f1 | rev)
@@ -120,10 +120,10 @@ for file in ${files[@]}; do
 			echo "Command: timeout $tm xrdcp $xrdargs -f $myprefix://$file $loc 2>&1"
 			echo "Trying to pull from trunk."
 		fi
-		st2=$(date)
+		st2=$(date +%s%3N)
 		timeout $tm xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1
 		res=$?
-		dl2=$(date)
+		dl2=$(date +%s%3N)
 		if [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then				
 			echo "Stashcp of $file failed."
 			echo "Command:timeout $tm xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1"
