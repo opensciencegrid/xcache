@@ -140,7 +140,7 @@ for file in ${files[@]}; do
 			echo $st2
 			echo $dl2
 			dltm=$((dl2-st2))
-			echo -e "Source: root://data.ci-connect.net - File: $myfile - Time: $dltm ms - Size: $size B - Speed: $((size/dltm)) KBps"
+			echo -e "Source: root://data.ci-connect.net - File: $myfile - Time: $dltm ms - Size: $size B - Speed: $((size/1000/dltm)) MBps"
 		fi
 	elif [ $debug -eq 2 ]; then	
 		size=$(stat --printf="%s" $loc/$myfile)	
@@ -148,6 +148,6 @@ for file in ${files[@]}; do
 		echo $st1
 		echo $dl1
 		dltm=$((dl1-st1))
-		echo -e "Source: $myprefix - File: $myfile - Time: $dltm ms - Size: $size B - Speed: $((size/dltm)) KBps"
+		echo -e "Source: $myprefix - File: $myfile - Time: $dltm ms - Size: $size B - Speed: $((size/1000/dltm)) MBps"
 	fi
 done
