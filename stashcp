@@ -139,15 +139,15 @@ for file in ${files[@]}; do
 			size=$(stat --printf="%s" $loc/$myfile)
 			echo $st2
 			echo $dl2
-			echo "DL time: $((dl2 - st2)) ms"
-			echo "Size: $size b"
+			dltm=$((dl2-st2))
+			echo "Source: root://data.ci-connect.net\tFile: $myfile\tTime: $dltm ms\tSize: $size B\tSpeed: $((size/dltm)) KBps"
 		fi
-	elif [ $debug -eq 2 ]; then		
+	elif [ $debug -eq 2 ]; then	
+		size=$(stat --printf="%s" $loc/$myfile)	
 		echo "Pull of $myfile from $myprefix was successful."
-		size=$(stat --printf="%s" $loc/$myfile)
 		echo $st1
 		echo $dl1
-		echo "DL time: $((dl1 - st1)) ms"
-		echo "Size: $size b"
+		dltm=$((dl1-st1))
+		echo "Source: $myprefix\tFile: $myfile\tTime: $dltm ms\tSize: $size B\tSpeed: $((size/dltm)) KBps"
 	fi
 done
