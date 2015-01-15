@@ -50,15 +50,15 @@ else
 fi
 
 #set prefix to proper format
+if [ ${#myprefix} -lt 3 ]; then
+	echo "Nonexistent prefix!"
+    myprefix="root://data.ci-connect.net"
+fi
 lcs=$(echo "${STASHPREFIX: -1}")
 if [ $lcs == "/" ]; then
 	myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
 else
 	myprefix=$STASHPREFIX
-fi
-if [ ${#myprefix} -lt 3 ]; then
-	echo "Nonexistent prefix!"
-    myprefix="root://data.ci-connect.net"
 fi
 if [ $debug -eq 2 ]; then
     echo "I think my STASHPREFIX is $STASHPREFIX"
