@@ -129,9 +129,9 @@ for file in ${files[@]}; do
 		res=$?
 		dl2=$(date +%s%3N)
 		if [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then	
-			if [ $res -ne 0 ]; then
-				echo "Trunk timeout."
-			fi			
+			#if [ $res -ne 0 ]; then
+			#	echo "Trunk timeout."
+			#fi			
 			echo "Stashcp of $file failed."
 			echo "Command: timeout $tm xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1"
 		elif [ $debug -eq 2 ]; then
