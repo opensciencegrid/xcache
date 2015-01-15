@@ -3,5 +3,6 @@
     {"name":"root://iut2-waniotest.mwt2.org/", "status":1, "longitude":-86.456, "latitude":39.25}, 
     {"name":"root://data.ci-connect.net/", "status":1, "longitude":-87.603, "latitude":41.78},
     {"name":"root://ec2-54-148-62-77.us-west-2.compute.amazonaws.com", "status":1, "longitude":-119.529, "latitude":45.7788},
-    {"name":"root://cm3.bu.edu", "status":1, "longitude":-72.6167, "latitude":42.2042}
+    {"name":"root://cm3.bu.edu", "status":1, "longitude":-72.6167, "latitude":42.2042},
+    {"name":"root://phiphi.t2.ucsd.edu", "status":1, "longitude":-117.2359, "latitude":32.8807}
 ]
