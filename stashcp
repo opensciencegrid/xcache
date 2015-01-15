@@ -129,16 +129,18 @@ for file in ${files[@]}; do
 			echo "Command:timeout $tm xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1"
 		elif [ $debug -eq 2 ]; then
 			echo "Pull from trunk was successful."
-			echo $(stat --printf="%s" $loc/$myfile)
+			size=$(stat --printf="%s" $loc/$myfile)
 			echo $st2
 			echo $dl2
 			echo "DL time: $((dl2 - st2)) ms"
+			echo "Size: $size b"
 		fi
 	elif [ $debug -eq 2 ]; then		
 		echo "Pull of $myfile from $myprefix was successful."
-		echo $(stat --printf="%s" $loc/$myfile)
+		size=$(stat --printf="%s" $loc/$myfile)
 		echo $st1
 		echo $dl1
 		echo "DL time: $((dl1 - st1)) ms"
+		echo "Size: $size b"
 	fi
 done
