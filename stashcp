@@ -44,9 +44,9 @@ done
 #echo "$(date): Got opts"
 
 if [ $debug -eq 2 ]; then
-	xrdargs="-d 2 --nopbar --force"
+	xrdargs="-d 2 --nopbar"
 else
-	xrdargs="-s --force"
+	xrdargs="-s"
 fi
 
 #set prefix to proper format
