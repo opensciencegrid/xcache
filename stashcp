@@ -107,7 +107,8 @@ for file in ${files[@]}; do
 		fi
 		continue
 	fi
-	timeout $tm xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
+	#timeout $tm xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
+	xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
 	res=$?
 	dl1=$(date +%s%3N)
 	##check to see if the pull worked, and file exists and has non-zero size
@@ -115,15 +116,16 @@ for file in ${files[@]}; do
 	myfile=$(echo $file | rev | cut -d/ -f1 | rev)
 	elif [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then
 		if [ $debug -eq 2 ]; then	
-			if [ $res -ne 0 ]; then
-				echo "$myprefix timeout."
-			fi		
+			#if [ $res -ne 0 ]; then
+			#	echo "$myprefix timeout."
+			#fi		
 			echo "Pull of $file from $myprefix failed."
 			echo "Command: timeout $tm xrdcp $xrdargs -f $myprefix://$file $loc 2>&1"
 			echo "Trying to pull from trunk."
 		fi
 		st2=$(date +%s%3N)
-		timeout $tm xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1
+		#timeout $tm xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1
+		xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1
 		res=$?
 		dl2=$(date +%s%3N)
 		if [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then	
