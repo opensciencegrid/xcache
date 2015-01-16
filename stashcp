@@ -50,14 +50,16 @@ else
 fi
 
 #set prefix to proper format
-if [ ${#myprefix} -lt 3 ]; then
+if [ ${#STASHPREFIX} -lt 3 ]; then
     myprefix="root://data.ci-connect.net"
-fi
-lcs=$(echo "${STASHPREFIX: -1}")
-if [ $lcs == "/" ]; then
-	myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
+	echo "Empty prefix"
 else
-	myprefix=$STASHPREFIX
+	lcs=$(echo "${STASHPREFIX: -1}")
+	if [ $lcs == "/" ]; then
+		myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
+	else
+		myprefix=$STASHPREFIX
+	fi
 fi
 if [ $debug -eq 2 ]; then
     echo "I think my STASHPREFIX is $STASHPREFIX"
