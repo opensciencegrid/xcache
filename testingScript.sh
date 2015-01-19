@@ -16,7 +16,7 @@ for f in $arrFiles; do
     wget http://stash.osgconnect.net/+olsona/$f1 -P $2
     dl=$(date +%s%3N)
     if [ -s $2/$file ]; then
-	size=$(stat --printf="%s" $2/$myfile)
+	size=$(stat --printf="%s" $2/$file)
 	dltm=$((dl-st))
 	printf "Source: STASH\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\tSpeed: %s KBps\n" "$file" "$dltm" "$st" "$size" "$((size/dltm))"
 	rm $2/$file
