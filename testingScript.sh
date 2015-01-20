@@ -13,7 +13,7 @@ for f in $arrFiles; do
     rm $2/$file
     f1=$(echo $f | cut -d'/' -f4-)
     st=$(date +%s%3N)
-    wget http://stash.osgconnect.net/+olsona/$f1 -P $2
+    wget http://stash.osgconnect.net/+olsona/$f1 -P $2 2>&1
     dl=$(date +%s%3N)
     if [ -s $2/$file ]; then
 	size=$(stat --printf="%s" $2/$file)
