@@ -112,7 +112,7 @@ for file in ${files[@]}; do
 		fi
 		continue
 	fi
-	size=$(xrdfs root://data.ci-connect.net stat $file | grep "Size:" | cut -d':' -f1)
+	size=$(xrdfs root://data.ci-connect.net stat $file | grep "Size:" | cut -d':' -f2)
 	#timeout $tm xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
 	xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
 	res=$?
