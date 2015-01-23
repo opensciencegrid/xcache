@@ -112,6 +112,7 @@ for file in ${files[@]}; do
 		fi
 		continue
 	fi
+	size=$(xrdfs root://data.ci-connect.net stat $file | grep "Size:" | cut -d':' -f1)
 	#timeout $tm xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
 	xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
 	res=$?
@@ -143,7 +144,7 @@ for file in ${files[@]}; do
 			echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1"
 		elif [ $debug -eq 2 ]; then
 			echo "Pull from trunk was successful."
-			size=$(stat --printf="%s" $loc/$myfile)
+			#size=$(stat --printf="%s" $loc/$myfile)
 			echo $st2
 			echo $dl2
 			dltm=$((dl2-st2))
@@ -151,7 +152,7 @@ for file in ${files[@]}; do
 			printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "root://data.ci-connect.net" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st2" "$size"
 		fi
 	elif [ $debug -eq 2 ]; then	
-		size=$(stat --printf="%s" $loc/$myfile)	
+		#size=$(stat --printf="%s" $loc/$myfile)	
 		echo "Pull of $myfile from $myprefix was successful."
 		echo $st1
 		echo $dl1
