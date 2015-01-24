@@ -50,12 +50,12 @@ else
 fi
 
 #set prefix to proper format
-if [ ${#STASHPREFIX} -lt 3 ]; then
-    myprefix="root://data.ci-connect.net"
-	echo "Empty prefix"
-elif [[ $OSG_SITE_NAME == CIT* ]]; then
+if [[ $OSG_SITE_NAME == CIT* ]]; then
     STASHPREFIX="root://phiphi.t2.ucsd.edu"
     myprefix=$STASHPREFIX
+elif [ ${#STASHPREFIX} -lt 3 ]; then
+    myprefix="root://data.ci-connect.net"
+	echo "Empty prefix"
 else
 	lcs=$(echo "${STASHPREFIX: -1}")
 	if [ $lcs == "/" ]; then
