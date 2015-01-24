@@ -112,7 +112,7 @@ for file in ${files[@]}; do
 		fi
 		continue
 	fi
-	size=$(xrdfs root://data.ci-connect.net stat $file | grep "Size:" | cut -d':' -f2)
+	#size=$(xrdfs root://data.ci-connect.net stat $file | grep "Size:" | cut -d':' -f2)
 	#timeout $tm xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
 	xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
 	res=$?
@@ -149,7 +149,7 @@ for file in ${files[@]}; do
 			echo $dl2
 			dltm=$((dl2-st2))
 			#echo -e "Source: root://data.ci-connect.net * File: $myfile * Time: $dltm ms * Size: $size B * Speed: $((size/dltm)) KBps"
-			printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "root://data.ci-connect.net" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st2" "$size"
+			printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "root://data.ci-connect.net" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st2" "$sz"
 		fi
 	elif [ $debug -eq 2 ]; then	
 		#size=$(stat --printf="%s" $loc/$myfile)	
@@ -158,6 +158,6 @@ for file in ${files[@]}; do
 		echo $dl1
 		dltm=$((dl1-st1))
 		#echo -e "Source: $myprefix * File: $myfile * Time: $dltm ms * Size: $size B * Speed: $((size/dltm)) KBps"
-		printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "$myprefix" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st1" "$size"
+		printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "$myprefix" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st1" "$sz"
 	fi
 done
