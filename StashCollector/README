@@ -1,0 +1,6 @@
+This code is intended to collect information from all the invocations of the stashcp command.
+It is basically a flume collector that listens on port 80 for a specially formated JSON posts.
+Collected info is stored in log files and in hadoop cluster running at the same node.
+JSON message is explained in script "sendingTestMessage.sh"
+Care should be taken that a user running flume agent has write rights to both the log directory and the hdfs directory. 
+Service should be always running and set to autorestart.
