@@ -1,1 +1,1 @@
-curl --data "param1=value1&param2=value2" hadoop.mwt2.org:80
+curl -X POST -H 'Content-Type: application/json; charset=UTF-8' -d '{"username":"xyz","password":"123"}' http://hadoop-dev.mwt2.org:80/
