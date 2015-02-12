@@ -1,0 +1,1 @@
+curl --data "param1=value1&param2=value2" hadoop.mwt2.org:80
