@@ -162,7 +162,7 @@ for file in ${files[@]}; do
 		dltm=$((dl1-st1))
 		#echo -e "Source: $myprefix * File: $myfile * Time: $dltm ms * Size: $size B * Speed: $((size/dltm)) KBps"
 		#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "$myprefix" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st1" "$sz"
-		body="\"body\" : \"$myprefix, $OSG_SITE_NAME, $myfile, $dltm, $st2, $sz\" }]"
+		body="{ \"body\" : \"$myprefix, $OSG_SITE_NAME, $myfile, $dltm, $st2, $sz\" }]"
 	fi
 	echo $header$body > data.json
 	#curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json
