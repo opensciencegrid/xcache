@@ -154,7 +154,7 @@ for file in ${files[@]}; do
 				#echo -e "Source: root://data.ci-connect.net * File: $myfile * Time: $dltm ms * Size: $size B * Speed: $((size/dltm)) KBps"
 				#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "root://data.ci-connect.net" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st2" "$sz"
 			fi
-			body="\"body\" : \"root://data.ci-connect.net\",\"$OSG_SITE_NAME\",\"$myfile\",$dltm,$st2,$sz}]"
+			body="\"body\" : \"root://data.ci-connect.net,$OSG_SITE_NAME,$myfile,$dltm,$st2,$sz\"}]"
 		fi
 		else
 			dltm=$((dl1-st1))
@@ -167,7 +167,7 @@ for file in ${files[@]}; do
 				#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "$myprefix" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st1" "$sz"
 			fi
 		echo $myfile
-		body="{ \"body\" : \"$myprefix\", \"$OSG_SITE_NAME\", \"$myfile\", $dltm, $st1, $sz}]"
+		body="\"body\" : \"$myprefix,$OSG_SITE_NAME,$myfile,$dltm,$st1,$sz\"}]"
 	fi
 	echo $header
 	echo $header$body > data.json
