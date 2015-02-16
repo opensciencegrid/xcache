@@ -165,6 +165,6 @@ for file in ${files[@]}; do
 		body="\"body\" : \"$myprefix, $OSG_SITE_NAME, $myfile, $dltm, $st2, $sz\" }]"
 	fi
 	echo $header$body > data.json
-	curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json
+	#curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json
 	#rm data.json
 done
