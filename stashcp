@@ -135,6 +135,8 @@ for file in ${files[@]}; do
 		xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1
 		res=$?
 		dl2=$(date +%s%3N)
+		header="[{ \"headers\" : \"source\", \"destination\", \"file\", \"time\", \"start\", \"size\" },"
+		body="\"body\" : --, --, --, --, --, --\"}]"
 		#if [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then	
 		if [ $res -ne 0 ]; then
 	                #if [ $res -ne 0 ]; then
@@ -149,7 +151,8 @@ for file in ${files[@]}; do
 			echo $dl2
 			dltm=$((dl2-st2))
 			#echo -e "Source: root://data.ci-connect.net * File: $myfile * Time: $dltm ms * Size: $size B * Speed: $((size/dltm)) KBps"
-			printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "root://data.ci-connect.net" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st2" "$sz"
+			#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "root://data.ci-connect.net" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st2" "$sz"
+			body="\"body\" : \"root://data.ci-connect.net, $OSG_SITE_NAME, $myfile, $dltm, $st2, $sz\" }]"
 		fi
 	elif [ $debug -eq 2 ]; then	
 		#size=$(stat --printf="%s" $loc/$myfile)	
@@ -158,6 +161,10 @@ for file in ${files[@]}; do
 		echo $dl1
 		dltm=$((dl1-st1))
 		#echo -e "Source: $myprefix * File: $myfile * Time: $dltm ms * Size: $size B * Speed: $((size/dltm)) KBps"
-		printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "$myprefix" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st1" "$sz"
+		#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "$myprefix" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st1" "$sz"
+		body="\"body\" : \"$myprefix, $OSG_SITE_NAME, $myfile, $dltm, $st2, $sz\" }]"
 	fi
+	echo $header$body > data.json
+	curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json
+	#rm data.json
 done
