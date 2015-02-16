@@ -136,7 +136,7 @@ for file in ${files[@]}; do
 		res=$?
 		dl2=$(date +%s%3N)
 		header="[{ \"headers\" : \"source\", \"destination\", \"file\", \"time\", \"start\", \"size\" },"
-		body="\"body\" : --, --, --, --, --, --\"}]"
+		body="{ \"body\" : --, --, --, --, --, --\"}]"
 		#if [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then	
 		if [ $res -ne 0 ]; then
 	                #if [ $res -ne 0 ]; then
@@ -152,7 +152,7 @@ for file in ${files[@]}; do
 			dltm=$((dl2-st2))
 			#echo -e "Source: root://data.ci-connect.net * File: $myfile * Time: $dltm ms * Size: $size B * Speed: $((size/dltm)) KBps"
 			#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "root://data.ci-connect.net" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st2" "$sz"
-			body="\"body\" : \"root://data.ci-connect.net, $OSG_SITE_NAME, $myfile, $dltm, $st2, $sz\" }]"
+			body="{ \"body\" : \"root://data.ci-connect.net, $OSG_SITE_NAME, $myfile, $dltm, $st2, $sz\" }]"
 		fi
 	elif [ $debug -eq 2 ]; then	
 		#size=$(stat --printf="%s" $loc/$myfile)	
