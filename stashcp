@@ -120,7 +120,7 @@ for file in ${files[@]}; do
 	##check to see if the pull worked, and file exists and has non-zero size
 	##if not, pull from trunk
 	myfile=$(echo $file | rev | cut -d/ -f1 | rev)
-	header="[{ \"headers\" : {\"source\", \"destination\", \"file\", \"time\", \"start\", \"size\" },"
+	header="[{ \"headers\" : {\"source\", \"destination\", \"file\", \"time\", \"start\", \"size\"},"
 	body="\"body\" : \"--,--,--,--,--,--\"}]"
 	#if [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then
 	if [ $res -ne 0 ]; then
