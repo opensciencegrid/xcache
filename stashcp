@@ -161,8 +161,8 @@ for file in ${files[@]}; do
 			header="[{ \"headers\" : {\"timestamp\" : \"$((st2/1000))\", \"host\" : \"${hn}\" },"
 			body="\"body\" : \"$hn,$OSG_SITE_NAME,$myfile,$dltm,$st2,$sz\"}]"
 			echo $header$body > data.json
-			#curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json
-			#rm data.json
+			curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json
+			rm data.json
 		fi
 		else
 			dltm=$((dl1-st1))
@@ -178,7 +178,7 @@ for file in ${files[@]}; do
 		header="[{ \"headers\" : {\"timestamp\" : \"$((st1/1000))\", \"host\" : \"${hn}\" },"
 		body="\"body\" : \"$hn,$OSG_SITE_NAME,$myfile,$dltm,$st1,$sz\"}]"
 		echo $header$body > data.json
-		#curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json
-		#rm data.json
+		curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json
+		rm data.json
 	fi
 done
