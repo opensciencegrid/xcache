@@ -144,25 +144,29 @@ for file in ${files[@]}; do
 			#fi			
 			echo "Stashcp of $file failed."
 			echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1"
-		elif [ $debug -eq 2 ]; then
-			echo "Pull from trunk was successful."
-			#size=$(stat --printf="%s" $loc/$myfile)
-			echo $st2
-			echo $dl2
-			dltm=$((dl2-st2))
-			#echo -e "Source: root://data.ci-connect.net * File: $myfile * Time: $dltm ms * Size: $size B * Speed: $((size/dltm)) KBps"
-			#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "root://data.ci-connect.net" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st2" "$sz"
+		else
+			if [ $debug -eq 2 ]; then
+				echo "Pull from trunk was successful."
+				#size=$(stat --printf="%s" $loc/$myfile)
+				echo $st2
+				echo $dl2
+				dltm=$((dl2-st2))
+				#echo -e "Source: root://data.ci-connect.net * File: $myfile * Time: $dltm ms * Size: $size B * Speed: $((size/dltm)) KBps"
+				#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "root://data.ci-connect.net" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st2" "$sz"
+			fi
 			body="{ \"body\" : \"root://data.ci-connect.net, $OSG_SITE_NAME, $myfile, $dltm, $st2, $sz\" }]"
 		fi
-	elif [ $debug -eq 2 ]; then	
-		#size=$(stat --printf="%s" $loc/$myfile)	
-		echo "Pull of $myfile from $myprefix was successful."
-		echo $st1
-		echo $dl1
-		dltm=$((dl1-st1))
-		#echo -e "Source: $myprefix * File: $myfile * Time: $dltm ms * Size: $size B * Speed: $((size/dltm)) KBps"
-		#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "$myprefix" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st1" "$sz"
-		body="{ \"body\" : \"$myprefix, $OSG_SITE_NAME, $myfile, $dltm, $st2, $sz\" }]"
+		else
+			if [ $debug -eq 2 ]; then	
+				#size=$(stat --printf="%s" $loc/$myfile)	
+				echo "Pull of $myfile from $myprefix was successful."
+				echo $st1
+				echo $dl1
+				dltm=$((dl1-st1))
+				#echo -e "Source: $myprefix * File: $myfile * Time: $dltm ms * Size: $size B * Speed: $((size/dltm)) KBps"
+				#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "$myprefix" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st1" "$sz"
+			fi
+		body="{ \"body\" : \"$myprefix\, \"$OSG_SITE_NAME\", \"$myfile\", $dltm, $st1, $sz}]"
 	fi
 	echo $header
 	echo $header$body > data.json
