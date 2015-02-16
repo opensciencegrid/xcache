@@ -158,7 +158,7 @@ for file in ${files[@]}; do
 				#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "root://data.ci-connect.net" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st2" "$sz"
 			fi
 			hn="root://data.ci-connect.net"
-			header="[{ \"headers\" : {\"timestamp\" : \"${st2}\", \"host\" : \"${hn}\" },"
+			header="[{ \"headers\" : {\"timestamp\" : \"$((st2/1000))\", \"host\" : \"${hn}\" },"
 			body="\"body\" : \"$hn,$OSG_SITE_NAME,$myfile,$dltm,$st2,$sz\"}]"
 			echo $header$body > data.json
 			#curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json
