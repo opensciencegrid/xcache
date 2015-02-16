@@ -175,7 +175,7 @@ for file in ${files[@]}; do
 				#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "$myprefix" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st1" "$sz"
 			fi
 		hn=$myprefix
-		header="[{ \"headers\" : {\"timestamp\" : \"${((st1/1000))}\", \"host\" : \"${hn}\" },"
+		header="[{ \"headers\" : {\"timestamp\" : \"$((st1/1000))\", \"host\" : \"${hn}\" },"
 		body="\"body\" : \"$hn,$OSG_SITE_NAME,$myfile,$dltm,$st1,$sz\"}]"
 		echo $header$body > data.json
 		#curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json
