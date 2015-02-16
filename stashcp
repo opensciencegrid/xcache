@@ -95,6 +95,10 @@ else
 	mkdir -p $loc
 fi
 
+if [ ! -n "$OSG_SITE_NAME" ]; then
+	OSG_SITE_NAME="UNKNOWN"
+fi
+
 #try pulling from closest cache
 #if xrdcp doesn't finish in the time allotted, stop
 for file in ${files[@]}; do
