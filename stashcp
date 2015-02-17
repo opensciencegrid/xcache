@@ -2,11 +2,10 @@
 
 module load xrootd/4.1.1
 
-bdir=$(condor_config_val RELEASE_DIR)
-#$bdir/libexec/condor/condor_chirp set_job_attr_delayed Chirp_StashCp_Used true
-echo "My base directory is $bdir"
-ls $bdir/ 
-echo "That was my listing for $bdir"
+condor_q_loc=`which condor_q`
+libexec_loc=`dirname condor_q_loc`
+PATH=$PATH:$libexec_loc
+condor_chirp set_job_attr_delayed Chirp_StashCp_Used true
 
 usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
 
