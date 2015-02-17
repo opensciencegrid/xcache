@@ -157,14 +157,19 @@ for file in ${files[@]}; do
 			echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1"
 		else
 			echo "Pull from trunk was successful."
+			dltm=$((dl2-st2))
 			if [ $debug -eq 2 ]; then
 				#size=$(stat --printf="%s" $loc/$myfile)
 				echo $st2
 				echo $dl2
-				dltm=$((dl2-st2))
 				#echo -e "Source: root://data.ci-connect.net * File: $myfile * Time: $dltm ms * Size: $size B * Speed: $((size/dltm)) KBps"
 				#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "root://data.ci-connect.net" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st2" "$sz"
 			fi
+			condor_chirp set_job_attr Chirp_StashCp_DLStart $((st2/1000))
+			condor_chirp set_job_attr Chirp_StashCp_FileName $myfile
+			condor_chirp set_job_attr Chirp_StashCp_FileSize $sz
+			condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm
+			condor_chirp set_job_attr Chirp_StashCp_Source root://data.ci-connect.net
 			hn="root://data.ci-connect.net"
 			timestamp=$(date +%s)
 			header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
@@ -174,16 +179,21 @@ for file in ${files[@]}; do
 			echo $?
 			rm data.json
 		fi
-		else
-			dltm=$((dl1-st1))
-			echo "Pull of $myfile from $myprefix was successful."
-			if [ $debug -eq 2 ]; then	
-				#size=$(stat --printf="%s" $loc/$myfile)	
-				echo $st1
-				echo $dl1
-				#echo -e "Source: $myprefix * File: $myfile * Time: $dltm ms * Size: $size B * Speed: $((size/dltm)) KBps"
-				#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "$myprefix" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st1" "$sz"
-			fi
+	else
+		dltm=$((dl1-st1))
+		echo "Pull of $myfile from $myprefix was successful."
+		if [ $debug -eq 2 ]; then	
+			#size=$(stat --printf="%s" $loc/$myfile)	
+			echo $st1
+			echo $dl1
+			#echo -e "Source: $myprefix * File: $myfile * Time: $dltm ms * Size: $size B * Speed: $((size/dltm)) KBps"
+			#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "$myprefix" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st1" "$sz"
+		fi
+		condor_chirp set_job_attr Chirp_StashCp_DLStart $((st1/1000))
+		condor_chirp set_job_attr Chirp_StashCp_FileName $myfile
+		condor_chirp set_job_attr Chirp_StashCp_FileSize $sz
+		condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm
+		condor_chirp set_job_attr Chirp_StashCp_Source $myprefix
 		hn=$myprefix
 		timestamp=$(date +%s)
 		header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
