@@ -3,7 +3,8 @@
 module load xrootd/4.1.1
 
 bdir=$(condor_config_val RELEASE_DIR)
-$bdir/libexec/condor/condor_chirp set_job_attr_delayed Chirp_StashCp_Used true
+#$bdir/libexec/condor/condor_chirp set_job_attr_delayed Chirp_StashCp_Used true
+ls $bdir/
 
 usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
 
