@@ -165,11 +165,6 @@ for file in ${files[@]}; do
 				#echo -e "Source: root://data.ci-connect.net * File: $myfile * Time: $dltm ms * Size: $size B * Speed: $((size/dltm)) KBps"
 				#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "root://data.ci-connect.net" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st2" "$sz"
 			fi
-			condor_chirp set_job_attr Chirp_StashCp_DLStart $((st2/1000))
-			condor_chirp set_job_attr Chirp_StashCp_FileName "$myfile"
-			condor_chirp set_job_attr Chirp_StashCp_FileSize $sz
-			condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm
-			condor_chirp set_job_attr Chirp_StashCp_Source "root://data.ci-connect.net"
 			hn="root://data.ci-connect.net"
 			timestamp=$(date +%s)
 			header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
@@ -178,6 +173,11 @@ for file in ${files[@]}; do
 			timeout 5s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json
 			echo $?
 			rm data.json
+			condor_chirp set_job_attr Chirp_StashCp_DLStart $((st2/1000))
+			condor_chirp set_job_attr Chirp_StashCp_FileName $myfile
+			condor_chirp set_job_attr Chirp_StashCp_FileSize $sz
+			condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm
+			condor_chirp set_job_attr Chirp_StashCp_Source $hn
 		fi
 	else
 		dltm=$((dl1-st1))
@@ -189,11 +189,6 @@ for file in ${files[@]}; do
 			#echo -e "Source: $myprefix * File: $myfile * Time: $dltm ms * Size: $size B * Speed: $((size/dltm)) KBps"
 			#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "$myprefix" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st1" "$sz"
 		fi
-		condor_chirp set_job_attr Chirp_StashCp_DLStart $((st1/1000))
-		condor_chirp set_job_attr Chirp_StashCp_FileName "$myfile"
-		condor_chirp set_job_attr Chirp_StashCp_FileSize $sz
-		condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm
-		condor_chirp set_job_attr Chirp_StashCp_Source "$myprefix"
 		hn=$myprefix
 		timestamp=$(date +%s)
 		header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
@@ -202,5 +197,10 @@ for file in ${files[@]}; do
 		timeout 5s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json
 		echo $?
 		rm data.json
+		condor_chirp set_job_attr Chirp_StashCp_DLStart $((st1/1000))
+		condor_chirp set_job_attr Chirp_StashCp_FileName $myfile
+		condor_chirp set_job_attr Chirp_StashCp_FileSize $sz
+		condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm
+		condor_chirp set_job_attr Chirp_StashCp_Source "TEST SOURCE"
 	fi
 done
