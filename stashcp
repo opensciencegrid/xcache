@@ -177,7 +177,7 @@ for file in ${files[@]}; do
 			condor_chirp set_job_attr Chirp_StashCp_FileName $myfile
 			condor_chirp set_job_attr Chirp_StashCp_FileSize $sz
 			condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm
-			condor_chirp set_job_attr Chirp_StashCp_Source 'TEST SOURCE'
+			condor_chirp set_job_attr Chirp_StashCp_Source TESTSOURCE
 		fi
 	else
 		dltm=$((dl1-st1))
@@ -201,6 +201,6 @@ for file in ${files[@]}; do
 		condor_chirp set_job_attr Chirp_StashCp_FileName $myfile
 		condor_chirp set_job_attr Chirp_StashCp_FileSize $sz
 		condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm
-		condor_chirp set_job_attr Chirp_StashCp_Source 'TEST SOURCE'
+		condor_chirp set_job_attr Chirp_StashCp_Source TESTSOURCE
 	fi
 done
