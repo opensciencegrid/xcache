@@ -174,7 +174,7 @@ for file in ${files[@]}; do
 			echo $?
 			rm data.json
 			condor_chirp set_job_attr Chirp_StashCp_DLStart $((st2/1000))
-			condor_chirp set_job_attr Chirp_StashCp_FileName $myfile
+			condor_chirp set_job_attr Chirp_StashCp_FileName $(myfile)
 			condor_chirp set_job_attr Chirp_StashCp_FileSize $sz
 			condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm
 			condor_chirp set_job_attr Chirp_StashCp_Source TESTSOURCE
@@ -198,7 +198,7 @@ for file in ${files[@]}; do
 		echo $?
 		rm data.json
 		condor_chirp set_job_attr Chirp_StashCp_DLStart $((st1/1000))
-		condor_chirp set_job_attr Chirp_StashCp_FileName $myfile
+		condor_chirp set_job_attr Chirp_StashCp_FileName $(myfile)
 		condor_chirp set_job_attr Chirp_StashCp_FileSize $sz
 		condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm
 		condor_chirp set_job_attr Chirp_StashCp_Source TESTSOURCE
