@@ -8,7 +8,8 @@ module load xrootd/4.1.1
 #if [ -e /usr/libexec/condor/condor_chirp ]; then
 #	PATH=$PATH:/usr/libexec/condor
 #else
-which condor_chirp 2>&1
+which condor_chirp 
+echo $?
 cd ../../
 echo "Finding..."
 pd=$(find . | grep "condor_chirp")
