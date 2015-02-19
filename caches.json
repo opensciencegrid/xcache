@@ -4,6 +4,6 @@
     {"name":"root://data.ci-connect.net/", "status":1, "longitude":-87.603, "latitude":41.78},
     {"name":"root://cm3.bu.edu", "status":0, "longitude":-72.6167, "latitude":42.2042},
     {"name":"root://phiphi.t2.ucsd.edu", "status":1, "longitude":-117.2359, "latitude":32.8807},
-    #{"name":"root://mwt2-stashcache.campuscluster.illinois.edu", "status":1, "longitude":-88.23, "latitude":40.107487},
-    #{"name":"root://hcc-stash.unl.edu", "status":1, "longitude":-96.702991, "latitude":40.812957}
+    {"name":"root://mwt2-stashcache.campuscluster.illinois.edu", "status":1, "longitude":-88.23, "latitude":40.107487},
+    {"name":"root://hcc-stash.unl.edu", "status":1, "longitude":-96.702991, "latitude":40.812957}
 ]
