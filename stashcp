@@ -16,9 +16,9 @@ module load xrootd/4.1.1
 	else
 		echo "Trying non-usr option"
 		path=$(echo $pd | cut -d'/' -f2 | rev | cut -d'/' -f2- | rev)
-		echo $path
+		echo "Path: $path"
 		cwd=$(pwd)
-		echo $cwd/$path
+		echo "Full: $cwd/$path"
 		PATH=$PATH:$cwd/$path
 		echo $PATH
 	fi
