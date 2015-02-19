@@ -8,27 +8,20 @@ module load xrootd/4.1.1
 #if [ -e /usr/libexec/condor/condor_chirp ]; then
 #	PATH=$PATH:/usr/libexec/condor
 #else
-	cd ../../
-	echo "Finding..."
-	pd=$(find . | grep "condor_chirp")
-	if [ -z $pd ]; then
-		PATH=$PATH:/usr/libexec/condor
-	else
-		echo "Trying non-usr option"
-		echo "PD: $pd"
-		p1=$(echo $pd | cut -c 2-)
-		echo "P1: $p1"
-		p2=$(echo $p1 | rev | cut -d'/' -f2- | rev)
-		echo "P2: $p2"
-		cwd=$(pwd)
-		echo "Full: $cwd/$p2"
-		PATH=$PATH:$cwd/$p2
-		echo "Final path: $PATH"
-	fi
-	cd -
-	#fi
-pwd 2>&1
-condor_chirp set_job_attr Chirp_StashCp_Used true 2>&1
+which condor_chirp 2>&1
+cd ../../
+echo "Finding..."
+pd=$(find . | grep "condor_chirp")
+if [ -z $pd ]; then
+	PATH=$PATH:/usr/libexec/condor
+else
+	echo "Trying non-usr option"
+	p1=$(echo $pd | cut -c 2-)
+	p2=$(echo $p1 | rev | cut -d'/' -f2- | rev)
+	cwd=$(pwd)
+	PATH=$PATH:$cwd/$p2
+fi
+cd -
 
 usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
 
@@ -200,6 +193,7 @@ for file in ${files[@]}; do
 			condor_chirp set_job_attr Chirp_StashCp_FileSize $sz
 			condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm
 			condor_chirp set_job_attr Chirp_StashCp_Source \"$myprefix\"
+			condor_chirp set_job_attr Chirp_StashCp_Used true 2>&1
 		fi
 	else
 		dltm=$((dl1-st1))
@@ -227,6 +221,7 @@ for file in ${files[@]}; do
 		condor_chirp set_job_attr Chirp_StashCp_FileSize $sz 2>&1
 		condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm 2>&1
 		condor_chirp set_job_attr Chirp_StashCp_Source \"$myprefix\" 2>&1
+		condor_chirp set_job_attr Chirp_StashCp_Used true 2>&1
 		echo "Chirped" 2>&1
 	fi
 done
