@@ -20,11 +20,11 @@ module load xrootd/4.1.1
 		echo "P1: $p1"
 		p2=$(echo $p1 | rev | cut -d'/' -f2- | rev)
 		echo "P2: $p2"
-		#echo "Path: $path"
-		#cwd=$(pwd)
-		#echo "Full: $cwd/$path"
-		#PATH=$PATH:$cwd/$path
-		echo $PATH
+		echo "Path: $path"
+		cwd=$(pwd)
+		echo "Full: $cwd/$path"
+		PATH=$PATH:$cwd/$path
+		echo "Final path: $PATH"
 	fi
 	cd -
 	#fi
