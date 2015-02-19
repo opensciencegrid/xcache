@@ -15,12 +15,15 @@ module load xrootd/4.1.1
 		PATH=$PATH:/usr/libexec/condor
 	else
 		echo "Trying non-usr option"
-		echo $pd
-		path=$(echo $pd | cut -d'/' -f2)
-		echo "Path: $path"
-		cwd=$(pwd)
-		echo "Full: $cwd/$path"
-		PATH=$PATH:$cwd/$path
+		echo "PD: $pd"
+		p1=$(echo $pd | cut -c 2-)
+		echo "P1: $p1"
+		p2=$(echo $p1 | rev | cut -d'/' -f2- | rev)
+		echo "P2: $p2"
+		#echo "Path: $path"
+		#cwd=$(pwd)
+		#echo "Full: $cwd/$path"
+		#PATH=$PATH:$cwd/$path
 		echo $PATH
 	fi
 	cd -
