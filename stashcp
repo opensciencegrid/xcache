@@ -5,17 +5,23 @@ module load xrootd/4.1.1
 #condor_q_loc=`which condor_q`
 #libexec_loc=`dirname condor_q_loc`
 #PATH=$PATH:$libexec_loc/condor
-if [ -e /usr/libexec/condor/condor_chirp ]; then
-	PATH=$PATH:/usr/libexec/condor
-else
+#if [ -e /usr/libexec/condor/condor_chirp ]; then
+#	PATH=$PATH:/usr/libexec/condor
+#else
 	cd ../../
 	echo "Finding..."
 	pd=$(find . | grep "condor_chirp")
-	path=$(echo $pd | rev | cut -d'/' -f2- | rev)
-	echo $path
-	PATH=$PATH:$path
+	if [ -z $pd ]; then
+		PATH=$PATH:/usr/libexec/condor
+	else
+		echo "Trying non-usr option"
+		path=$(echo $pd | rev | cut -d'/' -f2- | rev)
+		echo $path
+		PATH=$PATH:$path
+		echo $PATH
+	fi
 	cd -
-fi
+	#fi
 condor_chirp set_job_attr Chirp_StashCp_Used true
 
 usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
