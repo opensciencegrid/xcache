@@ -9,6 +9,7 @@ if [ -e /usr/libexec/condor/condor_chirp ]; then
 	PATH=$PATH:/usr/libexec/condor
 else
 	cd ../../../
+	echo "Finding..."
 	find . | grep condor 2>&1
 	cd -
 fi
