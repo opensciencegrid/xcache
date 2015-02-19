@@ -9,20 +9,23 @@ module load xrootd/4.1.1
 #	PATH=$PATH:/usr/libexec/condor
 #else
 which condor_chirp 
-echo $?
-cd ../../
-echo "Finding..."
-pd=$(find . | grep "condor_chirp")
-if [ -z $pd ]; then
-	PATH=$PATH:/usr/libexec/condor
-else
-	echo "Trying non-usr option"
-	p1=$(echo $pd | cut -c 2-)
-	p2=$(echo $p1 | rev | cut -d'/' -f2- | rev)
-	cwd=$(pwd)
-	PATH=$PATH:$cwd/$p2
+res=$?
+echo $res
+if [ $res -ne 0 ]
+	cd ../../
+	echo "Finding..."
+	pd=$(find . | grep "condor_chirp")
+	if [ -z $pd ]; then
+		PATH=$PATH:/usr/libexec/condor
+	else
+		echo "Trying non-usr option"
+		p1=$(echo $pd | cut -c 2-)
+		p2=$(echo $p1 | rev | cut -d'/' -f2- | rev)
+		cwd=$(pwd)
+		PATH=$PATH:$cwd/$p2
+	fi
+	cd -
 fi
-cd -
 
 usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
 
