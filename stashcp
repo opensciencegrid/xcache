@@ -12,6 +12,7 @@ else
 	echo "Finding..."
 	pd=$(find . | grep "condor_chirp")
 	path=$(echo $pd | rev | cut -d'/' -f2- | rev)
+	echo $path
 	PATH=$PATH:$path
 	cd -
 fi
