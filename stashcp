@@ -10,7 +10,9 @@ if [ -e /usr/libexec/condor/condor_chirp ]; then
 else
 	cd ../../
 	echo "Finding..."
-	find . | grep condor 2>&1
+	pd=$(find . | grep "condor_chirp")
+	path=$(echo $pd | rev | cut -d'/' -f2- | rev)
+	PATH=$PATH:$path
 	cd -
 fi
 condor_chirp set_job_attr Chirp_StashCp_Used true
