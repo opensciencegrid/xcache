@@ -10,7 +10,6 @@ module load xrootd/4.1.1
 #else
 which condor_chirp 
 res=$?
-echo $res
 if [ $res -ne 0 ]; then
 	cd ../../
 	echo "Finding..."
@@ -25,6 +24,8 @@ if [ $res -ne 0 ]; then
 		PATH=$PATH:$cwd/$p2
 	fi
 	cd -
+else
+	"I already know where it is."
 fi
 
 usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
