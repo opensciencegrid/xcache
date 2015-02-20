@@ -10,11 +10,13 @@ module load xrootd/4.1.1
 #else
 which condor_chirp 
 res=$?
+echo "which returned with $res"
 if [ $res -ne 0 ]; then
 	cd ../../
 	echo "Finding..."
 	pd=$(find . | grep "condor_chirp")
 	if [ -z $pd ]; then
+		echo "Hoping that it's in /usr/libexec/condor"
 		PATH=$PATH:/usr/libexec/condor
 	else
 		echo "Trying non-usr option"
@@ -198,7 +200,7 @@ for file in ${files[@]}; do
 			condor_chirp set_job_attr Chirp_StashCp_FileSize $sz
 			condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm
 			condor_chirp set_job_attr Chirp_StashCp_Source \"$myprefix\"
-			condor_chirp set_job_attr Chirp_StashCp_Used true 2>&1
+			condor_chirp set_job_attr Chirp_StashCp_Used true 
 		fi
 	else
 		dltm=$((dl1-st1))
@@ -221,12 +223,12 @@ for file in ${files[@]}; do
 		echo "Sent file (hopefully)" 2>&1
 		rm data.json 2>&1
 		echo "Removed file" 2>&1
-		condor_chirp set_job_attr Chirp_StashCp_DLStart $((st1/1000)) 2>&1
-		condor_chirp set_job_attr Chirp_StashCp_FileName \"$myfile\" 2>&1
-		condor_chirp set_job_attr Chirp_StashCp_FileSize $sz 2>&1
-		condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm 2>&1
-		condor_chirp set_job_attr Chirp_StashCp_Source \"$myprefix\" 2>&1
-		condor_chirp set_job_attr Chirp_StashCp_Used true 2>&1
+		condor_chirp set_job_attr Chirp_StashCp_DLStart $((st1/1000)) 
+		condor_chirp set_job_attr Chirp_StashCp_FileName \"$myfile\" 
+		condor_chirp set_job_attr Chirp_StashCp_FileSize $sz 
+		condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm 
+		condor_chirp set_job_attr Chirp_StashCp_Source \"$myprefix\" 
+		condor_chirp set_job_attr Chirp_StashCp_Used true 
 		echo "Chirped" 2>&1
 	fi
 done
