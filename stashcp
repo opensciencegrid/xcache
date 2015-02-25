@@ -29,7 +29,7 @@ fi
 if ! options=$(getopt -o :drhs:l: -l closest -- "$@"); then
 	exit 1
 fi
-set -- $options
+eval set -- "$options"
 while [ $# -gt 0 ]; do
     case $1 in 
 	-h)
@@ -40,14 +40,14 @@ while [ $# -gt 0 ]; do
 	    debug=2
 	    ;;
 	-s)
-	    source=$(echo $2 | cut -c2- | rev | cut -c2- | rev)
+	    source=$2
 		shift
 	    ;;
 	-r)
 	    recursive=1
 	    ;;
 	-l)
-	    loc=$(echo $2 | cut -c2- | rev | cut -c2- | rev)
+	    loc=$2
 		shift
 	    ;;
 	--closest)
