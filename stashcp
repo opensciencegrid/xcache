@@ -47,7 +47,7 @@ while [ $# -gt 0 ]; do
 	    recursive=1
 	    ;;
 	-l)
-	    loc=$2
+	    loc=$(echo $2 | cut -c2- | rev | cut -c2- | rev)
 		shift
 	    ;;
 	--closest)
