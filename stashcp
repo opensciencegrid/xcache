@@ -21,7 +21,7 @@ if ! options=$(getopt -o :drhs:l: -l closest -- "$@"); then
 	exit 1
 fi
 set -- $options
-while getopts ":drhs:l:p:" opt; do
+while [ $# -gt 0 ]; do
     case $opt in 
 	h)
 	    echo "$usage"
