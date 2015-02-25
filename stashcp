@@ -2,12 +2,6 @@
 
 module load xrootd/4.1.1
 
-#condor_q_loc=`which condor_q`
-#libexec_loc=`dirname condor_q_loc`
-#PATH=$PATH:$libexec_loc/condor
-#if [ -e /usr/libexec/condor/condor_chirp ]; then
-#	PATH=$PATH:/usr/libexec/condor
-#else
 which condor_chirp 
 res=$?
 #echo "which returned with $res"
@@ -42,8 +36,12 @@ if [ "$#" -eq 0 ]; then
 	echo "$usage"
 	exit
 fi
-
-while getopts ":drhs:l:" opt; do
+# http://stackoverflow.com/a/5230306
+if ! options=$(getopt -o :drhs:l: -l closest -- "$@"); then
+	exit 1
+fi
+set -- $options
+while getopts ":drhs:l:p:" opt; do
     case $opt in 
 	h)
 	    echo "$usage"
@@ -61,6 +59,9 @@ while getopts ":drhs:l:" opt; do
 	l)
 	    loc=$OPTARG
 	    ;;
+	closest)
+		getClose
+		;;
 	\?)
 	    echo "Invalid option: -$OPTARG" >&2
 	    echo "$usage" >&2
@@ -230,3 +231,11 @@ for file in ${files[@]}; do
 		echo "Chirped" 2>&1
 	fi
 done
+
+function getClose {
+	# for now, call Ilija's code, and hope that it is available nearby
+	loc=$(find ../ -type file -name 'setStashCache.sh' | head -n 1 | rev | cut -d'/' -f2- | rev)
+	cd $loc
+	setStashCache.sh
+	cd -
+}
