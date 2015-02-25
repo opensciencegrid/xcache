@@ -31,6 +31,7 @@ if ! options=$(getopt -o :drhs:l: -l closest -- "$@"); then
 fi
 set -- $options
 while [ $# -gt 0 ]; do
+	echo $1
     case $1 in 
 	-h)
 	    echo "$usage"
@@ -41,6 +42,7 @@ while [ $# -gt 0 ]; do
 	    ;;
 	-s)
 	    source=$2
+		echo $2
 		shift
 	    ;;
 	-r)
@@ -152,8 +154,6 @@ fi
 if [ ! -n "$OSG_SITE_NAME" ]; then
 	OSG_SITE_NAME="UNKNOWN"
 fi
-
-echo "Files: $files"
 
 #try pulling from closest cache
 #if xrdcp doesn't finish in the time allotted, stop
