@@ -6,7 +6,16 @@ usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to
 
 	-d: show debugging information
 	-r: recursively copy
-	-h: show this help text"
+	-h: show this help text
+	
+	--closest: return closest cache location"
+
+function getClose {
+	# for now, call Ilija's code, and hope that it is available nearby
+	echo "Running getClose"
+	#setStashCache.sh
+	#echo $STASHPREFIX
+}
 
 debug=0
 file=""
@@ -245,10 +254,3 @@ for file in ${files[@]}; do
 		echo "Chirped" 2>&1
 	fi
 done
-
-function getClose {
-	# for now, call Ilija's code, and hope that it is available nearby
-	echo "Running getClose"
-	#setStashCache.sh
-	#echo $STASHPREFIX
-}
