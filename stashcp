@@ -10,24 +10,22 @@ module load xrootd/4.1.1
 #else
 which condor_chirp 
 res=$?
-echo "which returned with $res"
+#echo "which returned with $res"
 if [ $res -ne 0 ]; then
 	cd ../../
-	echo "Finding..."
+	#echo "Finding..."
 	pd=$(find . | grep "condor_chirp")
 	if [ -z $pd ]; then
-		echo "Hoping that it's in /usr/libexec/condor"
+		#echo "Hoping that it's in /usr/libexec/condor"
 		PATH=$PATH:/usr/libexec/condor
 	else
-		echo "Trying non-usr option"
+		#echo "Trying non-usr option"
 		p1=$(echo $pd | cut -c 2-)
 		p2=$(echo $p1 | rev | cut -d'/' -f2- | rev)
 		cwd=$(pwd)
 		PATH=$PATH:$cwd/$p2
 	fi
 	cd -
-else
-	"I already know where it is."
 fi
 
 usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
@@ -94,10 +92,10 @@ else
 		myprefix=$STASHPREFIX
 	fi
 fi
-if [ $debug -eq 2 ]; then
-    echo "I think my STASHPREFIX is $STASHPREFIX"
-    echo "I think my prefix is $myprefix"
-fi
+#if [ $debug -eq 2 ]; then
+#    echo "I think my STASHPREFIX is $STASHPREFIX"
+#    echo "I think my prefix is $myprefix"
+#fi
 
 #check to see if chosen path is a file or directory
 #get size and appropriate time limit
@@ -134,7 +132,7 @@ fi
 #if xrdcp doesn't finish in the time allotted, stop
 for file in ${files[@]}; do
 	st1=$(date +%s%3N)
-	echo "Pulling $file"
+	#echo "Pulling $file"
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
 	if [ $fisdir -ne 0 ]; then
 		if [ $recursive -eq 1 ]; then
@@ -157,14 +155,14 @@ for file in ${files[@]}; do
 	myfile=$(echo $file | rev | cut -d/ -f1 | rev)
 	#if [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then
 	if [ $res -ne 0 ]; then
-	    if [ $debug -eq 2 ]; then	
+	    #if [ $debug -eq 2 ]; then	
 			#if [ $res -ne 0 ]; then
 			#	echo "$myprefix timeout."
 			#fi		
-			echo "Pull of $file from $myprefix failed."
-			echo "Command: xrdcp $xrdargs -f $myprefix://$file $loc 2>&1"
-			echo "Trying to pull from trunk."
-		fi
+		#	echo "Pull of $file from $myprefix failed."
+		#	echo "Command: xrdcp $xrdargs -f $myprefix://$file $loc 2>&1"
+		#	echo "Trying to pull from trunk."
+		#fi
 		st2=$(date +%s%3N)
 		timeout $tm xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1
 		#xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1
