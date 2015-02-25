@@ -26,3 +26,4 @@ else
     fi
     export STASHPREFIX="root://data.ci-connect.net/"
 fi
+echo $STASHPREFIX
