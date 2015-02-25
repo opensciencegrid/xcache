@@ -41,7 +41,7 @@ while [ $# -gt 0 ]; do
 	    ;;
 	-s)
 	    source=$2
-		echo $(echo $source | cut -c2-)
+		echo $(echo $source | cut -c2- | rev | cut -c2- | rev)
 		shift
 	    ;;
 	-r)
