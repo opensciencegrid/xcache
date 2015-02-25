@@ -2,26 +2,6 @@
 
 module load xrootd/4.1.1
 
-which condor_chirp 
-res=$?
-#echo "which returned with $res"
-if [ $res -ne 0 ]; then
-	cd ../../
-	#echo "Finding..."
-	pd=$(find . | grep "condor_chirp")
-	if [ -z $pd ]; then
-		#echo "Hoping that it's in /usr/libexec/condor"
-		PATH=$PATH:/usr/libexec/condor
-	else
-		#echo "Trying non-usr option"
-		p1=$(echo $pd | cut -c 2-)
-		p2=$(echo $p1 | rev | cut -d'/' -f2- | rev)
-		cwd=$(pwd)
-		PATH=$PATH:$cwd/$p2
-	fi
-	cd -
-fi
-
 usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
 
 	-d: show debugging information
@@ -61,6 +41,7 @@ while getopts ":drhs:l:p:" opt; do
 	    ;;
 	closest)
 		getClose
+		exit
 		;;
 	\?)
 	    echo "Invalid option: -$OPTARG" >&2
@@ -76,6 +57,27 @@ if [ $debug -eq 2 ]; then
 	xrdargs="-d 2 --nopbar"
 else
 	xrdargs="-s"
+fi
+
+#find chirp
+which condor_chirp 
+res=$?
+#echo "which returned with $res"
+if [ $res -ne 0 ]; then
+	cd ../../
+	#echo "Finding..."
+	pd=$(find . | grep "condor_chirp")
+	if [ -z $pd ]; then
+		#echo "Hoping that it's in /usr/libexec/condor"
+		PATH=$PATH:/usr/libexec/condor
+	else
+		#echo "Trying non-usr option"
+		p1=$(echo $pd | cut -c 2-)
+		p2=$(echo $p1 | rev | cut -d'/' -f2- | rev)
+		cwd=$(pwd)
+		PATH=$PATH:$cwd/$p2
+	fi
+	cd -
 fi
 
 #set prefix to proper format
