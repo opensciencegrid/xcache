@@ -40,14 +40,14 @@ while [ $# -gt 0 ]; do
 	    debug=2
 	    ;;
 	-s)
-	    source="$2"
+	    source=$2
 		shift
 	    ;;
 	-r)
 	    recursive=1
 	    ;;
 	-l)
-	    loc="$2"
+	    loc=$2
 		shift
 	    ;;
 	--closest)
