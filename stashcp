@@ -23,33 +23,44 @@ fi
 set -- $options
 while [ $# -gt 0 ]; do
     case $1 in 
-	h)
+	-h)
 	    echo "$usage"
 	    exit
 	    ;;
-	d)
+	-d)
 	    debug=2
+		shift
 	    ;;
-	s)
-	    source=$OPTARG
+	-s)
+	    source="$2"
+		shift
 	    ;;
-	r)
+	-r)
 	    recursive=1
 	    ;;
-	l)
-	    loc=$OPTARG
+	-l)
+	    loc="$2"
+		shift
 	    ;;
-	closest)
+	-closest)
 		echo "got to correct case branch"
 		getClose
 		exit
 		;;
-	\?)
-	    echo "Invalid option: -$OPTARG" >&2
+	(--)
+		shift
+		break
+		;;
+	(-*)
+	    echo "$0: error - unrecognized option $1" 1>&2
 	    echo "$usage" >&2
 	    exit 1
 	    ;;
+	(*)
+		break
+		;;
     esac
+	shift
 done
 
 #echo "$(date): Got opts"
