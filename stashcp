@@ -38,7 +38,6 @@ while [ $# -gt 0 ]; do
 	    ;;
 	-d)
 	    debug=2
-		shift
 	    ;;
 	-s)
 	    source="$2"
