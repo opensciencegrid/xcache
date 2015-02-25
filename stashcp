@@ -14,7 +14,7 @@ function getClose {
 	# for now, call Ilija's code, and hope that it is available nearby
 	echo "Running getClose"
 	bash setStashCache.sh > /dev/null
-	echo $STASHPREFIX
+	echo "STASHPREFIX is $STASHPREFIX"
 }
 
 debug=0
