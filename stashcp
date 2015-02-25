@@ -22,7 +22,7 @@ if ! options=$(getopt -o :drhs:l: -l closest -- "$@"); then
 fi
 set -- $options
 while [ $# -gt 0 ]; do
-    case $opt in 
+    case $1 in 
 	h)
 	    echo "$usage"
 	    exit
@@ -40,6 +40,7 @@ while [ $# -gt 0 ]; do
 	    loc=$OPTARG
 	    ;;
 	closest)
+		echo "got to correct case branch"
 		getClose
 		exit
 		;;
@@ -237,6 +238,6 @@ done
 function getClose {
 	# for now, call Ilija's code, and hope that it is available nearby
 	echo "Running getClose"
-	setStashCache.sh
-	echo $STASHPREFIX
+	#setStashCache.sh
+	#echo $STASHPREFIX
 }
