@@ -31,7 +31,6 @@ if ! options=$(getopt -o :drhs:l: -l closest -- "$@"); then
 fi
 set -- $options
 while [ $# -gt 0 ]; do
-	echo $1
     case $1 in 
 	-h)
 	    echo "$usage"
@@ -42,7 +41,7 @@ while [ $# -gt 0 ]; do
 	    ;;
 	-s)
 	    source=$2
-		echo $2
+		echo $(echo $source | cut -c2-)
 		shift
 	    ;;
 	-r)
