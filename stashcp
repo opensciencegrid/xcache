@@ -157,7 +157,7 @@ fi
 #if xrdcp doesn't finish in the time allotted, stop
 for file in ${files[@]}; do
 	st1=$(date +%s%3N)
-	#echo "Pulling $file"
+	echo "Pulling $file"
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
 	if [ $fisdir -ne 0 ]; then
 		if [ $recursive -eq 1 ]; then
