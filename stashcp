@@ -19,6 +19,7 @@ function getClose {
 debug=0
 file=""
 loc="."
+source=""
 recursive=0
 if [ "$#" -eq 0 ]; then
 	echo "$usage"
@@ -40,14 +41,14 @@ while [ $# -gt 0 ]; do
 		shift
 	    ;;
 	-s)
-	    source="$1"
+	    source="$2"
 		shift
 	    ;;
 	-r)
 	    recursive=1
 	    ;;
 	-l)
-	    loc="$1"
+	    loc="$2"
 		shift
 	    ;;
 	--closest)
@@ -70,7 +71,7 @@ while [ $# -gt 0 ]; do
 	shift
 done
 
-echo "File: $file"
+echo "Source: $source"
 echo "Location: $loc"
 
 #echo "$(date): Got opts"
