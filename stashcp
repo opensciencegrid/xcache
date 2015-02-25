@@ -26,6 +26,7 @@ if [ "$#" -eq 0 ]; then
 	exit
 fi
 # http://stackoverflow.com/a/5230306
+# http://stackoverflow.com/a/7948533
 if ! options=$(getopt -o :drhs:l: -l closest -- "$@"); then
 	exit 1
 fi
