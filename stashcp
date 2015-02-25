@@ -236,9 +236,7 @@ done
 
 function getClose {
 	# for now, call Ilija's code, and hope that it is available nearby
-	loc=$(find ../ -type file -name 'setStashCache.sh' | head -n 1 | rev | cut -d'/' -f2- | rev)
-	cd $loc
+	echo "Running getClose"
 	setStashCache.sh
 	echo $STASHPREFIX
-	cd -
 }
