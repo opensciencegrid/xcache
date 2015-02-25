@@ -42,7 +42,7 @@ while [ $# -gt 0 ]; do
 	    loc="$2"
 		shift
 	    ;;
-	-closest)
+	--closest)
 		echo "got to correct case branch"
 		getClose
 		exit
