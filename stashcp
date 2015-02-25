@@ -13,8 +13,8 @@ usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to
 function getClose {
 	# for now, call Ilija's code, and hope that it is available nearby
 	echo "Running getClose"
-	#setStashCache.sh
-	#echo $STASHPREFIX
+	setStashCache.sh
+	echo $STASHPREFIX
 }
 
 debug=0
