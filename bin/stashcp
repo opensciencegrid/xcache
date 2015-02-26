@@ -216,7 +216,7 @@ for file in ${files[@]}; do
 			header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
 			body="\"body\" : \"$((st2/1000)),$myfile,$sz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 			echo $header$body > data.json
-			timeout 5s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json
+			timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json
 			echo $?
 			rm data.json
 			condor_chirp set_job_attr Chirp_StashCp_DLStart $((st2/1000))
@@ -242,7 +242,7 @@ for file in ${files[@]}; do
 		body="\"body\" : \"$((st1/1000)),$myfile,$sz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 		echo $header$body > data.json
 		echo "Made JSON file" 2>&1
-		timeout 5s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json 2>&1
+		timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json 2>&1
 		echo $? 2>&1
 		echo "Sent file (hopefully)" 2>&1
 		rm data.json 2>&1
