@@ -70,7 +70,7 @@ class site:
 Sites=dict()
 worked=0
 try:
-    url="https://raw.githubusercontent.com/OSGConnect/StashCache/master/caches.json"
+    url="https://raw.githubusercontent.com/OSGConnect/StashCache/master/bin/caches.json"
     if debug: print "# getting StashCache endpoints coordinates and statuses from GitHub ..."
     response=urllib2.Request(url,None)
     opener = urllib2.build_opener()
