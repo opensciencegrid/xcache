@@ -13,7 +13,8 @@ usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to
 function getClose {
 	# for now, call Ilija's code, and hope that it is available nearby
 	export StashToolsDir=$(pwd)
-	source setStashCache.sh > /dev/null
+	echo $StashToolsDir
+	source setStashCache.sh 
 	echo "STASHPREFIX is $STASHPREFIX"
 }
 
