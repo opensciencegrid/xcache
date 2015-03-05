@@ -177,44 +177,34 @@ for file in ${files[@]}; do
 		fi
 		continue
 	fi
-	#size=$(xrdfs root://data.ci-connect.net stat $file | grep "Size:" | cut -d':' -f2)
 	timeout $tm xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
-	#xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
 	res=$?
 	dl1=$(date +%s%3N)
 	##check to see if the pull worked, and file exists and has non-zero size
 	##if not, pull from trunk
 	myfile=$(echo $file | rev | cut -d/ -f1 | rev)
-	#if [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then
 	if [ $res -ne 0 ]; then
-	    #if [ $debug -eq 2 ]; then	
-			#if [ $res -ne 0 ]; then
-			#	echo "$myprefix timeout."
-			#fi		
-		#	echo "Pull of $file from $myprefix failed."
-		#	echo "Command: xrdcp $xrdargs -f $myprefix://$file $loc 2>&1"
-		#	echo "Trying to pull from trunk."
-		#fi
+	    if [ $debug -eq 2 ]; then	
+			echo "Pull of $file from $myprefix failed."
+			echo "Command: xrdcp $xrdargs -f $myprefix://$file $loc 2>&1"
+			echo "Trying to pull from trunk."
+		fi
+		condor_chirp set_job_attr Chirp_StashCp_Error \"Pull of $file from $myprefix failed with code $res\"
+		condor_chirp set_job_attr Chirp_StashCp_Used true 
 		st2=$(date +%s%3N)
 		timeout $tm xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1
-		#xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1
 		res=$?
 		dl2=$(date +%s%3N)
-		#if [ $res -ne 0 ] || [ ! -s $loc/$myfile ]; then	
 		if [ $res -ne 0 ]; then
-	                #if [ $res -ne 0 ]; then
-			#	echo "Trunk timeout."
-			#fi			
+			condor_chirp set_job_attr Chirp_StashCp_Error \"Pull of $file from trunk failed with code $res\"
 			echo "Stashcp of $file failed."
 			echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1"
 		else
 			dltm=$((dl2-st2))
 			if [ $debug -eq 2 ]; then
 				echo "Pull from trunk was successful."
-				#size=$(stat --printf="%s" $loc/$myfile)
 				echo $st2
 				echo $dl2
-				#echo -e "Source: root://data.ci-connect.net * File: $myfile * Time: $dltm ms * Size: $size B * Speed: $((size/dltm)) KBps"
 				#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "root://data.ci-connect.net" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st2" "$sz"
 			fi
 			hn="root://data.ci-connect.net"
@@ -226,7 +216,7 @@ for file in ${files[@]}; do
 			echo $?
 			rm data.json
 			condor_chirp set_job_attr Chirp_StashCp_DLStart $((st2/1000))
-			condor_chirp set_job_attr Chirp_StashCp_FileName\"$myfile\"
+			condor_chirp set_job_attr Chirp_StashCp_FileName\"$file\"
 			condor_chirp set_job_attr Chirp_StashCp_FileSize $sz
 			condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm
 			condor_chirp set_job_attr Chirp_StashCp_Source \"$myprefix\"
@@ -235,11 +225,7 @@ for file in ${files[@]}; do
 	else
 		dltm=$((dl1-st1))
 		echo "Pull of $myfile from $myprefix was successful."
-		if [ $debug -eq 2 ]; then	
-			#size=$(stat --printf="%s" $loc/$myfile)	
-			echo $st1
-			echo $dl1
-			#echo -e "Source: $myprefix * File: $myfile * Time: $dltm ms * Size: $size B * Speed: $((size/dltm)) KBps"
+		if [ $debug -eq 2 ]; then
 			#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "$myprefix" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st1" "$sz"
 		fi
 		hn=$myprefix
@@ -254,7 +240,7 @@ for file in ${files[@]}; do
 		rm data.json 2>&1
 		echo "Removed file" 2>&1
 		condor_chirp set_job_attr Chirp_StashCp_DLStart $((st1/1000)) 
-		condor_chirp set_job_attr Chirp_StashCp_FileName \"$myfile\" 
+		condor_chirp set_job_attr Chirp_StashCp_FileName \"$file\" 
 		condor_chirp set_job_attr Chirp_StashCp_FileSize $sz 
 		condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm 
 		condor_chirp set_job_attr Chirp_StashCp_Source \"$myprefix\" 
