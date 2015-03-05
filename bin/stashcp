@@ -225,9 +225,9 @@ for file in ${files[@]}; do
 	else
 		dltm=$((dl1-st1))
 		echo "Pull of $myfile from $myprefix was successful."
-		if [ $debug -eq 2 ]; then
+		#if [ $debug -eq 2 ]; then
 			#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "$myprefix" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st1" "$sz"
-		fi
+			#fi
 		hn=$myprefix
 		timestamp=$(date +%s)
 		header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
