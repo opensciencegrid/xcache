@@ -1,6 +1,7 @@
 #!/bin/bash
 
 module load xrootd/4.1.1
+export PATH=$PATH:$(pwd)
 
 usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
 
