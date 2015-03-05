@@ -12,13 +12,14 @@ usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to
 
 function getClose {
 	# for now, call Ilija's code, and hope that it is available nearby
-        setStashCache=`which setStashCache.sh 2>&1 > /dev/null`
+        setStashCache=`which setStashCache.sh`
         if [ $? -ne '0' ]; then
           >&2 echo "Cannot find setStashCache.sh, setting to defaults"
           echo "root://data.ci-connect.net"
 	  exit 1
         else 	
-	  echo $STASHPREFIX
+	  source $setStashCache 2>&1 > /dev/null
+          echo $STASHPREFIX
 	fi
 }
 
