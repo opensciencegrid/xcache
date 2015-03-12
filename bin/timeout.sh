@@ -22,3 +22,5 @@ start_watchdog(){
  
 start_watchdog "$timeout" 2>/dev/null &
 exec "$@"
+
+#http://fahdshariff.blogspot.com/2013/08/executing-shell-command-with-timeout.html
