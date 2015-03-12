@@ -135,7 +135,7 @@ fi
 
 #check to see if chosen path is a file or directory
 #get size and appropriate time limit
-echo "xrdfs $myprefix stat $source"
+echo "$(xrdfs $myprefix stat $source)"
 #dfsOut=$(xrdfs root://data.ci-connect.net stat $source)
 isdir=$(xrdfs root://data.ci-connect.net stat $source | grep "IsDir" | wc -l)
 sz=$(xrdfs root://data.ci-connect.net stat $source | grep "Size: " | cut -d':' -f2)
