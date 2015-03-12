@@ -166,6 +166,7 @@ fi
 
 #try pulling from closest cache
 #if xrdcp doesn't finish in the time allotted, stop
+myres=0
 for file in ${files[@]}; do
 	st1=$(date +%s%3N)
 	#echo "Pulling $file"
@@ -203,6 +204,7 @@ for file in ${files[@]}; do
 			condor_chirp set_job_attr Chirp_StashCp_Error \"Pull of $file from trunk failed with code $res\"
 			echo "Stashcp of $file failed."
 			echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1"
+			myres=$res
 		else
 			dltm=$((dl2-st2))
 			if [ $debug -eq 2 ]; then
@@ -224,7 +226,7 @@ for file in ${files[@]}; do
 			condor_chirp set_job_attr Chirp_StashCp_FileSize $sz
 			condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm
 			condor_chirp set_job_attr Chirp_StashCp_Source \"$myprefix\"
-			condor_chirp set_job_attr Chirp_StashCp_Used true 
+			condor_chirp set_job_attr Chirp_StashCp_Used true
 		fi
 	else
 		dltm=$((dl1-st1))
@@ -249,6 +251,7 @@ for file in ${files[@]}; do
 		condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm 
 		condor_chirp set_job_attr Chirp_StashCp_Source \"$myprefix\" 
 		condor_chirp set_job_attr Chirp_StashCp_Used true 
-		echo "Chirped" 2>&1
 	fi
 done
+#Note: if any one file transfer fails, then stashcp fails
+return $myres
