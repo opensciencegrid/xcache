@@ -204,7 +204,7 @@ for file in ${files[@]}; do
 			condor_chirp set_job_attr Chirp_StashCp_Error \"Pull of $file from trunk failed with code $res\"
 			echo "Stashcp of $file failed."
 			echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1"
-			failed=(($failed+1))
+			failed=$((failed+1))
 		else
 			dltm=$((dl2-st2))
 			if [ $debug -eq 2 ]; then
