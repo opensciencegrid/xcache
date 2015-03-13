@@ -232,7 +232,8 @@ for file in ${files[@]}; do
 			condor_chirp set_job_attr Chirp_StashCp_FileName\"$file\"
 			condor_chirp set_job_attr Chirp_StashCp_FileSize $sz
 			condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm
-			condor_chirp set_job_attr Chirp_StashCp_Source \"$myprefix\"
+			condor_chirp set_job_attr Chirp_StashCp_Source \"data.ci-connect.net\"
+			condor_chirp set_job_attr Chirp_StashCp_Dest \"$OSG_SITE_NAME\"
 			condor_chirp set_job_attr Chirp_StashCp_Used true
 		fi
 	else
@@ -255,6 +256,7 @@ for file in ${files[@]}; do
 		condor_chirp set_job_attr Chirp_StashCp_FileSize $sz 
 		condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm 
 		condor_chirp set_job_attr Chirp_StashCp_Source \"$myprefix\" 
+		condor_chirp set_job_attr Chirp_StashCp_Dest \"$OSG_SITE_NAME\"
 		condor_chirp set_job_attr Chirp_StashCp_Used true 
 	fi
 done
