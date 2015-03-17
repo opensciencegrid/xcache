@@ -95,7 +95,6 @@ fi
 ## find chirp
 which condor_chirp 
 res=$?
-#echo "which returned with $res"
 if [ $res -ne 0 ]; then
 	if [ -s /usr/libexec/condor/condor_chirp ]; then
 		PATH=$PATH:/usr/libexec/condor
@@ -130,18 +129,13 @@ else
 		myprefix=$STASHPREFIX
 	fi
 fi
-#if [ $debug -eq 2 ]; then
-#    echo "I think my STASHPREFIX is $STASHPREFIX"
-#    echo "I think my prefix is $myprefix"
-#fi
 
 ## check to see if chosen path is a file or directory
 ## get size and appropriate time limit
-#echo "$(xrdfs $myprefix stat $source)"
 isdir=$(xrdfs root://data.ci-connect.net stat $source | grep "IsDir" | wc -l)
 sz=$(xrdfs root://data.ci-connect.net stat $source | grep "Size: " | cut -d':' -f2)
 sz=$(echo -n "${sz//[[:space:]]/}")
-#if someone has 'Size: ' in their file path, they have bigger problems than this not working.
+## if someone has 'Size: ' in their file path, they have bigger problems than this not working.
 mb=$((sz/1000000))
 tm=$((300+mb))
 if [ $debug -eq 2 ]; then
@@ -176,9 +170,9 @@ for file in ${files[@]}; do
 	if [ $fisdir -ne 0 ]; then
 		if [ $recursive -eq 1 ]; then
 			if [ $debug -eq 2 ]; then
-				fl="-d"
+				fl="-d -r"
 			else
-				fl=""
+				fl="-r"
 			fi
 			bash ./stashcp $fl -s $file -l $loc 
 		fi
