@@ -218,17 +218,17 @@ for file in ${files[@]}; do
 			hn="root://data.ci-connect.net"
 			timestamp=$(date +%s)
 			header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
-			body="\"body\" : \"$((st2/1000)),$myfile,$sz,$dltm,$OSG_SITE_NAME,$hn\"}]"
+			body="\"body\" : \"$((st2/1000)),$file,$sz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 			echo $header$body > data.json
 			timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json 2>&1
 			rm data.json 2>&1
-			condor_chirp set_job_attr Chirp_StashCp_DLStart $((st2/1000))
-			condor_chirp set_job_attr Chirp_StashCp_FileName\"$file\"
-			condor_chirp set_job_attr Chirp_StashCp_FileSize $sz
-			condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm
-			condor_chirp set_job_attr Chirp_StashCp_Source \"data.ci-connect.net\"
-			condor_chirp set_job_attr Chirp_StashCp_Dest \"$OSG_SITE_NAME\"
-			condor_chirp set_job_attr Chirp_StashCp_Used true
+			condor_chirp set_job_attr Chirp_StashCp_DLStart $((st2/1000)) > /dev/null 2>&1
+			condor_chirp set_job_attr Chirp_StashCp_FileName\"$file\" > /dev/null 2>&1
+			condor_chirp set_job_attr Chirp_StashCp_FileSize $sz > /dev/null 2>&1
+			condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm > /dev/null 2>&1
+			condor_chirp set_job_attr Chirp_StashCp_Source \"data.ci-connect.net\" > /dev/null 2>&1
+			condor_chirp set_job_attr Chirp_StashCp_Dest \"$OSG_SITE_NAME\" > /dev/null 2>&1
+			condor_chirp set_job_attr Chirp_StashCp_Used true > /dev/null 2>&1
 		fi
 	else
 		## pull from local cache succeeded
@@ -241,17 +241,17 @@ for file in ${files[@]}; do
 		hn=$myprefix
 		timestamp=$(date +%s)
 		header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
-		body="\"body\" : \"$((st1/1000)),$myfile,$sz,$dltm,$OSG_SITE_NAME,$hn\"}]"
+		body="\"body\" : \"$((st1/1000)),$file,$sz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 		echo $header$body > data.json
 		timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json 2>&1
 		rm data.json 2>&1
-		condor_chirp set_job_attr Chirp_StashCp_DLStart $((st1/1000)) 
-		condor_chirp set_job_attr Chirp_StashCp_FileName \"$file\" 
-		condor_chirp set_job_attr Chirp_StashCp_FileSize $sz 
-		condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm 
-		condor_chirp set_job_attr Chirp_StashCp_Source \"$myprefix\" 
-		condor_chirp set_job_attr Chirp_StashCp_Dest \"$OSG_SITE_NAME\"
-		condor_chirp set_job_attr Chirp_StashCp_Used true 
+		condor_chirp set_job_attr Chirp_StashCp_DLStart $((st1/1000)) > /dev/null 2>&1
+		condor_chirp set_job_attr Chirp_StashCp_FileName \"$file\" > /dev/null 2>&1
+		condor_chirp set_job_attr Chirp_StashCp_FileSize $sz > /dev/null 2>&1
+		condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm > /dev/null 2>&1
+		condor_chirp set_job_attr Chirp_StashCp_Source \"$myprefix\" > /dev/null 2>&1
+		condor_chirp set_job_attr Chirp_StashCp_Dest \"$OSG_SITE_NAME\" > /dev/null 2>&1
+		condor_chirp set_job_attr Chirp_StashCp_Used true > /dev/null 2>&1
 	fi
 done
 
