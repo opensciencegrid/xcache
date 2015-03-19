@@ -164,7 +164,6 @@ fi
 failed=0
 ## iterate through list of files
 for file in ${files[@]}; do
-	echo $file
 	## determine whether the input source is a directory or not
 	## if it is a directory, call stashcp on each file in the directory
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
