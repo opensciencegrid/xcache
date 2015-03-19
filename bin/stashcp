@@ -171,9 +171,9 @@ for file in ${files[@]}; do
 	if [ $fisdir -ne 0 ]; then
 		if [ $recursive -eq 1 ]; then
 			if [ $debug -eq 2 ]; then
-				fl="-d -r"
+				fl="-d"
 			else
-				fl="-r"
+				fl=""
 			fi
 			stashcp $fl -s $file -l $loc 
 		fi
