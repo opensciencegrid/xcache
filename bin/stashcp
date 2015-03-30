@@ -148,11 +148,12 @@ else
 	lc=$(echo "${source: -1}")
 	if [ $lc == "/" ]; then
 		dirname=$(echo $source | rev | cut -d/ -f2 | rev)
+		loc=$loc/$dirname
+		mkdir -p $loc
 	else
 		dirname=$(echo $source | rev | cut -d/ -f1 | rev)
 	fi
-	loc=$loc/$dirname
-	mkdir -p $loc
+	
 fi
 
 if [ ! -n "$OSG_SITE_NAME" ]; then
