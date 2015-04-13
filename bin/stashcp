@@ -37,6 +37,7 @@ function doChirp {
 	    oldval=$(echo $prev | sed -e 's/"//g' )
 	    echo $oldval
 	    newval=\"$oldval,$val\"
+	    echo $newval
 	    condor_chirp set_job_attr $attr $newval
 	fi
 }
