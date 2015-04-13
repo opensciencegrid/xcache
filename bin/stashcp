@@ -31,11 +31,13 @@ function doChirp {
 	val=$2
 	prev=$(condor_chirp get_job_attr $attr)
 	if [ $prev == "UNDEFINED" ] || [ $prev == "undefined" ]; then
-		condor_chirp set_job_attr $attr \"$val\"
+	    condor_chirp set_job_attr $attr \"$val\"
 	else
-		oldval=$(echo $prev | sed -e 's/^"//g' -e 's/"$//g' )
-		newval=\"$oldval,$val\"
-		condor_chirp set_job_attr $attr $newval
+	    echo $prev
+	    oldval=$(echo $prev | sed -e 's/"//g' )
+	    echo $oldval
+	    newval=\"$oldval,$val\"
+	    condor_chirp set_job_attr $attr $newval
 	fi
 }
 
