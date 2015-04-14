@@ -33,11 +33,8 @@ function doChirp {
 	if [ $prev == "UNDEFINED" ] || [ $prev == "undefined" ]; then
 	    condor_chirp set_job_attr $attr \"$val\"
 	else
-	    echo $prev
 	    oldval=$(echo $prev | sed -e 's/"//g' )
-	    echo $oldval
 	    newval=\"$oldval,$val\"
-	    echo $newval
 	    condor_chirp set_job_attr $attr $newval
 	fi
 }
@@ -99,8 +96,6 @@ done
 
 echo "Source: $source"
 echo "Location: $loc"
-
-#echo "$(date): Got opts"
 
 if [ $debug -eq 2 ]; then
 	xrdargs="-d 2 --nopbar"
@@ -239,28 +234,18 @@ for file in ${files[@]}; do
 			echo $header$body > data.json
 			timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json 2>&1
 			rm data.json 2>&1
-			#condor_chirp set_job_attr Chirp_StashCp_DLStart $((st1/1000)) > /dev/null 2>&1
 			doChirp Chirp_StashCp_DLStart $((st1/1000))
-			#condor_chirp set_job_attr Chirp_StashCp_FileName \"$file\" > /dev/null 2>&1
 			doChirp Chirp_StashCp_FileName $file
-			#condor_chirp set_job_attr Chirp_StashCp_FileSize $sz > /dev/null 2>&1
 			doChirp Chirp_StashCp_FileSize $sz
-			#condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm > /dev/null 2>&1
 			doChirp Chirp_StashCp_DLTimeMs $dltm
-			#condor_chirp set_job_attr Chirp_StashCp_Source \"data.ci-connect.net\" > /dev/null 2>&1
 			doChirp Chirp_StashCp_Source data.ci-connect.net
-			#condor_chirp set_job_attr Chirp_StashCp_Dest \"$OSG_SITE_NAME\" > /dev/null 2>&1
 			doChirp Chirp_StashCp_Dest $OSG_SITE_NAME
-			#condor_chirp set_job_attr Chirp_StashCp_Used true > /dev/null 2>&1
 			doChirp Chirp_StashCp_Used true
 		fi
 	else
 		## pull from local cache succeeded
 		dltm=$((dl1-st1))
 		echo "Pull of $myfile from $myprefix was successful."
-		#if [ $debug -eq 2 ]; then
-			#printf "Source: %s\tDestination: %s\tFile: %s\tTime: %s ms\tStart: %s\tSize: %s B\n" "$myprefix" "$OSG_SITE_NAME" "$myfile" "$dltm" "$st1" "$sz"
-			#fi
 		## send out data on usage to flume, chirp
 		hn=$myprefix
 		timestamp=$(date +%s)
@@ -269,19 +254,12 @@ for file in ${files[@]}; do
 		echo $header$body > data.json
 		timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json 2>&1
 		rm data.json 2>&1
-		#condor_chirp set_job_attr Chirp_StashCp_DLStart $((st1/1000)) > /dev/null 2>&1
 		doChirp Chirp_StashCp_DLStart $((st1/1000))
-		#condor_chirp set_job_attr Chirp_StashCp_FileName \"$file\" > /dev/null 2>&1
 		doChirp Chirp_StashCp_FileName $file
-		#condor_chirp set_job_attr Chirp_StashCp_FileSize $sz > /dev/null 2>&1
 		doChirp Chirp_StashCp_FileSize $sz
-		#condor_chirp set_job_attr Chirp_StashCp_DLTimeMs $dltm > /dev/null 2>&1
 		doChirp Chirp_StashCp_DLTimeMs $dltm
-		#condor_chirp set_job_attr Chirp_StashCp_Source \"$myprefix\" > /dev/null 2>&1
 		doChirp Chirp_StashCp_Source $myprefix
-		#condor_chirp set_job_attr Chirp_StashCp_Dest \"$OSG_SITE_NAME\" > /dev/null 2>&1
 		doChirp Chirp_StashCp_Dest $OSG_SITE_NAME
-		#condor_chirp set_job_attr Chirp_StashCp_Used true > /dev/null 2>&1
 		doChirp Chirp_StashCp_Used true
 	fi
 done
