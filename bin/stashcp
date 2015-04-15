@@ -186,7 +186,7 @@ for file in ${files[@]}; do
 			else
 				fl="-r"
 			fi
-			stashcp $fl -s $file -l $loc 
+			StashCache/bin/stashcp $fl -s $file -l $loc 
 		fi
 		continue
 	fi
