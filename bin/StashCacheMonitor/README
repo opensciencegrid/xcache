@@ -1,3 +1,10 @@
+Dependencies
+------------
+  condor-python
+  xrootd4-python
+
+Invocation
+----------
 This is a script for collecting information about the files in a Stash cache and formatting them as an HTCondor classad.
 
 If run as
