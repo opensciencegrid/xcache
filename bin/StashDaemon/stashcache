@@ -1,0 +1,57 @@
+#!/bin/env python
+
+import os
+import re
+import sys
+import signal
+from subprocess import Popen, PIPE
+
+ACCEPTED_SIGNALS = {signal.SIGHUP:'restart',
+                    signal.SIGQUIT:'stop',
+                    signal.SIGTERM:'stop'}
+
+def manage_xrootd(signum, frame):
+    rc, _, _ = xrootd_service_command(ACCEPTED_SIGNALS[signum])
+    if rc != 0:
+        # Kill XRootD service
+        rc, stdout, _ = xrootd_service_command('status')
+        try:
+            pid = re.search(r'\(pid (\d+)\)', stdout).group(1)
+        except AttributeError:
+            raise RuntimeError('Could not find XRootD service PID')
+        else:
+            os.kill(pid, signal.SIGKILL)
+        # Restart service if user requested it
+        if signum == signal.SIGHUP:
+            start_xrootd()
+    if signum == signal.SIGQUIT or signum == signal.SIGTERM:
+        sys.exit(0)
+
+def start_xrootd():
+    rc, stdout, _ = xrootd_service_command('start')
+    if rc != 0:
+        raise RuntimeError('Could not start XRootD service: %s' % stdout)
+
+def xrootd_service_command(cmd):
+    rc, stdout, stderr = run_command(['service', 'xrootd', cmd])
+    return rc, stdout, stderr
+
+def run_command(command):
+    p = Popen(command, stdout=PIPE, stderr=PIPE)
+    stdout, stderr = p.communicate()
+    return p.returncode, stdout, stderr
+
+def main():
+    start_xrootd()
+    for signum in ACCEPTED_SIGNALS.iterkeys():
+        signal.signal(signum, manage_xrootd)
+    while True:
+        signal.pause()
+
+if __name__ == '__main__':
+    try:
+        main()
+    except RuntimeError, e:
+        print e.message
+        sys.exit(1)
+
