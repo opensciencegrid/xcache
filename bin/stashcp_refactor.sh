@@ -120,6 +120,8 @@ function doStashCpDirectory {
 	sz=$(xrdfs root://data.ci-connect.net stat $source | grep "Size: " | cut -d':' -f2)
 	sz=$(echo -n "${sz//[[:space:]]/}")
 	st=$(date +%s%3N)
+	echo $source
+	echo $myLocalLoc
 	for sfile in $sfiles; do
 		echo $sfile
 		isdir=$(xrdfs root://data.ci-connect.net stat $sfile | grep "IsDir" | wc -l)
