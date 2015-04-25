@@ -1,8 +1,5 @@
 #!/bin/bash
 
-module load xrootd/4.1.1
-export PATH=$PATH:$(pwd)
-
 usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
 
 	-d: show debugging information
@@ -12,7 +9,7 @@ usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to
 	--closest: return closest cache location
 
 	Exit status 4 indicates that at least one file did not successfully copy over.
-	Exit status 5 indicates that the WantsStashCache classad was not present."
+	Exit status 1 indicates that the WantsStashCache classad was not present."
 
 function getClose {
 	## for now, call Ilija's code, and hope that it is available nearby
@@ -137,11 +134,14 @@ function doStashCpDirectory {
 }
 
 ## check if the relevant classad is there
-classad=(`grep ^WantsStashCache $_CONDOR_JOB_AD`)
-if [ ! $classad ]; then # break and return error
-	echo "WantsStashCache classad not present"
-	return 5
-fi
+#classad=(`grep ^WantsStashCache $_CONDOR_JOB_AD`)
+#if [ ! $classad ]; then # break and return error
+#	echo "WantsStashCache classad not present"
+#	return 1
+#fi
+
+module load xrootd/4.1.1
+export PATH=$PATH:$(pwd)
 
 debug=0
 file=""
