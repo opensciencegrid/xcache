@@ -109,11 +109,10 @@ function doStashCpDirectory {
 	lc=$(echo "${source: -1}")
 	if [ $lc != "/" ] || [ recursive == 1 ]; then
 		dirname=$(echo $source | rev | cut -d/ -f1 | rev)
-		localLoc=$loc/$dirname
+		loc=$loc/$dirname
 		mkdir -p $loc
 		sourceName="$source/+"
 	else
-		localLoc=$loc
 		sourceName="$source+"
 	fi
 	sz=$(xrdfs root://data.ci-connect.net stat $source | grep "Size: " | cut -d':' -f2)
@@ -125,10 +124,14 @@ function doStashCpDirectory {
 		isdir=$(xrdfs root://data.ci-connect.net stat $sfile | grep "IsDir" | wc -l)
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
 			echo "$sfile is directory; will copy"
-			doStashCpDirectory $sfile $localLoc
+			doStashCpDirectory $sfile $loc
+			dirs=("${dirs[@]}" $sfile)
 		elif [ $isdir == 0 ]; then
-			doStashCpSingle $sfile $localLoc
+			doStashCpSingle $sfile $loc
 		fi
+	done
+	for dir in $dirs; do
+		echo $dir;
 	done
 	dl=$(date +%s%3N)
 	dltm=$((dl-st))
