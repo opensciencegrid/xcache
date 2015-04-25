@@ -125,7 +125,7 @@ function doStashCpDirectory {
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
 			echo "$sfile is directory; will copy"
 			doStashCpDirectory $sfile $loc
-		elif [ $isdir == 0 ]
+		elif [ $isdir == 0 ]; then
 			doStashCpSingle $sfile $loc
 		fi
 	done
