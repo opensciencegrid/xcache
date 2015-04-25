@@ -119,10 +119,12 @@ function doStashCpDirectory {
 	sz=$(echo -n "${sz//[[:space:]]/}")
 	st=$(date +%s%3N)
 	for sfile in $sfiles; do
+		echo $sfile
 		isdir=$(xrdfs root://data.ci-connect.net stat $sfile | grep "IsDir" | wc -l)
-		if [ $isdir != 0 ]; then
+		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
+			echo "$sfile is directory; will copy"
 			doStashCpDirectory $sfile $loc
-		elif [ $recursive == 1 ]; then
+		else
 			doStashCpSingle $sfile $loc
 		fi
 	done
