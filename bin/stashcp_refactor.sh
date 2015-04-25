@@ -121,6 +121,7 @@ function doStashCpDirectory {
 	for sfile in $sfiles; do
 		echo $sfile
 		isdir=$(xrdfs root://data.ci-connect.net stat $sfile | grep "IsDir" | wc -l)
+		echo $isdir
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
 			echo "$sfile is directory; will copy"
 			doStashCpDirectory $sfile $loc
