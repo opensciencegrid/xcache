@@ -130,6 +130,7 @@ function doStashCpDirectory {
 			doStashCpSingle $sfile $loc
 		fi
 	done
+	echo "Dirs:"
 	for dir in $dirs; do
 		echo $dir;
 	done
