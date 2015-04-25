@@ -198,10 +198,8 @@ while [ $# -gt 0 ]; do
 	shift
 done
 
-echo "Source: $source"
-echo "Location: $loc"
-
-files=($source)
+#echo "Source: $source"
+#echo "Location: $loc"
 
 ## find chirp
 which condor_chirp 
@@ -265,11 +263,13 @@ failfiles=()
 failtimes=()
 failcodes=()
 
+files=($source)
 
 for file in ${files[@]}; do
 	## determine whether the input source is a directory or not
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
 	echo "File: $file"
+	echo $fisdir
 	if [ $fisdir -eq 0 ]; then
 		doStashCpSingle $file $loc u
 	else
