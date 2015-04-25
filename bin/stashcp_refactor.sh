@@ -198,6 +198,8 @@ while [ $# -gt 0 ]; do
 	shift
 done
 
+
+
 ## find chirp
 which condor_chirp 
 res=$?
@@ -259,6 +261,11 @@ failovertimes=()
 failfiles=()
 failtimes=()
 failcodes=()
+
+echo "Source: $source"
+echo "Location: $loc"
+
+files=($source)
 
 for file in ${files[@]}; do
 	## determine whether the input source is a directory or not
