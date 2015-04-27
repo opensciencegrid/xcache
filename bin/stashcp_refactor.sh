@@ -47,23 +47,24 @@ function doStashCpSingle {
 	tm=$((300+mb))
 	
 	## use included timeout script (timeout.sh) to timeout on xrdcp
-	file=$1
-	loc=$2
+	myFile=$1
+	myLoc=$2
+	relPath=${sfile#$prefix}
 	st1=$(date +%s%3N)
-	timeout $tm xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
+	timeout $tm xrdcp $xrdargs -f $myprefix://$myFile $baseDir/$relPath 2>&1
 	res=$?
 	dl1=$(date +%s%3N)
 	if [ $res -eq 0 ]; then
 		## pull from local cache succeeded
 		dltm=$((dl1-st1))
 		if [ $3 ]; then 	# update info only if I want to
-			updateInfo $st1 $file $sz $dltm $myprefix
+			updateInfo $st1 $myFile $sz $dltm $myprefix
 		fi
 		## send info out to flume
 		hn=$myprefix
 		timestamp=$(date +%s)
 		header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
-		body="\"body\" : \"$((st1/1000)),$file,$sz,$dltm,$OSG_SITE_NAME,$hn\"}]"
+		body="\"body\" : \"$((st1/1000)),$myFile,$sz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 		echo $header$body > data.json
 		timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json 2>&1
 		rm data.json 2>&1
@@ -77,30 +78,30 @@ function doStashCpSingle {
 		fi
 		st2=$(date +%s%3N)
 		hn="root://data.ci-connect.net"
-		timeout $tm xrdcp $xrdargs -f $hn://$file $loc 2>&1
+		timeout $tm xrdcp $xrdargs -f $hn://$myFile $baseDir/$relPath 2>&1
 		res=$?
 		dl2=$(date +%s%3N)
 		if [ $res -eq 0 ]; then
 			## pull from trunk succeeded
 			dltm=$((dl2-st2))
 			if [ $3 ]; then
-				updateInfo $st2 $file $sz $dltm $hn
+				updateInfo $st2 $myFile $sz $dltm $hn
 			fi
-			failoverfiles=("${failoverfiles[@]}" $file)
+			failoverfiles=("${failoverfiles[@]}" $myFile)
 			failovertimes=("${failovertimes[@]}" $st1) # time that the failed pull started
 			## send info out to flume
 			timestamp=$(date +%s)
 			header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
-			body="\"body\" : \"$((st2/1000)),$file,$sz,$dltm,$OSG_SITE_NAME,$hn\"}]"
+			body="\"body\" : \"$((st2/1000)),$myFile,$sz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 			echo $header$body > data.json
 			timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json 2>&1
 			rm data.json 2>&1
 		else
-			failfiles=("${failfiles[@]}" $file)
+			failfiles=("${failfiles[@]}" $myFile)
 			failtimes=("${failtimes[@]}" $st2)	# the last time something failed
 			failcodes=("${failcodes[@]}" $res)
 			echo "Stashcp of $file failed."
-			echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1"
+			echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$myFile $loc 2>&1"
 			failed=$((failed+1))
 		fi
 	fi
