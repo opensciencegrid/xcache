@@ -49,6 +49,7 @@ function doStashCpSingle {
 	
 	## use included timeout script (timeout.sh) to timeout on xrdcp
 	myFile=$1
+	#http://stackoverflow.com/a/16623897
 	relPath=${sfile#$prefix}
 	st1=$(date +%s%3N)
 	timeout $tm xrdcp $xrdargs -f $myPrefix://$myFile $baseDir/$relPath 2>&1
