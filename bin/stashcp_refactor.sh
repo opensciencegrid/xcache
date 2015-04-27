@@ -127,7 +127,7 @@ function doStashCpDirectory {
 			mkdir -p $baseDir/$relPath
 			doStashCpDirectory $sfile $baseDir/$relPath
 		elif [ $isdir == 0 ]; then
-			doStashCpSingle $sfile $baseDir
+			doStashCpSingle $sfile $myLoc
 		fi
 	done
 	dl=$(date +%s%3N)
