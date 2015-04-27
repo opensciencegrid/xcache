@@ -264,6 +264,7 @@ failcodes=()
 
 baseDir=$loc
 prefix=""
+echo "My base directory is $loc"
 
 files=($source)
 
@@ -281,7 +282,7 @@ for file in ${files[@]}; do
 		else
 			dir=$(echo $source | rev | cut -d/ -f1 | rev)
 			prefix=$(echo $source | rev | cut -d/ -f2- | rev)
-			echo $prefix
+			echo "My source prefix is $prefix"
 			mkdir $loc/$dir
 			doStashCpDirectory $file $loc/$dir update
 		fi
