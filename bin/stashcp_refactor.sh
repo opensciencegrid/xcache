@@ -129,7 +129,9 @@ function doStashCpDirectory {
 			echo "$sfile is directory; will copy"
 			doStashCpDirectory $sfile $myLocalLoc
 		elif [ $isdir == 0 ]; then
+			prevLoc=$myLocalLoc
 			doStashCpSingle $sfile $myLocalLoc
+			myLocalLoc=$prevLoc
 		fi
 	done
 	dl=$(date +%s%3N)
