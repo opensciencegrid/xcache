@@ -48,20 +48,19 @@ function doStashCpSingle {
 	
 	## use included timeout script (timeout.sh) to timeout on xrdcp
 	myFile=$1
-	myLoc=$2
 	relPath=${sfile#$prefix}
 	st1=$(date +%s%3N)
-	timeout $tm xrdcp $xrdargs -f $myprefix://$myFile $baseDir/$relPath 2>&1
+	timeout $tm xrdcp $xrdargs -f $myPrefix://$myFile $baseDir/$relPath 2>&1
 	res=$?
 	dl1=$(date +%s%3N)
 	if [ $res -eq 0 ]; then
 		## pull from local cache succeeded
 		dltm=$((dl1-st1))
-		if [ $3 ]; then 	# update info only if I want to
-			updateInfo $st1 $myFile $sz $dltm $myprefix
+		if [ $2 ]; then 	# update info only if I want to
+			updateInfo $st1 $myFile $sz $dltm $myPrefix
 		fi
 		## send info out to flume
-		hn=$myprefix
+		hn=$myPrefix
 		timestamp=$(date +%s)
 		header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
 		body="\"body\" : \"$((st1/1000)),$myFile,$sz,$dltm,$OSG_SITE_NAME,$hn\"}]"
@@ -72,8 +71,8 @@ function doStashCpSingle {
 		## pull from local cache failed; pull from trunk
 	    if [ $debug -eq 2 ]; then	
 			## print out debug info
-			echo "Pull of $file from $myprefix failed."
-			echo "Command: xrdcp $xrdargs -f $myprefix://$file $loc 2>&1"
+			echo "Pull of $myFile from $myPrefix failed."
+			echo "Command: xrdcp $xrdargs -f $myPrefix://$myFile $baseDir/$relPath 2>&1"
 			echo "Trying to pull from trunk."
 		fi
 		st2=$(date +%s%3N)
@@ -84,7 +83,7 @@ function doStashCpSingle {
 		if [ $res -eq 0 ]; then
 			## pull from trunk succeeded
 			dltm=$((dl2-st2))
-			if [ $3 ]; then
+			if [ $2 ]; then
 				updateInfo $st2 $myFile $sz $dltm $hn
 			fi
 			failoverfiles=("${failoverfiles[@]}" $myFile)
@@ -100,8 +99,8 @@ function doStashCpSingle {
 			failfiles=("${failfiles[@]}" $myFile)
 			failtimes=("${failtimes[@]}" $st2)	# the last time something failed
 			failcodes=("${failcodes[@]}" $res)
-			echo "Stashcp of $file failed."
-			echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$myFile $loc 2>&1"
+			echo "Stashcp of $myFile failed."
+			echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$myFile $baseDir/$relPath 2>&1"
 			failed=$((failed+1))
 		fi
 	fi
@@ -110,7 +109,6 @@ function doStashCpSingle {
 function doStashCpDirectory {
 	## address directory case
 	mySource=$1
-	myLoc=$2
 	sfiles=$(xrdfs root://data.ci-connect.net ls $mySource)
 	sz=$(xrdfs root://data.ci-connect.net stat $mySource | grep "Size: " | cut -d':' -f2)
 	sz=$(echo -n "${sz//[[:space:]]/}")
@@ -128,13 +126,13 @@ function doStashCpDirectory {
 			mkdir -p $baseDir/$relPath
 			doStashCpDirectory $sfile $baseDir/$relPath
 		elif [ $isdir == 0 ]; then
-			doStashCpSingle $sfile $myLoc
+			doStashCpSingle $sfile 
 		fi
 	done
 	dl=$(date +%s%3N)
 	dltm=$((dl-st))
-	if [ $3 ]; then
-		updateInfo $st $sourceName $sz $dltm $myprefix
+	if [ $2 ]; then
+		updateInfo $st $sourceName $sz $dltm $myPrefix
 	fi
 }
 
@@ -231,16 +229,16 @@ fi
 ## set prefix to proper format
 if [[ $OSG_SITE_NAME == CIT* ]]; then
     STASHPREFIX="root://phiphi.t2.ucsd.edu"
-    myprefix=$STASHPREFIX
+    myPrefix=$STASHPREFIX
 elif [ ${#STASHPREFIX} -lt 3 ]; then
-    myprefix="root://data.ci-connect.net"
+    myPrefix="root://data.ci-connect.net"
 	echo "Empty prefix"
 else
 	lcs=$(echo "${STASHPREFIX: -1}")
 	if [ $lcs == "/" ]; then
-		myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
+		myPrefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
 	else
-		myprefix=$STASHPREFIX
+		myPrefix=$STASHPREFIX
 	fi
 fi
 
@@ -284,14 +282,14 @@ for file in ${files[@]}; do
 	else
 		lc=$(echo "${source: -1}")
 		if [ "x$lc" == "x/" ]; then
-			doStashCpDirectory $file $loc update
+			doStashCpDirectory $file update
 		else
 			dir=$(echo $source | rev | cut -d/ -f1 | rev)
 			export prefix="/$(echo $source | rev | cut -d/ -f2- | rev)/"
 			echo "My source prefix is $prefix"
 			mkdir $loc/$dir
 			baseDir = $loc/$dir
-			doStashCpDirectory $file $loc/$dir update
+			doStashCpDirectory $file update
 		fi
 	fi
 done
