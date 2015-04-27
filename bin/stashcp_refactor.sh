@@ -124,10 +124,10 @@ function doStashCpDirectory {
 			echo $(strIndex $sfile $prefix)
 			relPath=${sfile#$prefix}
 			echo "My relative path is: $relPath"
-			mkdir -p $myLoc/$relPath
-			doStashCpDirectory $sfile $myLoc/$relPath
+			mkdir -p $baseDir/$relPath
+			doStashCpDirectory $sfile $baseDir/$relPath
 		elif [ $isdir == 0 ]; then
-			doStashCpSingle $sfile $myLoc
+			doStashCpSingle $sfile $baseDir
 		fi
 	done
 	dl=$(date +%s%3N)
