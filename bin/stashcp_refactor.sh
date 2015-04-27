@@ -115,6 +115,7 @@ function doStashCpDirectory {
 	sz=$(echo -n "${sz//[[:space:]]/}")
 	st=$(date +%s%3N)
 	echo "Source: $mySource"
+	echo "Prefix: $prefix"
 	for sfile in $sfiles; do
 		echo $sfile
 		isdir=$(xrdfs root://data.ci-connect.net stat $sfile | grep "IsDir" | wc -l)
@@ -284,6 +285,7 @@ for file in ${files[@]}; do
 		else
 			dir=$(echo $source | rev | cut -d/ -f1 | rev)
 			prefix=$(echo $source | rev | cut -d/ -f2- | rev)
+			export $prefix
 			echo "My source prefix is $prefix"
 			mkdir $loc/$dir
 			doStashCpDirectory $file $loc/$dir update
