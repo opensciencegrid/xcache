@@ -122,6 +122,7 @@ function doStashCpDirectory {
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
 			echo "$sfile is directory; will copy"
 			relPath=${sfile#$prefix}
+			echo $relPath
 			mkdir -p $myLoc/$relPath
 			doStashCpDirectory $sfile $myLoc/$relPath
 		elif [ $isdir == 0 ]; then
