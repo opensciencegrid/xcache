@@ -285,8 +285,9 @@ for file in ${files[@]}; do
 			doStashCpDirectory $file $loc update
 		else
 			dir=$(echo $source | rev | cut -d/ -f1 | rev)
-			export prefix=$(echo $source | rev | cut -d/ -f2- | rev)
-			echo "My source prefix is $prefix"
+			ind=$(strIndex $source $dir)
+			echo "Index is: $ind"
+			echo "Prefix?: ${source:0:ind}"
 			mkdir $loc/$dir
 			doStashCpDirectory $file $loc/$dir update
 		fi
