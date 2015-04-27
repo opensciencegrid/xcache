@@ -121,8 +121,8 @@ function doStashCpDirectory {
 		isdir=$(xrdfs root://data.ci-connect.net stat $sfile | grep "IsDir" | wc -l)
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
 			echo "$sfile is directory; will copy"
-			relPath=${sfile#$prefix}
-			echo "My relative path: $relPath"
+			relPath=$(echo $sfile | sed "s/^$prefix//")
+			echo "My relative path is: $relPath"
 			mkdir -p $myLoc/$relPath
 			doStashCpDirectory $sfile $myLoc/$relPath
 		elif [ $isdir == 0 ]; then
@@ -285,8 +285,7 @@ for file in ${files[@]}; do
 			doStashCpDirectory $file $loc update
 		else
 			dir=$(echo $source | rev | cut -d/ -f1 | rev)
-			prefix=$(echo $source | rev | cut -d/ -f2- | rev)
-			export $prefix
+			export prefix=$(echo $source | rev | cut -d/ -f2- | rev)
 			echo "My source prefix is $prefix"
 			mkdir $loc/$dir
 			doStashCpDirectory $file $loc/$dir update
