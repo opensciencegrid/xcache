@@ -118,11 +118,8 @@ function doStashCpDirectory {
 	echo "Source: $mySource"
 	echo "Prefix: $prefix"
 	for sfile in $sfiles; do
-		echo $sfile
 		isdir=$(xrdfs root://data.ci-connect.net stat $sfile | grep "IsDir" | wc -l)
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
-			echo "$sfile is directory; will copy"
-			echo $(strIndex $sfile $prefix)
 			relPath=${sfile#$prefix}
 			echo "My relative path is: $relPath"
 			mkdir -p $baseDir/$relPath
@@ -270,29 +267,23 @@ failcodes=()
 
 baseDir=$loc
 prefix=""
-echo "My base directory is $loc"
 
 files=($source)
 
 for file in ${files[@]}; do
 	## determine whether the input source is a directory or not
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
-	echo "File: $file"
-	echo $fisdir
 	if [ $fisdir -eq 0 ]; then
 		export prefix="/$(echo $source | rev | cut -d/ -f1- | rev)"
-		echo "My source prefix is $prefix"
 		doStashCpSingle $file update
 	else
 		lc=$(echo "${source: -1}")
 		if [ "x$lc" == "x/" ]; then
 			export prefix="/$(echo $source | rev | cut -d/ -f1- | rev)"
-			echo "My source prefix is $prefix"
 			doStashCpDirectory $file update
 		else
 			dir=$(echo $source | rev | cut -d/ -f1 | rev)
 			export prefix="/$(echo $source | rev | cut -d/ -f2- | rev)/"
-			echo "My source prefix is $prefix"
 			mkdir $loc/$dir
 			baseDir = $loc/$dir
 			doStashCpDirectory $file update
