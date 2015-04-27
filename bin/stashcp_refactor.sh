@@ -280,12 +280,14 @@ for file in ${files[@]}; do
 	echo "File: $file"
 	echo $fisdir
 	if [ $fisdir -eq 0 ]; then
-		export prefix="/$source/"
+		export prefix="/$(echo $source | rev | cut -d/ -f1- | rev)/"
+		echo "My source prefix is $prefix"
 		doStashCpSingle $file update
 	else
 		lc=$(echo "${source: -1}")
 		if [ "x$lc" == "x/" ]; then
-			export prefix="/$source/"
+			export prefix="/$(echo $source | rev | cut -d/ -f1- | rev)/"
+			echo "My source prefix is $prefix"
 			doStashCpDirectory $file update
 		else
 			dir=$(echo $source | rev | cut -d/ -f1 | rev)
