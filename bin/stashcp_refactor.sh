@@ -121,7 +121,7 @@ function doStashCpDirectory {
 		isdir=$(xrdfs root://data.ci-connect.net stat $sfile | grep "IsDir" | wc -l)
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
 			echo "$sfile is directory; will copy"
-			relPath=$(echo $sfile | sed "s/^$prefix//")
+			relPath=$(echo $sfile | sed 's/^$prefix//')
 			echo "My relative path is: $relPath"
 			mkdir -p $myLoc/$relPath
 			doStashCpDirectory $sfile $myLoc/$relPath
