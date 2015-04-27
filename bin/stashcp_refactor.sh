@@ -121,9 +121,9 @@ function doStashCpDirectory {
 	sz=$(echo -n "${sz//[[:space:]]/}")
 	st=$(date +%s%3N)
 	echo "Source: $source"
-	echo "MyLocalLoc: $myLocalLoc"
 	for sfile in $sfiles; do
 		echo $sfile
+		echo "MyLocalLoc: $myLocalLoc"
 		isdir=$(xrdfs root://data.ci-connect.net stat $sfile | grep "IsDir" | wc -l)
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
 			echo "$sfile is directory; will copy"
