@@ -280,10 +280,11 @@ for file in ${files[@]}; do
 	echo "File: $file"
 	echo $fisdir
 	if [ $fisdir -eq 0 ]; then
-		doStashCpSingle $file $loc update
+		doStashCpSingle $file update
 	else
 		lc=$(echo "${source: -1}")
 		if [ "x$lc" == "x/" ]; then
+			echo "Slash case"
 			doStashCpDirectory $file update
 		else
 			dir=$(echo $source | rev | cut -d/ -f1 | rev)
