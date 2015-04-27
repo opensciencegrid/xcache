@@ -106,32 +106,20 @@ function doStashCpDirectory {
 	source=$1
 	loc=$2
 	sfiles=$(xrdfs root://data.ci-connect.net ls $source)
-	lc=$(echo "${source: -1}")
-	if [ $lc != "/" ] || [ recursive == 1 ]; then
-		dirname=$(echo $source | rev | cut -d/ -f1 | rev)
-		myLocalLoc=$loc/$dirname
-		echo "Source: $source"
-		echo "Updated myLocalLoc: $myLocalLoc"
-		#loc=$loc/$dirname
-		mkdir -p $myLocalLoc
-		sourceName="$source/+"
-	else
-		myLocalLoc=$loc
-		sourceName="$source+"
-	fi
 	sz=$(xrdfs root://data.ci-connect.net stat $source | grep "Size: " | cut -d':' -f2)
 	sz=$(echo -n "${sz//[[:space:]]/}")
 	st=$(date +%s%3N)
 	echo "Source: $source"
 	for sfile in $sfiles; do
 		echo $sfile
-		#echo "MyLocalLoc: $myLocalLoc"
 		isdir=$(xrdfs root://data.ci-connect.net stat $sfile | grep "IsDir" | wc -l)
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
 			echo "$sfile is directory; will copy"
-			doStashCpDirectory $sfile $myLocalLoc
+			mydir=$(echo $sfile | rev | cut -d/ -f1 | rev)
+			mkdir $loc/$mydir
+			doStashCpDirectory $sfile $loc/$mydir
 		elif [ $isdir == 0 ]; then
-			doStashCpSingle $sfile $myLocalLoc
+			doStashCpSingle $sfile $loc
 		fi
 	done
 	dl=$(date +%s%3N)
@@ -169,14 +157,14 @@ eval set -- "$options"
 while [ $# -gt 0 ]; do
     case $1 in 
 	-h)
-	    echo "$usage"
-	    exit
-	    ;;
+		echo "$usage"
+		exit
+		;;
 	-d)
-	    debug=2
-	    ;;
+		debug=2
+		;;
 	-s)
-	    source=$2
+		source=$2
 		shift
 	    ;;
 	-r)
@@ -279,9 +267,16 @@ for file in ${files[@]}; do
 	echo "File: $file"
 	echo $fisdir
 	if [ $fisdir -eq 0 ]; then
-		doStashCpSingle $file $loc u
+		doStashCpSingle $file $loc update
 	else
-		doStashCpDirectory $file $loc u
+		lc=$(echo "${source: -1}")
+		if [ "x$lc" == "x/" ]; then
+			doStashCpDirectory $file $loc update
+		else
+			dir=$(echo $source | rev | cut -d/ -f1 | rev)
+			mkdir $loc/$dir
+			doStashCpDirectory $file $loc/$dir update
+		fi
 	fi
 done
 
