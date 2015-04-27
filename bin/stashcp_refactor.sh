@@ -108,21 +108,23 @@ function doStashCpSingle {
 
 function doStashCpDirectory {
 	## address directory case
-	source=$1
-	loc=$2
-	sfiles=$(xrdfs root://data.ci-connect.net ls $source)
-	sz=$(xrdfs root://data.ci-connect.net stat $source | grep "Size: " | cut -d':' -f2)
+	mySource=$1
+	myLoc=$2
+	sfiles=$(xrdfs root://data.ci-connect.net ls $mySource)
+	sz=$(xrdfs root://data.ci-connect.net stat $mySource | grep "Size: " | cut -d':' -f2)
 	sz=$(echo -n "${sz//[[:space:]]/}")
 	st=$(date +%s%3N)
-	echo "Source: $source"
+	echo "Source: $mySource"
 	for sfile in $sfiles; do
 		echo $sfile
 		isdir=$(xrdfs root://data.ci-connect.net stat $sfile | grep "IsDir" | wc -l)
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
 			echo "$sfile is directory; will copy"
-			doStashCpDirectory $sfile $loc
+			relPath=${sfile#$prefix}
+			mkdir -p $myLoc/$relPath
+			doStashCpDirectory $sfile $myLoc/$relPath
 		elif [ $isdir == 0 ]; then
-			doStashCpSingle $sfile $loc
+			doStashCpSingle $sfile $myLoc
 		fi
 	done
 	dl=$(date +%s%3N)
