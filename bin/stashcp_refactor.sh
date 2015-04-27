@@ -33,6 +33,11 @@ function updateInfo {
 	sources=("${sources[@]}" $5)
 }
 
+function strIndex {
+	x="${1%%$2*}"
+	[[ $x = $1 ]] && echo -1 || echo ${#x}
+}
+
 function doStashCpSingle {
 	## address single-file case
 	sz=$(xrdfs root://data.ci-connect.net stat $source | grep "Size: " | cut -d':' -f2)
@@ -115,9 +120,7 @@ function doStashCpDirectory {
 		isdir=$(xrdfs root://data.ci-connect.net stat $sfile | grep "IsDir" | wc -l)
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
 			echo "$sfile is directory; will copy"
-			mydir=$(echo $sfile | rev | cut -d/ -f1 | rev)
-			mkdir $loc/$mydir
-			doStashCpDirectory $sfile $loc/$mydir
+			doStashCpDirectory $sfile $loc
 		elif [ $isdir == 0 ]; then
 			doStashCpSingle $sfile $loc
 		fi
@@ -259,6 +262,9 @@ failfiles=()
 failtimes=()
 failcodes=()
 
+baseDir=$loc
+prefix=""
+
 files=($source)
 
 for file in ${files[@]}; do
@@ -274,6 +280,8 @@ for file in ${files[@]}; do
 			doStashCpDirectory $file $loc update
 		else
 			dir=$(echo $source | rev | cut -d/ -f1 | rev)
+			ind=strIndex $source $dir
+			echo ${source:0:ind}
 			mkdir $loc/$dir
 			doStashCpDirectory $file $loc/$dir update
 		fi
