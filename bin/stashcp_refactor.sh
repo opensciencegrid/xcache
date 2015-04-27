@@ -110,6 +110,8 @@ function doStashCpDirectory {
 	if [ $lc != "/" ] || [ recursive == 1 ]; then
 		dirname=$(echo $source | rev | cut -d/ -f1 | rev)
 		myLocalLoc=$loc/$dirname
+		echo "Source: $source"
+		echo "Updated myLocalLoc: $myLocalLoc"
 		#loc=$loc/$dirname
 		mkdir -p $myLocalLoc
 		sourceName="$source/+"
@@ -123,15 +125,13 @@ function doStashCpDirectory {
 	echo "Source: $source"
 	for sfile in $sfiles; do
 		echo $sfile
-		echo "MyLocalLoc: $myLocalLoc"
+		#echo "MyLocalLoc: $myLocalLoc"
 		isdir=$(xrdfs root://data.ci-connect.net stat $sfile | grep "IsDir" | wc -l)
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
 			echo "$sfile is directory; will copy"
 			doStashCpDirectory $sfile $myLocalLoc
 		elif [ $isdir == 0 ]; then
-			prevLoc=$myLocalLoc
 			doStashCpSingle $sfile $myLocalLoc
-			myLocalLoc=$prevLoc
 		fi
 	done
 	dl=$(date +%s%3N)
