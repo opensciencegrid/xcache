@@ -280,8 +280,8 @@ for file in ${files[@]}; do
 			doStashCpDirectory $file $loc update
 		else
 			dir=$(echo $source | rev | cut -d/ -f1 | rev)
-			ind=strIndex $source $dir
-			echo ${source:0:ind}
+			prefix=$(echo $source | rev | cut -d/ -f2- | rev)
+			echo $prefix
 			mkdir $loc/$dir
 			doStashCpDirectory $file $loc/$dir update
 		fi
