@@ -26,6 +26,13 @@ function getClose {
 	fi
 }
 
+## REFACTOR: write function that does all the work of stashcp, and returns all the values to be chirped.
+## stashcp will just call this function appropriately.
+
+function doStashCP {
+	
+}
+
 function doChirp {
 	attr=$1
 	val=$2
