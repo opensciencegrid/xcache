@@ -97,7 +97,7 @@ def kill_xrootd():
     try:
         pid = int(re.search(r'\(pid\s+(\d+)\)', stdout).group(1))
     except AttributeError:
-        raise RuntimeError('Could not find XRootD service PID')
+        pass # xrootd already dead
     else:
         os.kill(pid, signal.SIGKILL)
 
