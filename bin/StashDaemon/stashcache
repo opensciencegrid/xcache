@@ -35,37 +35,38 @@ class HeartBeatThread(threading.Thread):
         threading.Thread.__init__(self)
         self.setDaemon(True)
 
-    def _raise_exception(self, exception):
-        '''Place exception in the queue so the main thread can raise it'''
-        self.exceptions.put(exception)
-        signal.alarm(1)
-        sys.exit(1)
-
     def run(self):
-        xrootd_addr = 'root://' + self.url
-        coll = htcondor.Collector(self.url)
-        master_ad = None
-        while not master_ad:
-            try:
-                master_ad = coll.locate(htcondor.DaemonTypes.Master)
-            except ValueError: # Master has not advertised to the collector yet
-                pass
-            except IOError: # Failed communication with collector
-                self._raise_exception(CondorException('Could not locate Collector at %s' % self.url))
-
-        while True:
-            cache_ad = xrootd_cache_stats.collect_cache_stats(xrootd_addr, '/stash')
-            if cache_ad['ping_response_status'] == 'ok':
+        try:
+            xrootd_addr = 'root://' + self.url
+            coll = htcondor.Collector(self.url)
+            master_ad = None
+            while not master_ad:
                 try:
-                    htcondor.send_alive(master_ad)
-                except RuntimeError:
-                    self._raise_exception(CondorException('Failed to deliver keepalive message'))
-                # ads expire every 15 min while heartbeats should be done every 30 min
-                for i in range(2):
-                    coll.advertise([cache_ad])
-                    time.sleep(900)
-            else:
-                self._raise_exception(XrootdException('No heartbeat from xrootd server'))
+                    master_ad = coll.locate(htcondor.DaemonTypes.Master)
+                except ValueError: # Master has not advertised to the collector yet
+                    pass
+                except IOError: # Failed communication with collector
+                    raise CondorException('Could not locate Collector at %s' % self.url)
+
+            while True:
+                cache_ad = xrootd_cache_stats.collect_cache_stats(xrootd_addr, '/stash')
+                if cache_ad['ping_response_status'] == 'ok':
+                    try:
+                        htcondor.send_alive(master_ad)
+                    except RuntimeError:
+                        raise CondorException('Failed to deliver keepalive message to condor_master at %s'
+                                              % url)
+                    # ads need to be updated every 15 min while heartbeats should be done every 30 min
+                    for i in range(2):
+                        coll.advertise([cache_ad])
+                        time.sleep(5)
+                else:
+                    raise XrootdException('No heartbeat from xrootd server')
+        except Exception, error:
+            # Exceptions don't rise to the main thread so we have to pass them via queue and SIGALARM
+            self.exceptions.put(error)
+            signal.alarm(1)
+            sys.exit(1)
 
 def raise_heartbeat_exception(signum, frame):
     '''Raise exception from heartbeat thread'''
