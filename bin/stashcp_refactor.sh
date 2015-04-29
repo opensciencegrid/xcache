@@ -273,6 +273,7 @@ for file in ${files[@]}; do
 		lc=$(echo "${source: -1}")
 		if [ "x$lc" == "x/" ]; then
 			export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)"
+			echo "Prefix: $prefix"
 			doStashCpDirectory $file update
 		else
 			dir=$(echo $file | rev | cut -d/ -f1 | rev)
@@ -288,7 +289,7 @@ done
 ## Setting classads as appropriate
 condor_chirp set_job_attr_delayed Chirp_StashCp_Dest $OSG_SITE_NAME
 condor_chirp set_job_attr_delayed Chirp_StashCp_Used true
-condor_chirp set_job_attr_delayed Chirp_StashCp_Prefix $myPrefix
+condor_chirp set_job_attr_delayed Chirp_StashCp_Prefix \"$myPrefix\"
 ## http://stackoverflow.com/a/2317171
 startString=$(printf ",%s" "${starts[@]}")
 condor_chirp set_job_attr_delayed Chirp_StashCp_DLStart \"${startString:1:1023}\"
