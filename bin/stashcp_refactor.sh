@@ -108,6 +108,7 @@ function doStashCpDirectory {
 	sfiles=$(xrdfs root://data.ci-connect.net ls $mySource)
 	sz=$(xrdfs root://data.ci-connect.net stat $mySource | grep "Size: " | cut -d':' -f2)
 	sz=$(echo -n "${sz//[[:space:]]/}")
+	echo $sz
 	st=$(date +%s%3N)
 	echo "Source: $mySource"
 	echo "Prefix: $prefix"
@@ -117,7 +118,7 @@ function doStashCpDirectory {
 			relPath=${sfile#$prefix}
 			echo "My relative path is: $relPath"
 			mkdir -p $baseDir/$relPath
-			doStashCpDirectory $sfile $baseDir/$relPath
+			doStashCpDirectory $sfile 
 		elif [ $isdir == 0 ]; then
 			doStashCpSingle $sfile 
 		fi
