@@ -38,7 +38,7 @@ function doStashCpSingle {
 	myFile=$1
 	#http://stackoverflow.com/a/16623897
 	relPath=${sfile#$prefix}
-	sz=$(xrdfs root://data.ci-connect.net stat $source | grep "Size: " | cut -d':' -f2)
+	sz=$(xrdfs root://data.ci-connect.net stat $myFile | grep "Size: " | cut -d':' -f2)
 	echo "Size from xrdfs: $sz"
 	sz=$(echo -n "${sz//[[:space:]]/}")
 	echo "Size now: $sz"
