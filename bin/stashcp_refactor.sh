@@ -121,9 +121,7 @@ function doStashCpDirectory {
 	dl=$(date +%s%3N)
 	dltm=$((dl-st))
 	if [ $2 ]; then
-		echo "Base source: $baseSource"
-		echo "Base source+: $baseSource+"
-		updateInfo $st "$baseSource+" $sz $dltm 
+		updateInfo $st $baseSource $sz $dltm 
 	fi
 }
 
@@ -269,14 +267,14 @@ for file in ${files[@]}; do
 		lc=$(echo "${source: -1}")
 		if [ "x$lc" == "x/" ]; then
 			export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)"
-			baseSource=$file
+			baseSource=$file+
 			doStashCpDirectory $file update
 		else
 			dir=$(echo $file | rev | cut -d/ -f1 | rev)
 			export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)/"
 			mkdir $loc/$dir
 			baseDir=$loc/$dir
-			baseSource=$file
+			baseSource=$file/+
 			doStashCpDirectory $file update
 		fi
 	fi
