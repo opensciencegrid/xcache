@@ -52,11 +52,9 @@ function doStashCpSingle {
 	if [ $res -eq 0 ]; then
 		## pull from local cache succeeded
 		dltm=$((dl1-st1))
+		echo "$st1 $myFile $sz $dltm $myPrefix"
 		if [ $2 ]; then 	# update info only if I want to
 			updateInfo $st1 $myFile $sz $dltm $myPrefix
-			for i in $sizes; do
-				echo $i;
-			done
 		fi
 		## send info out to flume
 		hn=$myPrefix
@@ -271,9 +269,11 @@ echo "Downloading files"
 
 for file in ${files[@]}; do
 	## determine whether the input source is a directory or not
+	echo "Getting dir status"
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
 	if [ $fisdir -eq 0 ]; then
 		export prefix="/$(echo $source | rev | cut -d/ -f1- | rev)"
+		echo "DLing $file"
 		doStashCpSingle $file update
 	else
 		lc=$(echo "${source: -1}")
