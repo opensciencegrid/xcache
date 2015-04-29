@@ -30,6 +30,8 @@ function updateInfo {
 	names=("${names[@]}" $2)
 	sizes=("${sizes[@]}" $3)
 	times=("${times[@]}" $4)
+	echo $2
+	for i in ${names[@]}; do echo $i; done
 }
 
 function doStashCpSingle {
