@@ -74,7 +74,9 @@ function doStashCpSingle {
 		header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
 		body="\"body\" : \"$((st1/1000)),$myFile,$sz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 		echo $header$body > data.json
+		echo "curling $myFile"
 		timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json 2>&1 
+		echo "curled $myFile"
 		rm data.json 2>&1
 	else
 		## pull from local cache failed; pull from trunk
