@@ -108,15 +108,11 @@ function doStashCpDirectory {
 	xrdfs root://data.ci-connect.net stat $mySource | grep "Size: "
 	sz=$(xrdfs root://data.ci-connect.net stat $mySource | grep "Size: " | cut -d':' -f2)
 	sz=$(echo -n "${sz//[[:space:]]/}")
-	echo $sz
 	st=$(date +%s%3N)
-	echo "Source: $mySource"
-	echo "Prefix: $prefix"
 	for sfile in $sfiles; do
 		isdir=$(xrdfs root://data.ci-connect.net stat $sfile | grep "IsDir" | wc -l)
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
 			relPath=${sfile#$prefix}
-			echo "My relative path is: $relPath"
 			mkdir -p $baseDir/$relPath
 			doStashCpDirectory $sfile 
 		elif [ $isdir == 0 ]; then
@@ -287,7 +283,7 @@ for file in ${files[@]}; do
 done
 
 ## Setting classads as appropriate
-condor_chirp set_job_attr_delayed Chirp_StashCp_Dest $OSG_SITE_NAME
+condor_chirp set_job_attr_delayed Chirp_StashCp_Dest \"$OSG_SITE_NAME\"
 condor_chirp set_job_attr_delayed Chirp_StashCp_Used true
 condor_chirp set_job_attr_delayed Chirp_StashCp_Prefix \"$myPrefix\"
 ## http://stackoverflow.com/a/2317171
