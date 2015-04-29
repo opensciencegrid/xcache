@@ -105,6 +105,7 @@ function doStashCpSingle {
 function doStashCpDirectory {
 	## address directory case
 	mySource=$1
+	baseSource=$1
 	sfiles=$(xrdfs root://data.ci-connect.net ls $mySource)
 	sz=$(xrdfs root://data.ci-connect.net stat $mySource | grep "Size: " | cut -d':' -f2)
 	sz=$(echo -n "${sz//[[:space:]]/}")
@@ -125,9 +126,9 @@ function doStashCpDirectory {
 	done
 	dl=$(date +%s%3N)
 	dltm=$((dl-st))
-	echo "Update info: $st $mySource $sz $dltm $prefix"
+	echo "Update info: $st $baseSource $sz $dltm $myPrefix"
 	if [ $2 ]; then
-		updateInfo $st $mySource $sz $dltm $prefix
+		updateInfo $st $baseSource $sz $dltm $myPrefix
 	fi
 }
 
