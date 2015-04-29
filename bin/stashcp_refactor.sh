@@ -278,7 +278,8 @@ for file in ${files[@]}; do
 		doStashCpSingle $file update
 	else
 		lc=$(echo "${source: -1}")
-		if [ "x$lc" == "x/" ]; then
+		echo "$lc"
+		if [ "$lc" == "/" ]; then
 			export prefix="/$(echo $source | rev | cut -d/ -f1- | rev)"
 			doStashCpDirectory $file update
 		else
