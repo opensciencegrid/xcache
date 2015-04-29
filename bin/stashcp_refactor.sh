@@ -266,16 +266,16 @@ for file in ${files[@]}; do
 	## determine whether the input source is a directory or not
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
 	if [ $fisdir -eq 0 ]; then
-		export prefix="/$(echo $source | rev | cut -d/ -f1- | rev)"
+		export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)"
 		doStashCpSingle $file update
 	else
 		lc=$(echo "${source: -1}")
 		if [ "x$lc" == "x/" ]; then
-			export prefix="/$(echo $source | rev | cut -d/ -f1- | rev)"
+			export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)"
 			doStashCpDirectory $file update
 		else
 			dir=$(echo $source | rev | cut -d/ -f1 | rev)
-			export prefix="/$(echo $source | rev | cut -d/ -f2- | rev)/"
+			export prefix="/$(echo $file | rev | cut -d/ -f2- | rev)/"
 			mkdir $loc/$dir
 			baseDir=$loc/$dir
 			doStashCpDirectory $file update
