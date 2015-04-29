@@ -286,7 +286,9 @@ for file in ${files[@]}; do
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
 	if [ $fisdir -eq 0 ]; then
 		export prefix="/$(echo $source | rev | cut -d/ -f1- | rev)"
+		echo "DL single file $file"
 		doStashCpSingle $file update
+		echo "DL'd single file $file"
 	else
 		lc=$(echo "${source: -1}")
 		if [ "x$lc" == "x/" ]; then
