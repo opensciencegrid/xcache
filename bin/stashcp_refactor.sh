@@ -105,8 +105,8 @@ function doStashCpSingle {
 function doStashCpDirectory {
 	## address directory case
 	mySource=$1
-	baseSource=$1
 	sfiles=$(xrdfs root://data.ci-connect.net ls $mySource)
+	xrdfs root://data.ci-connect.net stat $mySource | grep "Size: "
 	sz=$(xrdfs root://data.ci-connect.net stat $mySource | grep "Size: " | cut -d':' -f2)
 	sz=$(echo -n "${sz//[[:space:]]/}")
 	echo $sz
@@ -281,6 +281,7 @@ for file in ${files[@]}; do
 			export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)/"
 			mkdir $loc/$dir
 			baseDir=$loc/$dir
+			baseSource=$source
 			doStashCpDirectory $file update
 		fi
 	fi
