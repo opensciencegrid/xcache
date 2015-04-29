@@ -122,7 +122,7 @@ function doStashCpDirectory {
 	dl=$(date +%s%3N)
 	dltm=$((dl-st))
 	if [ $2 ]; then
-		updateInfo $st $baseSource+ $sz $dltm 
+		updateInfo $st "$baseSource+" $sz $dltm 
 	fi
 }
 
