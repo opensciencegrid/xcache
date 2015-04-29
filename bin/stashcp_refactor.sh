@@ -125,9 +125,9 @@ function doStashCpDirectory {
 	done
 	dl=$(date +%s%3N)
 	dltm=$((dl-st))
-	echo $sz
+	echo $st $mySource $sz $dltm $myPrefix
 	if [ $2 ]; then
-		updateInfo $st $sourceName $sz $dltm $myPrefix
+		updateInfo $st $mySource $sz $dltm $myPrefix
 	fi
 }
 
