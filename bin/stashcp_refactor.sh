@@ -284,7 +284,7 @@ for file in ${files[@]}; do
 	    doStashCpDirectory $file update
 	else
 	    dir=$(echo $source | rev | cut -d/ -f1 | rev)
-	    export prefix="/$(echo $source | rev | cut -d/ -f2- | rev)/"
+	    export prefix="/$(echo $source | rev | cut -d/ -f1- | rev)/"
 	    echo "Prefix for noslash case: $prefix"
 	    mkdir $loc/$dir
 	    baseDir=$loc/$dir
