@@ -275,7 +275,7 @@ for file in ${files[@]}; do
 			doStashCpDirectory $file update
 		else
 			dir=$(echo $source | rev | cut -d/ -f1 | rev)
-			export prefix="/$(echo $file | rev | cut -d/ -f2- | rev)/"
+			export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)/"
 			mkdir $loc/$dir
 			baseDir=$loc/$dir
 			doStashCpDirectory $file update
