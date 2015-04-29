@@ -39,9 +39,7 @@ function doStashCpSingle {
 	#http://stackoverflow.com/a/16623897
 	relPath=${sfile#$prefix}
 	sz=$(xrdfs root://data.ci-connect.net stat $myFile | grep "Size: " | cut -d':' -f2)
-	echo "Size from xrdfs: $sz"
 	sz=$(echo -n "${sz//[[:space:]]/}")
-	echo "Size now: $sz"
 	## if someone has 'Size: ' in their file path, they have bigger problems than this not working.
 	mb=$((sz/1000000))
 	tm=$((300+mb))
@@ -140,8 +138,6 @@ function doStashCpDirectory {
 
 module load xrootd/4.1.1
 export PATH=$PATH:$(pwd)
-
-echo "Reading arguments"
 
 debug=0
 file=""
@@ -266,15 +262,11 @@ prefix=""
 source=$(echo $source | tr ',' ' ' | tr ';' ' ')
 files=($source)
 
-echo "Downloading files"
-
 for file in ${files[@]}; do
 	## determine whether the input source is a directory or not
-	echo "Getting dir status"
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
 	if [ $fisdir -eq 0 ]; then
 		export prefix="/$(echo $source | rev | cut -d/ -f1- | rev)"
-		echo "DLing $file"
 		doStashCpSingle $file update
 	else
 		lc=$(echo "${source: -1}")
@@ -291,8 +283,6 @@ for file in ${files[@]}; do
 	fi
 done
 
-echo "Setting classads"
-
 ## Setting classads as appropriate
 condor_chirp set_job_attr_delayed Chirp_StashCp_Dest $OSG_SITE_NAME
 condor_chirp set_job_attr_delayed Chirp_StashCp_Used true
@@ -303,24 +293,24 @@ nameString=$(printf ",%s" "${names[@]}")
 condor_chirp set_job_attr_delayed Chirp_StashCp_FileName \"${nameString:1:1023}\"
 sizeString=$(printf ",%s" "${sizes[@]}")
 condor_chirp set_job_attr_delayed Chirp_StashCp_FileSize \"${sizeString:1:1023}\"
-#timeString=$(printf ",%s" "${times[@]}")
-#condor_chirp set_job_attr_delayed Chirp_StashCp_DlTimeMs \"${timeString:1:1023}\"
-#sourceString=$(printf ",%s" "${sources[@]}")
-#condor_chirp set_job_attr_delayed Chirp_StashCp_Source \"${sourceString:1:1023}\"
-#if [ $failoverfiles ]; then
-#	fofString=$(printf ",%s" "${failoverfiles[@]}")
-#	condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverFiles \"${fofString:1:1023}\"
-#	fotString=$(printf ",%s" "${failovertimes[@]}")
-#	condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverTimes \"${fotString:1:1023}\"
-#fi
-#if [ $failfiles ]; then
-#	ffString=$(printf ",%s" "${failfiles[@]}")
-#	condor_chirp set_job_attr_delayed Chirp_StashCp_FailFiles \"${ffString:1:1023}\"
-#	ftString=$(printf ",%s" "${failtimes[@]}")
-#	condor_chirp set_job_attr_delayed Chirp_StashCp_FailTimes \"${ftString:1:1023}\"
-#	fcString=$(printf ",%s" "${failcodes[@]}")
-#	condor_chirp set_job_attr_delayed Chirp_StashCp_FailCodes \"${fcString:1:1023}\"
-#fi
+timeString=$(printf ",%s" "${times[@]}")
+condor_chirp set_job_attr_delayed Chirp_StashCp_DlTimeMs \"${timeString:1:1023}\"
+sourceString=$(printf ",%s" "${sources[@]}")
+condor_chirp set_job_attr_delayed Chirp_StashCp_Source \"${sourceString:1:1023}\"
+if [ $failoverfiles ]; then
+	fofString=$(printf ",%s" "${failoverfiles[@]}")
+	condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverFiles \"${fofString:1:1023}\"
+	fotString=$(printf ",%s" "${failovertimes[@]}")
+	condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverTimes \"${fotString:1:1023}\"
+fi
+if [ $failfiles ]; then
+	ffString=$(printf ",%s" "${failfiles[@]}")
+	condor_chirp set_job_attr_delayed Chirp_StashCp_FailFiles \"${ffString:1:1023}\"
+	ftString=$(printf ",%s" "${failtimes[@]}")
+	condor_chirp set_job_attr_delayed Chirp_StashCp_FailTimes \"${ftString:1:1023}\"
+	fcString=$(printf ",%s" "${failcodes[@]}")
+	condor_chirp set_job_attr_delayed Chirp_StashCp_FailCodes \"${fcString:1:1023}\"
+fi
 
 #Note: if any one file transfer fails, then stashcp fails
 if [ $failed -ne 0 ]; then
