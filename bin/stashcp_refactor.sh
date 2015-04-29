@@ -41,6 +41,10 @@ function strIndex {
 
 function doStashCpSingle {
 	## address single-file case
+	myFile=$1
+	#http://stackoverflow.com/a/16623897
+	relPath=${sfile#$prefix}
+	echo "getting size"
 	sz=$(xrdfs root://data.ci-connect.net stat $source | grep "Size: " | cut -d':' -f2)
 	sz=$(echo -n "${sz//[[:space:]]/}")
 	## if someone has 'Size: ' in their file path, they have bigger problems than this not working.
@@ -48,9 +52,7 @@ function doStashCpSingle {
 	tm=$((300+mb))
 	
 	## use included timeout script (timeout.sh) to timeout on xrdcp
-	myFile=$1
-	#http://stackoverflow.com/a/16623897
-	relPath=${sfile#$prefix}
+	echo "start $myFile"
 	st1=$(date +%s%3N)
 	if [ $debug -eq 2 ]; then
 		timeout $tm xrdcp $xrdargs -f $myPrefix://$myFile $baseDir/$relPath 2>&1
@@ -59,6 +61,7 @@ function doStashCpSingle {
 	fi
 	res=$?
 	dl1=$(date +%s%3N)
+	echo "end $myFile"
 	if [ $res -eq 0 ]; then
 		## pull from local cache succeeded
 		dltm=$((dl1-st1))
