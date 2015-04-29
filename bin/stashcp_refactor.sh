@@ -13,14 +13,14 @@ usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to
 
 function getClose {
 	## for now, call Ilija's code, and hope that it is available nearby
-        setStashCache=`which setStashCache.sh 2>/dev/null`
-        if [ $? -ne '0' ]; then
-          >&2 echo "Cannot find setStashCache.sh, setting to defaults"
-          echo "root://data.ci-connect.net"
-	  exit 1
-        else 	
-	  source $setStashCache 2>&1 > /dev/null
-          echo $STASHPREFIX
+	setStashCache=`which setStashCache.sh 2>/dev/null`
+	if [ $? -ne '0' ]; then
+		>&2 echo "Cannot find setStashCache.sh, setting to defaults"
+		echo "root://data.ci-connect.net"
+		exit 1
+	else 	
+		source $setStashCache 2>&1 > /dev/null
+		echo $STASHPREFIX
 	fi
 }
 
@@ -31,12 +31,6 @@ function updateInfo {
 	sizes=("${sizes[@]}" $3)
 	times=("${times[@]}" $4)
 	sources=("${sources[@]}" $5)
-}
-
-#http://stackoverflow.com/a/5032641
-function strIndex {
-	x="${1%%$2*}"
-	[[ $x = $1 ]] && echo -1 || echo ${#x}
 }
 
 function doStashCpSingle {
@@ -300,8 +294,8 @@ startString=$(printf ",%s" "${starts[@]}")
 condor_chirp set_job_attr_delayed Chirp_StashCp_DLStart \"${startString:1:1023}\"
 nameString=$(printf ",%s" "${names[@]}")
 condor_chirp set_job_attr_delayed Chirp_StashCp_FileName \"${nameString:1:1023}\"
-#sizeString=$(printf ",%s" "${sizes[@]}")
-#condor_chirp set_job_attr_delayed Chirp_StashCp_FileSize \"${sizeString:1:1023}\"
+sizeString=$(printf ",%s" "${sizes[@]}")
+condor_chirp set_job_attr_delayed Chirp_StashCp_FileSize \"${sizeString:1:1023}\"
 #timeString=$(printf ",%s" "${times[@]}")
 #condor_chirp set_job_attr_delayed Chirp_StashCp_DlTimeMs \"${timeString:1:1023}\"
 #sourceString=$(printf ",%s" "${sources[@]}")
