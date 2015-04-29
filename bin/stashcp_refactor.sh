@@ -44,7 +44,6 @@ function doStashCpSingle {
 	myFile=$1
 	#http://stackoverflow.com/a/16623897
 	relPath=${sfile#$prefix}
-	echo "getting size"
 	sz=$(xrdfs root://data.ci-connect.net stat $source | grep "Size: " | cut -d':' -f2)
 	sz=$(echo -n "${sz//[[:space:]]/}")
 	## if someone has 'Size: ' in their file path, they have bigger problems than this not working.
@@ -52,12 +51,10 @@ function doStashCpSingle {
 	tm=$((300+mb))
 	
 	## use included timeout script (timeout.sh) to timeout on xrdcp
-	echo "start $myFile"
 	st1=$(date +%s%3N)
 	timeout $tm xrdcp $xrdargs -f $myPrefix://$myFile $baseDir/$relPath 2>&1
 	res=$?
 	dl1=$(date +%s%3N)
-	echo "end $myFile"
 	if [ $res -eq 0 ]; then
 		## pull from local cache succeeded
 		dltm=$((dl1-st1))
@@ -274,16 +271,12 @@ prefix=""
 source=$(echo $source | tr ',' ' ' | tr ';' ' ')
 files=($source)
 
-echo "Time to start downloading!"
-
 for file in ${files[@]}; do
 	## determine whether the input source is a directory or not
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
 	if [ $fisdir -eq 0 ]; then
 		export prefix="/$(echo $source | rev | cut -d/ -f1- | rev)"
-		echo "DL single file $file"
 		doStashCpSingle $file update
-		echo "DL'd single file $file"
 	else
 		lc=$(echo "${source: -1}")
 		if [ "x$lc" == "x/" ]; then
@@ -305,28 +298,28 @@ condor_chirp set_job_attr_delayed Chirp_StashCp_Used true
 ## http://stackoverflow.com/a/2317171
 startString=$(printf ",%s" "${starts[@]}")
 condor_chirp set_job_attr_delayed Chirp_StashCp_DLStart \"${startString:1:1023}\"
-nameString=$(printf ",%s" "${names[@]}")
-condor_chirp set_job_attr_delayed Chirp_StashCp_FileName \"${nameString:1:1023}\"
-sizeString=$(printf ",%s" "${sizes[@]}")
-condor_chirp set_job_attr_delayed Chirp_StashCp_FileSize \"${sizeString:1:1023}\"
-timeString=$(printf ",%s" "${times[@]}")
-condor_chirp set_job_attr_delayed Chirp_StashCp_DlTimeMs \"${timeString:1:1023}\"
-sourceString=$(printf ",%s" "${sources[@]}")
-condor_chirp set_job_attr_delayed Chirp_StashCp_Source \"${sourceString:1:1023}\"
-if [ $failoverfiles ]; then
-	fofString=$(printf ",%s" "${failoverfiles[@]}")
-	condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverFiles \"${fofString:1:1023}\"
-	fotString=$(printf ",%s" "${failovertimes[@]}")
-	condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverTimes \"${fotString:1:1023}\"
-fi
-if [ $failfiles ]; then
-	ffString=$(printf ",%s" "${failfiles[@]}")
-	condor_chirp set_job_attr_delayed Chirp_StashCp_FailFiles \"${ffString:1:1023}\"
-	ftString=$(printf ",%s" "${failtimes[@]}")
-	condor_chirp set_job_attr_delayed Chirp_StashCp_FailTimes \"${ftString:1:1023}\"
-	fcString=$(printf ",%s" "${failcodes[@]}")
-	condor_chirp set_job_attr_delayed Chirp_StashCp_FailCodes \"${fcString:1:1023}\"
-fi
+#nameString=$(printf ",%s" "${names[@]}")
+#condor_chirp set_job_attr_delayed Chirp_StashCp_FileName \"${nameString:1:1023}\"
+#sizeString=$(printf ",%s" "${sizes[@]}")
+#condor_chirp set_job_attr_delayed Chirp_StashCp_FileSize \"${sizeString:1:1023}\"
+#timeString=$(printf ",%s" "${times[@]}")
+#condor_chirp set_job_attr_delayed Chirp_StashCp_DlTimeMs \"${timeString:1:1023}\"
+#sourceString=$(printf ",%s" "${sources[@]}")
+#condor_chirp set_job_attr_delayed Chirp_StashCp_Source \"${sourceString:1:1023}\"
+#if [ $failoverfiles ]; then
+#	fofString=$(printf ",%s" "${failoverfiles[@]}")
+#	condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverFiles \"${fofString:1:1023}\"
+#	fotString=$(printf ",%s" "${failovertimes[@]}")
+#	condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverTimes \"${fotString:1:1023}\"
+#fi
+#if [ $failfiles ]; then
+#	ffString=$(printf ",%s" "${failfiles[@]}")
+#	condor_chirp set_job_attr_delayed Chirp_StashCp_FailFiles \"${ffString:1:1023}\"
+#	ftString=$(printf ",%s" "${failtimes[@]}")
+#	condor_chirp set_job_attr_delayed Chirp_StashCp_FailTimes \"${ftString:1:1023}\"
+#	fcString=$(printf ",%s" "${failcodes[@]}")
+#	condor_chirp set_job_attr_delayed Chirp_StashCp_FailCodes \"${fcString:1:1023}\"
+#fi
 
 #Note: if any one file transfer fails, then stashcp fails
 if [ $failed -ne 0 ]; then
