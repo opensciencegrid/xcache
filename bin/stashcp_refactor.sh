@@ -30,7 +30,6 @@ function updateInfo {
 	names=("${names[@]}" $2)
 	sizes=("${sizes[@]}" $3)
 	times=("${times[@]}" $4)
-	sources=("${sources[@]}" $5)
 }
 
 function doStashCpSingle {
@@ -53,7 +52,7 @@ function doStashCpSingle {
 		## pull from local cache succeeded
 		dltm=$((dl1-st1))
 		if [ $2 ]; then 	# update info only if I want to
-			updateInfo $st1 $myFile $mySz $dltm $myPrefix
+			updateInfo $st1 $myFile $mySz $dltm
 		fi
 		## send info out to flume
 		hn=$myPrefix
@@ -80,7 +79,7 @@ function doStashCpSingle {
 			## pull from trunk succeeded
 			dltm=$((dl2-st2))
 			if [ $2 ]; then
-				updateInfo $st2 $myFile $mySz $dltm $hn
+				updateInfo $st2 $myFile $mySz $dltm
 			fi
 			failoverfiles=("${failoverfiles[@]}" $myFile)
 			failovertimes=("${failovertimes[@]}" $st1) # time that the failed pull started
@@ -126,9 +125,8 @@ function doStashCpDirectory {
 	done
 	dl=$(date +%s%3N)
 	dltm=$((dl-st))
-	echo "Update info: $st $baseSource $sz $dltm $myPrefix"
 	if [ $2 ]; then
-		updateInfo $st $baseSource+ $sz $dltm $myPrefix
+		updateInfo $st $baseSource+ $sz $dltm 
 	fi
 }
 
@@ -252,7 +250,7 @@ starts=()
 names=()
 sizes=()
 times=()
-sources=()
+sources=$myPrefix
 failoverfiles=()
 failovertimes=()
 failfiles=()
@@ -290,6 +288,7 @@ done
 ## Setting classads as appropriate
 condor_chirp set_job_attr_delayed Chirp_StashCp_Dest $OSG_SITE_NAME
 condor_chirp set_job_attr_delayed Chirp_StashCp_Used true
+condor_chirp set_job_attr_delayed Chirp_StashCp_Prefix $myPrefix
 ## http://stackoverflow.com/a/2317171
 startString=$(printf ",%s" "${starts[@]}")
 condor_chirp set_job_attr_delayed Chirp_StashCp_DLStart \"${startString:1:1023}\"
@@ -299,8 +298,8 @@ sizeString=$(printf ",%s" "${sizes[@]}")
 condor_chirp set_job_attr_delayed Chirp_StashCp_FileSize \"${sizeString:1:1023}\"
 timeString=$(printf ",%s" "${times[@]}")
 condor_chirp set_job_attr_delayed Chirp_StashCp_DlTimeMs \"${timeString:1:1023}\"
-sourceString=$(printf ",%s" "${sources[@]}")
-condor_chirp set_job_attr_delayed Chirp_StashCp_Source \"${sourceString:1:1023}\"
+#sourceString=$(printf ",%s" "${sources[@]}")
+#condor_chirp set_job_attr_delayed Chirp_StashCp_Source \"${sourceString:1:1023}\"
 if [ $failoverfiles ]; then
 	fofString=$(printf ",%s" "${failoverfiles[@]}")
 	condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverFiles \"${fofString:1:1023}\"
