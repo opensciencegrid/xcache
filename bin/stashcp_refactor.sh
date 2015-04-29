@@ -136,11 +136,11 @@ function doStashCpDirectory {
 }
 
 ## check if the relevant classad is there
-#classad=(`grep ^WantsStashCache $_CONDOR_JOB_AD`)
-#if [ ! $classad ]; then # break and return error
-#	echo "WantsStashCache classad not present"
-#	return 1
-#fi
+classad=(`grep ^WantsStashCache $_CONDOR_JOB_AD`)
+if [ ! $classad ]; then # break and return error
+    echo "WantsStashCache classad not present"
+    return 1
+fi
 
 module load xrootd/4.1.1
 export PATH=$PATH:$(pwd)
@@ -204,26 +204,26 @@ done
 #echo "Location: $loc"
 
 ## find chirp
-#which condor_chirp 
-#res=$?
-#if [ $res -ne 0 ]; then
-#	if [ -s /usr/libexec/condor/condor_chirp ]; then
-#		PATH=$PATH:/usr/libexec/condor
-#	else
-#		cd ../../
-#		pd=$(find . | grep "condor_chirp")
-#		if [ -z $pd ]; then
-#			echo "condor_chirp not found" >&2
-#		else
-#			#echo "Trying non-usr option"
-#			p1=$(echo $pd | cut -c 2-)
-#			p2=$(echo $p1 | rev | cut -d'/' -f2- | rev)
-#			cwd=$(pwd)
-#			PATH=$PATH:$cwd/$p2
-#		fi
-#		cd -
-#	fi
-#fi
+which condor_chirp 
+res=$?
+if [ $res -ne 0 ]; then
+    if [ -s /usr/libexec/condor/condor_chirp ]; then
+	PATH=$PATH:/usr/libexec/condor
+    else
+	cd ../../
+	pd=$(find . | grep "condor_chirp")
+	if [ -z $pd ]; then
+	    echo "condor_chirp not found" >&2
+	else
+	    #echo "Trying non-usr option"
+	    p1=$(echo $pd | cut -c 2-)
+	    p2=$(echo $p1 | rev | cut -d'/' -f2- | rev)
+	    cwd=$(pwd)
+	    PATH=$PATH:$cwd/$p2
+	fi
+	cd -
+    fi
+fi
 
 ## set prefix to proper format
 if [[ $OSG_SITE_NAME == CIT* ]]; then
@@ -277,51 +277,47 @@ for file in ${files[@]}; do
 	export prefix="/$(echo $source | rev | cut -d/ -f1- | rev)"
 	doStashCpSingle $file update
     else
+	export prefix="/$(echo $source | rev | cut -d/ -f1- | rev)"
 	lc=$(echo "${source: -1}")
 	if [ "$lc" == "/" ]; then
-	    export prefix="/$(echo $source | rev | cut -d/ -f1- | rev)"
-	    echo "Prefix for slash case: $prefix"
 	    doStashCpDirectory $file update
 	else
 	    dir=$(echo $source | rev | cut -d/ -f1 | rev)
-	    export prefix="/$(echo $source | rev | cut -d/ -f1- | rev)/"
-	    echo "Prefix for noslash case: $prefix"
 	    mkdir $loc/$dir
 	    baseDir=$loc/$dir
-	    echo "Base dir: $baseDir"
 	    doStashCpDirectory $file update
 	fi
     fi
 done
 
 ## Setting classads as appropriate
-#condor_chirp set_job_attr_delayed Chirp_StashCp_Dest $OSG_SITE_NAME
-#condor_chirp set_job_attr_delayed Chirp_StashCp_Used true
+condor_chirp set_job_attr_delayed Chirp_StashCp_Dest $OSG_SITE_NAME
+condor_chirp set_job_attr_delayed Chirp_StashCp_Used true
 ##http://stackoverflow.com/a/2317171
-#startString=$(printf ",%s" "${starts[@]}")
-#condor_chirp set_job_attr_delayed Chirp_StashCp_DLStart \"${startString:1:1023}\"
-#nameString=$(printf ",%s" "${names[@]}")
-#condor_chirp set_job_attr_delayed Chirp_StashCp_FileName \"${nameString:1:1023}\"
-#sizeString=$(printf ",%s" "${sizes[@]}")
-#condor_chirp set_job_attr_delayed Chirp_StashCp_FileSize \"${sizeString:1:1023}\"
-#timeString=$(printf ",%s" "${times[@]}")
-#condor_chirp set_job_attr_delayed Chirp_StashCp_DlTimeMs \"${timeString:1:1023}\"
-#sourceString=$(printf ",%s" "${sources[@]}")
-#condor_chirp set_job_attr_delayed Chirp_StashCp_Source \"${sourceString:1:1023}\"
-#if [ $failoverfiles ]; then
-#	fofString=$(printf ",%s" "${failoverfiles[@]}")
-#	condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverFiles \"${fofString:1:1023}\"
-#	fotString=$(printf ",%s" "${failovertimes[@]}")
-#	condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverTimes \"${fotString:1:1023}\"
-#fi
-#if [ $failfiles ]; then
-#	ffString=$(printf ",%s" "${failfiles[@]}")
-#	condor_chirp set_job_attr_delayed Chirp_StashCp_FailFiles \"${ffString:1:1023}\"
-#	ftString=$(printf ",%s" "${failtimes[@]}")
-#	condor_chirp set_job_attr_delayed Chirp_StashCp_FailTimes \"${ftString:1:1023}\"
-#	fcString=$(printf ",%s" "${failcodes[@]}")
-#	condor_chirp set_job_attr_delayed Chirp_StashCp_FailCodes \"${fcString:1:1023}\"
-#fi
+startString=$(printf ",%s" "${starts[@]}")
+condor_chirp set_job_attr_delayed Chirp_StashCp_DLStart \"${startString:1:1023}\"
+nameString=$(printf ",%s" "${names[@]}")
+condor_chirp set_job_attr_delayed Chirp_StashCp_FileName \"${nameString:1:1023}\"
+sizeString=$(printf ",%s" "${sizes[@]}")
+condor_chirp set_job_attr_delayed Chirp_StashCp_FileSize \"${sizeString:1:1023}\"
+timeString=$(printf ",%s" "${times[@]}")
+condor_chirp set_job_attr_delayed Chirp_StashCp_DlTimeMs \"${timeString:1:1023}\"
+sourceString=$(printf ",%s" "${sources[@]}")
+condor_chirp set_job_attr_delayed Chirp_StashCp_Source \"${sourceString:1:1023}\"
+if [ $failoverfiles ]; then
+    fofString=$(printf ",%s" "${failoverfiles[@]}")
+    condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverFiles \"${fofString:1:1023}\"
+    fotString=$(printf ",%s" "${failovertimes[@]}")
+    condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverTimes \"${fotString:1:1023}\"
+fi
+if [ $failfiles ]; then
+    ffString=$(printf ",%s" "${failfiles[@]}")
+    condor_chirp set_job_attr_delayed Chirp_StashCp_FailFiles \"${ffString:1:1023}\"
+    ftString=$(printf ",%s" "${failtimes[@]}")
+    condor_chirp set_job_attr_delayed Chirp_StashCp_FailTimes \"${ftString:1:1023}\"
+    fcString=$(printf ",%s" "${failcodes[@]}")
+    condor_chirp set_job_attr_delayed Chirp_StashCp_FailCodes \"${fcString:1:1023}\"
+fi
 
 #Note: if any one file transfer fails, then stashcp fails
 if [ $failed -ne 0 ]; then
