@@ -54,6 +54,9 @@ function doStashCpSingle {
 		dltm=$((dl1-st1))
 		if [ $2 ]; then 	# update info only if I want to
 			updateInfo $st1 $myFile $sz $dltm $myPrefix
+			for i in $sizes; do
+				echo $i;
+			done
 		fi
 		## send info out to flume
 		hn=$myPrefix
@@ -139,6 +142,8 @@ function doStashCpDirectory {
 module load xrootd/4.1.1
 export PATH=$PATH:$(pwd)
 
+echo "Reading arguments"
+
 debug=0
 file=""
 loc="."
@@ -193,9 +198,6 @@ while [ $# -gt 0 ]; do
     esac
 	shift
 done
-
-#echo "Source: $source"
-#echo "Location: $loc"
 
 ## find chirp
 which condor_chirp 
@@ -265,6 +267,8 @@ prefix=""
 source=$(echo $source | tr ',' ' ' | tr ';' ' ')
 files=($source)
 
+echo "Downloading files"
+
 for file in ${files[@]}; do
 	## determine whether the input source is a directory or not
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
@@ -285,6 +289,8 @@ for file in ${files[@]}; do
 		fi
 	fi
 done
+
+echo "Setting classads"
 
 ## Setting classads as appropriate
 condor_chirp set_job_attr_delayed Chirp_StashCp_Dest $OSG_SITE_NAME
