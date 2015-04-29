@@ -38,10 +38,10 @@ function doStashCpSingle {
 	myFile=$1
 	#http://stackoverflow.com/a/16623897
 	relPath=${sfile#$prefix}
-	sz=$(xrdfs root://data.ci-connect.net stat $myFile | grep "Size: " | cut -d':' -f2)
-	sz=$(echo -n "${sz//[[:space:]]/}")
+	mySz=$(xrdfs root://data.ci-connect.net stat $myFile | grep "Size: " | cut -d':' -f2)
+	mySz=$(echo -n "${mySz//[[:space:]]/}")
 	## if someone has 'Size: ' in their file path, they have bigger problems than this not working.
-	mb=$((sz/1000000))
+	mb=$((mySz/1000000))
 	tm=$((300+mb))
 	
 	## use included timeout script (timeout.sh) to timeout on xrdcp
@@ -53,13 +53,13 @@ function doStashCpSingle {
 		## pull from local cache succeeded
 		dltm=$((dl1-st1))
 		if [ $2 ]; then 	# update info only if I want to
-			updateInfo $st1 $myFile $sz $dltm $myPrefix
+			updateInfo $st1 $myFile $mySz $dltm $myPrefix
 		fi
 		## send info out to flume
 		hn=$myPrefix
 		timestamp=$(date +%s)
 		header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
-		body="\"body\" : \"$((st1/1000)),$myFile,$sz,$dltm,$OSG_SITE_NAME,$hn\"}]"
+		body="\"body\" : \"$((st1/1000)),$myFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 		echo $header$body > data.json
 		timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1 
 		rm data.json 2>&1
@@ -80,14 +80,14 @@ function doStashCpSingle {
 			## pull from trunk succeeded
 			dltm=$((dl2-st2))
 			if [ $2 ]; then
-				updateInfo $st2 $myFile $sz $dltm $hn
+				updateInfo $st2 $myFile $mySz $dltm $hn
 			fi
 			failoverfiles=("${failoverfiles[@]}" $myFile)
 			failovertimes=("${failovertimes[@]}" $st1) # time that the failed pull started
 			## send info out to flume
 			timestamp=$(date +%s)
 			header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
-			body="\"body\" : \"$((st2/1000)),$myFile,$sz,$dltm,$OSG_SITE_NAME,$hn\"}]"
+			body="\"body\" : \"$((st2/1000)),$myFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 			echo $header$body > data.json
 			timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1
 			rm data.json 2>&1
@@ -128,7 +128,7 @@ function doStashCpDirectory {
 	dltm=$((dl-st))
 	echo "Update info: $st $baseSource $sz $dltm $myPrefix"
 	if [ $2 ]; then
-		updateInfo $st $baseSource $sz $dltm $myPrefix
+		updateInfo $st $baseSource+ $sz $dltm $myPrefix
 	fi
 }
 
