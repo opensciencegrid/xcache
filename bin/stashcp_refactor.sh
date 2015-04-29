@@ -105,7 +105,6 @@ function doStashCpDirectory {
 	## address directory case
 	mySource=$1
 	sfiles=$(xrdfs root://data.ci-connect.net ls $mySource)
-	xrdfs root://data.ci-connect.net stat $mySource | grep "Size: "
 	sz=$(xrdfs root://data.ci-connect.net stat $mySource | grep "Size: " | cut -d':' -f2)
 	sz=$(echo -n "${sz//[[:space:]]/}")
 	st=$(date +%s%3N)
@@ -271,7 +270,6 @@ for file in ${files[@]}; do
 		lc=$(echo "${source: -1}")
 		if [ "x$lc" == "x/" ]; then
 			export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)"
-			echo "Prefix: $prefix"
 			doStashCpDirectory $file update
 		else
 			dir=$(echo $file | rev | cut -d/ -f1 | rev)
