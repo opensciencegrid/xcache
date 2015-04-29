@@ -54,11 +54,7 @@ function doStashCpSingle {
 	## use included timeout script (timeout.sh) to timeout on xrdcp
 	echo "start $myFile"
 	st1=$(date +%s%3N)
-	if [ $debug -eq 2 ]; then
-		timeout $tm xrdcp $xrdargs -f $myPrefix://$myFile $baseDir/$relPath 2>&1
-	else
-		timeout $tm xrdcp $xrdargs -f $myPrefix://$myFile $baseDir/$relPath > /dev/null 2>&1 
-	fi
+	timeout $tm xrdcp $xrdargs -f $myPrefix://$myFile $baseDir/$relPath 2>&1
 	res=$?
 	dl1=$(date +%s%3N)
 	echo "end $myFile"
@@ -74,9 +70,7 @@ function doStashCpSingle {
 		header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
 		body="\"body\" : \"$((st1/1000)),$myFile,$sz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 		echo $header$body > data.json
-		echo "curling $myFile"
-		timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json 2>&1 
-		echo "curled $myFile"
+		timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1 
 		rm data.json 2>&1
 	else
 		## pull from local cache failed; pull from trunk
@@ -88,11 +82,7 @@ function doStashCpSingle {
 		fi
 		st2=$(date +%s%3N)
 		hn="root://data.ci-connect.net"
-		if [ $debug -eq 2 ]; then
-			timeout $tm xrdcp $xrdargs -f $hn://$myFile $baseDir/$relPath 2>&1
-		else
-			timeout $tm xrdcp $xrdargs -f $hn://$myFile $baseDir/$relPath > /dev/null 2>&1
-		fi
+		timeout $tm xrdcp $xrdargs -f $hn://$myFile $baseDir/$relPath 2>&1
 		res=$?
 		dl2=$(date +%s%3N)
 		if [ $res -eq 0 ]; then
@@ -108,7 +98,7 @@ function doStashCpSingle {
 			header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
 			body="\"body\" : \"$((st2/1000)),$myFile,$sz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 			echo $header$body > data.json
-			timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json 2>&1
+			timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1
 			rm data.json 2>&1
 		else
 			failfiles=("${failfiles[@]}" $myFile)
