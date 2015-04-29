@@ -288,6 +288,7 @@ for file in ${files[@]}; do
 	    echo "Prefix for noslash case: $prefix"
 	    mkdir $loc/$dir
 	    baseDir=$loc/$dir
+	    echo "Base dir: $baseDir"
 	    doStashCpDirectory $file update
 	fi
     fi
