@@ -277,6 +277,8 @@ for file in ${files[@]}; do
 			mkdir $loc/$dir
 			baseDir=$loc/$dir
 			baseSource=$file
+			echo "File: $file"
+			echo "baseSource (from main): $baseSource"
 			doStashCpDirectory $file update
 		fi
 	fi
