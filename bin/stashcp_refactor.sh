@@ -277,11 +277,11 @@ for file in ${files[@]}; do
 			export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)"
 			doStashCpDirectory $file update
 		else
-			dir=$(echo $source | rev | cut -d/ -f1 | rev)
+			dir=$(echo $file | rev | cut -d/ -f1 | rev)
 			export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)/"
 			mkdir $loc/$dir
 			baseDir=$loc/$dir
-			baseSource=$source
+			baseSource=$file
 			doStashCpDirectory $file update
 		fi
 	fi
