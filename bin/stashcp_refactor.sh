@@ -39,7 +39,9 @@ function doStashCpSingle {
 	#http://stackoverflow.com/a/16623897
 	relPath=${sfile#$prefix}
 	sz=$(xrdfs root://data.ci-connect.net stat $source | grep "Size: " | cut -d':' -f2)
+	echo "Size from xrdfs: $sz"
 	sz=$(echo -n "${sz//[[:space:]]/}")
+	echo "Size now: $sz"
 	## if someone has 'Size: ' in their file path, they have bigger problems than this not working.
 	mb=$((sz/1000000))
 	tm=$((300+mb))
@@ -52,7 +54,6 @@ function doStashCpSingle {
 	if [ $res -eq 0 ]; then
 		## pull from local cache succeeded
 		dltm=$((dl1-st1))
-		echo "$st1 $myFile $sz $dltm $myPrefix"
 		if [ $2 ]; then 	# update info only if I want to
 			updateInfo $st1 $myFile $sz $dltm $myPrefix
 		fi
