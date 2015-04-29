@@ -52,7 +52,11 @@ function doStashCpSingle {
 	#http://stackoverflow.com/a/16623897
 	relPath=${sfile#$prefix}
 	st1=$(date +%s%3N)
-	timeout $tm xrdcp $xrdargs -f $myPrefix://$myFile $baseDir/$relPath 2>&1
+	if [ $debug -eq 2 ]; then
+		timeout $tm xrdcp $xrdargs -f $myPrefix://$myFile $baseDir/$relPath 2>&1
+	else
+		timeout $tm xrdcp $xrdargs -f $myPrefix://$myFile $baseDir/$relPath > /dev/null 2>&1 
+	fi
 	res=$?
 	dl1=$(date +%s%3N)
 	if [ $res -eq 0 ]; then
@@ -79,7 +83,11 @@ function doStashCpSingle {
 		fi
 		st2=$(date +%s%3N)
 		hn="root://data.ci-connect.net"
-		timeout $tm xrdcp $xrdargs -f $hn://$myFile $baseDir/$relPath 2>&1
+		if [ $debug -eq 2 ]; then
+			timeout $tm xrdcp $xrdargs -f $hn://$myFile $baseDir/$relPath 2>&1
+		else
+			timeout $tm xrdcp $xrdargs -f $hn://$myFile $baseDir/$relPath > /dev/null 2>&1
+		fi
 		res=$?
 		dl2=$(date +%s%3N)
 		if [ $res -eq 0 ]; then
