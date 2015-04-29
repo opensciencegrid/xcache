@@ -279,6 +279,8 @@ prefix=""
 source=$(echo $source | tr ',' ' ' | tr ';' ' ')
 files=($source)
 
+echo "Time to start downloading!"
+
 for file in ${files[@]}; do
 	## determine whether the input source is a directory or not
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
