@@ -269,6 +269,7 @@ for file in ${files[@]}; do
 		lc=$(echo "${source: -1}")
 		if [ "x$lc" == "x/" ]; then
 			export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)"
+			baseSource=$file
 			doStashCpDirectory $file update
 		else
 			dir=$(echo $file | rev | cut -d/ -f1 | rev)
@@ -276,8 +277,6 @@ for file in ${files[@]}; do
 			mkdir $loc/$dir
 			baseDir=$loc/$dir
 			baseSource=$file
-			echo "File: $file"
-			echo "baseSource (from main): $baseSource"
 			doStashCpDirectory $file update
 		fi
 	fi
