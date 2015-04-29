@@ -247,7 +247,6 @@ starts=()
 names=()
 sizes=()
 times=()
-sources=$myPrefix
 failoverfiles=()
 failovertimes=()
 failfiles=()
@@ -297,8 +296,6 @@ sizeString=$(printf ",%s" "${sizes[@]}")
 condor_chirp set_job_attr_delayed Chirp_StashCp_FileSize \"${sizeString:1:1023}\"
 timeString=$(printf ",%s" "${times[@]}")
 condor_chirp set_job_attr_delayed Chirp_StashCp_DlTimeMs \"${timeString:1:1023}\"
-#sourceString=$(printf ",%s" "${sources[@]}")
-#condor_chirp set_job_attr_delayed Chirp_StashCp_Source \"${sourceString:1:1023}\"
 if [ $failoverfiles ]; then
 	fofString=$(printf ",%s" "${failoverfiles[@]}")
 	condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverFiles \"${fofString:1:1023}\"
