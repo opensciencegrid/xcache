@@ -280,10 +280,12 @@ for file in ${files[@]}; do
 	lc=$(echo "${source: -1}")
 	if [ "$lc" == "/" ]; then
 	    export prefix="/$(echo $source | rev | cut -d/ -f1- | rev)"
+	    echo "Prefix for slash case: $prefix"
 	    doStashCpDirectory $file update
 	else
 	    dir=$(echo $source | rev | cut -d/ -f1 | rev)
 	    export prefix="/$(echo $source | rev | cut -d/ -f2- | rev)/"
+	    echo "Prefix for noslash case: $prefix"
 	    mkdir $loc/$dir
 	    baseDir=$loc/$dir
 	    doStashCpDirectory $file update
