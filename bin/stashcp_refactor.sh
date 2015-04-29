@@ -298,8 +298,8 @@ condor_chirp set_job_attr_delayed Chirp_StashCp_Used true
 ## http://stackoverflow.com/a/2317171
 startString=$(printf ",%s" "${starts[@]}")
 condor_chirp set_job_attr_delayed Chirp_StashCp_DLStart \"${startString:1:1023}\"
-#nameString=$(printf ",%s" "${names[@]}")
-#condor_chirp set_job_attr_delayed Chirp_StashCp_FileName \"${nameString:1:1023}\"
+nameString=$(printf ",%s" "${names[@]}")
+condor_chirp set_job_attr_delayed Chirp_StashCp_FileName \"${nameString:1:1023}\"
 #sizeString=$(printf ",%s" "${sizes[@]}")
 #condor_chirp set_job_attr_delayed Chirp_StashCp_FileSize \"${sizeString:1:1023}\"
 #timeString=$(printf ",%s" "${times[@]}")
