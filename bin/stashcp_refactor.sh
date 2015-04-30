@@ -49,6 +49,7 @@ function doStashCpSingle {
 	echo "Base Dir within for $file: $baseDir"
 	res=$?
 	dl1=$(date +%s%3N)
+	echo "My Command: xrdcp $xrdargs -f $myPrefix://$myFile $baseDir/$relPath"
 	if [ $res -eq 0 ]; then
 		## pull from local cache succeeded
 		dltm=$((dl1-st1))
