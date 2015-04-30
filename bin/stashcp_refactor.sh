@@ -262,6 +262,7 @@ for file in ${files[@]}; do
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
 	if [ $fisdir -eq 0 ]; then
 		export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)"
+		baseDir=$loc
 		doStashCpSingle $file update
 	else
 		lc=$(echo "${source: -1}")
