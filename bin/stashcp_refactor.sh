@@ -44,12 +44,14 @@ function doStashCpSingle {
 	tm=$((300+mb))
 	
 	## use included timeout script (timeout.sh) to timeout on xrdcp
+	echo "My prefix: $prefix"
+	echo "Base Dir within for $myFile: $baseDir"
+	echo "Rel Path within for $myFile: $relPath"
 	st1=$(date +%s%3N)
 	timeout $tm xrdcp $xrdargs -f $stashPrefix://$myFile $baseDir/$relPath 2>&1
-	echo "Base Dir within for $file: $baseDir"
-	echo "Rel Path within for $file: $relPath"
 	res=$?
 	dl1=$(date +%s%3N)
+	echo "XRDCP (I hope)"
 	if [ $res -eq 0 ]; then
 		## pull from local cache succeeded
 		dltm=$((dl1-st1))
