@@ -45,7 +45,7 @@ function doStashCpSingle {
 	
 	## use included timeout script (timeout.sh) to timeout on xrdcp
 	st1=$(date +%s%3N)
-	timeout $tm xrdcp $xrdargs -f $myPrefix://$myFile $baseDir/$relPath 2>&1
+	timeout $tm xrdcp $xrdargs -f $stashPrefix://$myFile $baseDir/$relPath 2>&1
 	echo "Base Dir within for $file: $baseDir"
 	echo "Rel Path within for $file: $relPath"
 	res=$?
@@ -57,7 +57,7 @@ function doStashCpSingle {
 			updateInfo $st1 $myFile $mySz $dltm
 		fi
 		## send info out to flume
-		hn=$myPrefix
+		hn=$stashPrefix
 		timestamp=$(date +%s)
 		header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
 		body="\"body\" : \"$((st1/1000)),$myFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
@@ -68,8 +68,8 @@ function doStashCpSingle {
 		## pull from local cache failed; pull from trunk
 	    if [ $debug -eq 2 ]; then	
 			## print out debug info
-			echo "Pull of $myFile from $myPrefix failed."
-			echo "Command: xrdcp $xrdargs -f $myPrefix://$myFile $baseDir/$relPath 2>&1"
+			echo "Pull of $myFile from $stashPrefix failed."
+			echo "Command: xrdcp $xrdargs -f $stashPrefix://$myFile $baseDir/$relPath 2>&1"
 			echo "Trying to pull from trunk."
 		fi
 		st2=$(date +%s%3N)
@@ -115,7 +115,6 @@ function doStashCpDirectory {
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
 			relPath=${sfile#$prefix}
 			mkdir -p $baseDir/$relPath
-			echo "Made $baseDir/$relPath"
 			doStashCpDirectory $sfile 
 		elif [ $isdir == 0 ]; then
 			doStashCpSingle $sfile 
@@ -218,16 +217,16 @@ fi
 ## set prefix to proper format
 if [[ $OSG_SITE_NAME == CIT* ]]; then
     STASHPREFIX="root://phiphi.t2.ucsd.edu"
-    myPrefix=$STASHPREFIX
+    stashPrefix=$STASHPREFIX
 elif [ ${#STASHPREFIX} -lt 3 ]; then
-    myPrefix="root://data.ci-connect.net"
+    stashPrefix="root://data.ci-connect.net"
 	echo "Empty prefix"
 else
 	lcs=$(echo "${STASHPREFIX: -1}")
 	if [ $lcs == "/" ]; then
-		myPrefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
+		stashPrefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
 	else
-		myPrefix=$STASHPREFIX
+		stashPrefix=$STASHPREFIX
 	fi
 fi
 
@@ -283,6 +282,7 @@ for file in ${files[@]}; do
 			echo "Made: $loc/$dir"
 			baseDir=$loc/$dir
 			baseSource=$file/+
+			echo "Trying to CP Directory $file"
 			doStashCpDirectory $file update
 		fi
 	fi
@@ -291,7 +291,7 @@ done
 ## Setting classads as appropriate
 condor_chirp set_job_attr_delayed Chirp_StashCp_Dest \"$OSG_SITE_NAME\"
 condor_chirp set_job_attr_delayed Chirp_StashCp_Used true
-condor_chirp set_job_attr_delayed Chirp_StashCp_Prefix \"$myPrefix\"
+condor_chirp set_job_attr_delayed Chirp_StashCp_Prefix \"$stashPrefix\"
 ## http://stackoverflow.com/a/2317171
 startString=$(printf ",%s" "${starts[@]}")
 condor_chirp set_job_attr_delayed Chirp_StashCp_DLStart \"${startString:1:1023}\"
