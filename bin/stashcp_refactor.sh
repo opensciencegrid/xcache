@@ -37,6 +37,7 @@ function doStashCpSingle {
 	myFile=$1
 	#http://stackoverflow.com/a/16623897
 	relPath=${myFile#$prefix}
+	echo "Rel Path within for $file: $relPath"
 	mySz=$(xrdfs root://data.ci-connect.net stat $myFile | grep "Size: " | cut -d':' -f2)
 	mySz=$(echo -n "${mySz//[[:space:]]/}")
 	## if someone has 'Size: ' in their file path, they have bigger problems than this not working.
@@ -46,8 +47,6 @@ function doStashCpSingle {
 	## use included timeout script (timeout.sh) to timeout on xrdcp
 	st1=$(date +%s%3N)
 	timeout $tm xrdcp $xrdargs -f $myPrefix://$myFile $baseDir/$relPath 2>&1
-	echo "Base Dir within for $file: $baseDir"
-	echo "Rel Path within for $file: $relPath"
 	res=$?
 	dl1=$(date +%s%3N)
 	if [ $res -eq 0 ]; then
