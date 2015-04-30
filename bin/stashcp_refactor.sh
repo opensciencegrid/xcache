@@ -279,6 +279,8 @@ for file in ${files[@]}; do
 			dir=$(echo $file | rev | cut -d/ -f1 | rev)
 			export prefix="$(echo $file | rev | cut -d/ -f1- | rev)/"
 			mkdir $loc/$dir
+			echo "Loc: $loc"
+			echo "Made: $loc/$dir"
 			baseDir=$loc/$dir
 			baseSource=$file/+
 			doStashCpDirectory $file update
