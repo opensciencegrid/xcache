@@ -36,7 +36,7 @@ function doStashCpSingle {
 	## address single-file case
 	myFile=$1
 	#http://stackoverflow.com/a/16623897
-	relPath=${sfile#$prefix}
+	relPath=${myFile#$prefix}
 	mySz=$(xrdfs root://data.ci-connect.net stat $myFile | grep "Size: " | cut -d':' -f2)
 	mySz=$(echo -n "${mySz//[[:space:]]/}")
 	## if someone has 'Size: ' in their file path, they have bigger problems than this not working.
@@ -267,10 +267,7 @@ for file in ${files[@]}; do
 		export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)"
 		echo "Single prefix: $prefix"
 		baseDir=$loc
-		echo "Base Dir: $baseDir"
-		export relPath=""
 		doStashCpSingle $file update
-		echo "Base Dir: $baseDir"
 	else
 		lc=$(echo "${source: -1}")
 		if [ "x$lc" == "x/" ]; then
