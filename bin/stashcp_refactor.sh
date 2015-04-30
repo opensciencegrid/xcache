@@ -46,6 +46,7 @@ function doStashCpSingle {
 	## use included timeout script (timeout.sh) to timeout on xrdcp
 	st1=$(date +%s%3N)
 	timeout $tm xrdcp $xrdargs -f $myPrefix://$myFile $baseDir/$relPath 2>&1
+	echo "Base Dir within: $baseDir"
 	res=$?
 	dl1=$(date +%s%3N)
 	if [ $res -eq 0 ]; then
@@ -264,10 +265,11 @@ for file in ${files[@]}; do
 	if [ $fisdir -eq 0 ]; then
 		export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)"
 		echo "Single prefix: $prefix"
-		echo "BaseDir: $loc"
 		baseDir=$loc
+		"Base Dir: $baseDir"
 		relPath=""
 		doStashCpSingle $file update
+		echo "Base Dir: $baseDir"
 	else
 		lc=$(echo "${source: -1}")
 		if [ "x$lc" == "x/" ]; then
