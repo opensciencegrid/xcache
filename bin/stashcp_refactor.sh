@@ -46,7 +46,7 @@ function doStashCpSingle {
 	## use included timeout script (timeout.sh) to timeout on xrdcp
 	st1=$(date +%s%3N)
 	timeout $tm xrdcp $xrdargs -f $myPrefix://$myFile $baseDir/$relPath 2>&1
-	echo "Base Dir within: $baseDir"
+	echo "Base Dir within for $file: $baseDir"
 	res=$?
 	dl1=$(date +%s%3N)
 	if [ $res -eq 0 ]; then
