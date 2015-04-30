@@ -266,7 +266,7 @@ for file in ${files[@]}; do
 		export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)"
 		echo "Single prefix: $prefix"
 		baseDir=$loc
-		"Base Dir: $baseDir"
+		echo "Base Dir: $baseDir"
 		relPath=""
 		doStashCpSingle $file update
 		echo "Base Dir: $baseDir"
