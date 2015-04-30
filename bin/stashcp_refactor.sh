@@ -115,6 +115,7 @@ function doStashCpDirectory {
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
 			relPath=${sfile#$prefix}
 			mkdir -p $baseDir/$relPath
+			echo "Made $baseDir/$relPath"
 			doStashCpDirectory $sfile 
 		elif [ $isdir == 0 ]; then
 			doStashCpSingle $sfile 
