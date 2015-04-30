@@ -36,7 +36,7 @@ function doStashCpSingle {
 	## address single-file case
 	myFile=$1
 	if [ ${myFile:0:1} == "/" ]; then
-		$myFile=$(echo myFile | cut -c2-)
+		myFile=$(echo myFile | cut -c2-)
 	fi
 	echo "My file: $myFile"
 	#http://stackoverflow.com/a/16623897
