@@ -260,8 +260,11 @@ files=($source)
 for file in ${files[@]}; do
 	## determine whether the input source is a directory or not
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
+	echo "File: $file"
 	if [ $fisdir -eq 0 ]; then
 		export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)"
+		echo "Single prefix: $prefix"
+		echo "BaseDir: $loc"
 		baseDir=$loc
 		doStashCpSingle $file update
 	else
