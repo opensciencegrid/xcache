@@ -37,9 +37,6 @@ function doStashCpSingle {
 	myFile=$1
 	#http://stackoverflow.com/a/16623897
 	relPath=${myFile#$prefix}
-	echo "myFile: $myFile"
-	echo "Prefix: $prefix"
-	echo "Rel Path within for $file: $relPath"
 	mySz=$(xrdfs root://data.ci-connect.net stat $myFile | grep "Size: " | cut -d':' -f2)
 	mySz=$(echo -n "${mySz//[[:space:]]/}")
 	## if someone has 'Size: ' in their file path, they have bigger problems than this not working.
@@ -49,6 +46,8 @@ function doStashCpSingle {
 	## use included timeout script (timeout.sh) to timeout on xrdcp
 	st1=$(date +%s%3N)
 	timeout $tm xrdcp $xrdargs -f $myPrefix://$myFile $baseDir/$relPath 2>&1
+	echo "Base Dir within for $file: $baseDir"
+	echo "Rel Path within for $file: $relPath"
 	res=$?
 	dl1=$(date +%s%3N)
 	if [ $res -eq 0 ]; then
@@ -265,19 +264,19 @@ for file in ${files[@]}; do
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
 	echo "File: $file"
 	if [ $fisdir -eq 0 ]; then
-		export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)"
+		export prefix="$(echo $file | rev | cut -d/ -f1- | rev)"
 		echo "Single prefix: $prefix"
 		baseDir=$loc
 		doStashCpSingle $file update
 	else
 		lc=$(echo "${source: -1}")
 		if [ "x$lc" == "x/" ]; then
-			export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)"
+			export prefix="$(echo $file | rev | cut -d/ -f1- | rev)"
 			baseSource=$file+
 			doStashCpDirectory $file update
 		else
 			dir=$(echo $file | rev | cut -d/ -f1 | rev)
-			export prefix="/$(echo $file | rev | cut -d/ -f1- | rev)/"
+			export prefix="$(echo $file | rev | cut -d/ -f1- | rev)/"
 			mkdir $loc/$dir
 			baseDir=$loc/$dir
 			baseSource=$file/+
