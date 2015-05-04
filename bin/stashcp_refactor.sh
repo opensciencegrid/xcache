@@ -120,12 +120,9 @@ function doStashCpDirectory {
 		isdir=$(xrdfs root://data.ci-connect.net stat $sfile | grep "IsDir" | wc -l)
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
 			relPath=${sfile#$prefix}
-			echo ""
-			ls
-			echo ""
 			mkdir -p $baseDir/$relPath
-			ls
 			echo ""
+			find . 
 			echo ""
 			doStashCpDirectory $sfile 
 		elif [ $isdir == 0 ]; then
