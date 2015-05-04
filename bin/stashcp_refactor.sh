@@ -38,8 +38,8 @@ function doStashCpSingle {
 	if [ ${myFile:0:1} == "/" ]; then
 		myFile=$(echo $myFile | cut -c2-)
 	fi
-	echo "My file: $myFile"
-	#http://stackoverflow.com/a/16623897
+	#echo "My file: $myFile"
+	## http://stackoverflow.com/a/16623897
 	relPath=${myFile#$prefix}
 	mySz=$(xrdfs root://data.ci-connect.net stat $myFile | grep "Size: " | cut -d':' -f2)
 	mySz=$(echo -n "${mySz//[[:space:]]/}")
@@ -48,14 +48,14 @@ function doStashCpSingle {
 	tm=$((300+mb))
 	
 	## use included timeout script (timeout.sh) to timeout on xrdcp
-	echo "My prefix: $prefix"
-	echo "Base Dir within for $myFile: $baseDir"
-	echo "Rel Path within for $myFile: $relPath"
+	#echo "My prefix: $prefix"
+	#echo "Base Dir within for $myFile: $baseDir"
+	#echo "Rel Path within for $myFile: $relPath"
 	st1=$(date +%s%3N)
 	timeout $tm xrdcp $xrdargs -f $stashPrefix://$myFile $baseDir/$relPath 2>&1
 	res=$?
 	dl1=$(date +%s%3N)
-	echo "XRDCP (I hope)"
+	#echo "XRDCP (I hope)"
 	if [ $res -eq 0 ]; then
 		## pull from local cache succeeded
 		dltm=$((dl1-st1))
@@ -124,9 +124,6 @@ function doStashCpDirectory {
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
 			relPath=${sfile#$prefix}
 			mkdir -p $baseDir/$relPath
-			echo ""
-			find folder
-			echo ""
 			doStashCpDirectory $sfile 
 		elif [ $isdir == 0 ]; then
 			doStashCpSingle $sfile 
@@ -274,10 +271,10 @@ files=($source)
 for file in ${files[@]}; do
 	## determine whether the input source is a directory or not
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
-	echo "File: $file"
+	#echo "File: $file"
 	if [ $fisdir -eq 0 ]; then
 		export prefix="$(echo $file | rev | cut -d/ -f1- | rev)"
-		echo "Single prefix: $prefix"
+		#echo "Single prefix: $prefix"
 		baseDir=$loc
 		doStashCpSingle $file update
 	else
@@ -290,11 +287,11 @@ for file in ${files[@]}; do
 			dir=$(echo $file | rev | cut -d/ -f1 | rev)
 			export prefix="$(echo $file | rev | cut -d/ -f1- | rev)/"
 			mkdir $loc/$dir
-			echo "Loc: $loc"
-			echo "Made: $loc/$dir"
+			#echo "Loc: $loc"
+			#echo "Made: $loc/$dir"
 			baseDir=$loc/$dir
 			baseSource=$file/+
-			echo "Trying to CP Directory $file"
+			#echo "Trying to CP Directory $file"
 			doStashCpDirectory $file update
 		fi
 	fi
