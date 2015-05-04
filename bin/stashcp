@@ -1,8 +1,5 @@
 #!/bin/bash
 
-module load xrootd/4.1.1
-export PATH=$PATH:$(pwd)
-
 usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
 
 	-d: show debugging information
@@ -11,40 +8,143 @@ usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to
 	
 	--closest: return closest cache location
 
-	Exit status 4 indicates that at least one file did not successfully copy over."
+	Exit status 4 indicates that at least one file did not successfully copy over.
+	Exit status 1 indicates that the WantsStashCache classad was not present."
 
 function getClose {
 	## for now, call Ilija's code, and hope that it is available nearby
-        setStashCache=`which setStashCache.sh 2>/dev/null`
-        if [ $? -ne '0' ]; then
-          >&2 echo "Cannot find setStashCache.sh, setting to defaults"
-          echo "root://data.ci-connect.net"
-	  exit 1
-        else 	
-	  source $setStashCache 2>&1 > /dev/null
-          echo $STASHPREFIX
+	setStashCache=`which setStashCache.sh 2>/dev/null`
+	if [ $? -ne '0' ]; then
+		>&2 echo "Cannot find setStashCache.sh, setting to defaults"
+		echo "root://data.ci-connect.net"
+		exit 1
+	else 	
+		source $setStashCache 2>&1 > /dev/null
+		echo $STASHPREFIX
 	fi
 }
 
-## REFACTOR: write function that does all the work of stashcp, and returns all the values to be chirped.
-## stashcp will just call this function appropriately.
+function updateInfo {
+	# starts, names, sizes, times, sources
+	starts=("${starts[@]}" $1)
+	names=("${names[@]}" $2)
+	sizes=("${sizes[@]}" $3)
+	times=("${times[@]}" $4)
+}
 
-function doStashCP {
+function doStashCpSingle {
+	## address single-file case
+	myFile=$1
+	if [ ${myFile:0:1} == "/" ]; then
+		myFile=$(echo $myFile | cut -c2-)
+	fi
+	#echo "My file: $myFile"
+	## http://stackoverflow.com/a/16623897
+	relPath=${myFile#$prefix}
+	mySz=$(xrdfs root://data.ci-connect.net stat $myFile | grep "Size: " | cut -d':' -f2)
+	mySz=$(echo -n "${mySz//[[:space:]]/}")
+	## if someone has 'Size: ' in their file path, they have bigger problems than this not working.
+	mb=$((mySz/1000000))
+	tm=$((300+mb))
 	
-}
-
-function doChirp {
-	attr=$1
-	val=$2
-	prev=$(condor_chirp get_job_attr $attr)
-	if [ $prev == "UNDEFINED" ] || [ $prev == "undefined" ]; then
-	    condor_chirp set_job_attr $attr \"$val\"
+	## use included timeout script (timeout.sh) to timeout on xrdcp
+	#echo "My prefix: $prefix"
+	#echo "Base Dir within for $myFile: $baseDir"
+	#echo "Rel Path within for $myFile: $relPath"
+	st1=$(date +%s%3N)
+	timeout $tm xrdcp $xrdargs -f $stashPrefix://$myFile $baseDir/$relPath 2>&1
+	res=$?
+	dl1=$(date +%s%3N)
+	#echo "XRDCP (I hope)"
+	if [ $res -eq 0 ]; then
+		## pull from local cache succeeded
+		dltm=$((dl1-st1))
+		if [ $2 ]; then 	# update info only if I want to
+			updateInfo $st1 $myFile $mySz $dltm
+		fi
+		## send info out to flume
+		hn=$stashPrefix
+		timestamp=$(date +%s)
+		header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
+		body="\"body\" : \"$((st1/1000)),$myFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
+		echo $header$body > data.json
+		timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1 
+		rm data.json 2>&1
 	else
-	    oldval=$(echo $prev | sed -e 's/"//g' )
-	    newval=\"$oldval,$val\"
-	    condor_chirp set_job_attr $attr $newval
+		## pull from local cache failed; pull from trunk
+	    if [ $debug -eq 2 ]; then	
+			## print out debug info
+			echo "Pull of $myFile from $stashPrefix failed."
+			echo "Command: xrdcp $xrdargs -f $stashPrefix://$myFile $baseDir/$relPath 2>&1"
+			echo "Trying to pull from trunk."
+		fi
+		st2=$(date +%s%3N)
+		hn="root://data.ci-connect.net"
+		timeout $tm xrdcp $xrdargs -f $hn://$myFile $baseDir/$relPath 2>&1
+		res=$?
+		dl2=$(date +%s%3N)
+		if [ $res -eq 0 ]; then
+			## pull from trunk succeeded
+			dltm=$((dl2-st2))
+			if [ $2 ]; then
+				updateInfo $st2 $myFile $mySz $dltm
+			fi
+			failoverfiles=("${failoverfiles[@]}" $myFile)
+			failovertimes=("${failovertimes[@]}" $st1) # time that the failed pull started
+			## send info out to flume
+			timestamp=$(date +%s)
+			header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
+			body="\"body\" : \"$((st2/1000)),$myFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
+			echo $header$body > data.json
+			timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1
+			rm data.json 2>&1
+		else
+			failfiles=("${failfiles[@]}" $myFile)
+			failtimes=("${failtimes[@]}" $st2)	# the last time something failed
+			failcodes=("${failcodes[@]}" $res)
+			echo "Stashcp of $myFile failed."
+			echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$myFile $baseDir/$relPath 2>&1"
+			failed=$((failed+1))
+		fi
 	fi
 }
+
+function doStashCpDirectory {
+	## address directory case
+	mySource=$1
+	sfiles=$(xrdfs root://data.ci-connect.net ls $mySource)
+	sz=$(xrdfs root://data.ci-connect.net stat $mySource | grep "Size: " | cut -d':' -f2)
+	sz=$(echo -n "${sz//[[:space:]]/}")
+	st=$(date +%s%3N)
+	for sfile in $sfiles; do
+		isdir=$(xrdfs root://data.ci-connect.net stat $sfile | grep "IsDir" | wc -l)
+		if [ ${sfile:0:1} == "/" ]; then
+			sfile=$(echo $sfile | cut -c2- )
+		fi
+		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
+			relPath=${sfile#$prefix}
+			mkdir -p $baseDir/$relPath
+			doStashCpDirectory $sfile 
+		elif [ $isdir == 0 ]; then
+			doStashCpSingle $sfile 
+		fi
+	done
+	dl=$(date +%s%3N)
+	dltm=$((dl-st))
+	if [ $2 ]; then
+		updateInfo $st $baseSource $sz $dltm 
+	fi
+}
+
+## check if the relevant classad is there
+#classad=(`grep ^WantsStashCache $_CONDOR_JOB_AD`)
+#if [ ! $classad ]; then # break and return error
+#	echo "WantsStashCache classad not present"
+#	return 1
+#fi
+
+module load xrootd/4.1.1
+export PATH=$PATH:$(pwd)
 
 debug=0
 file=""
@@ -64,14 +164,14 @@ eval set -- "$options"
 while [ $# -gt 0 ]; do
     case $1 in 
 	-h)
-	    echo "$usage"
-	    exit
-	    ;;
+		echo "$usage"
+		exit
+		;;
 	-d)
-	    debug=2
-	    ;;
+		debug=2
+		;;
 	-s)
-	    source=$2
+		source=$2
 		shift
 	    ;;
 	-r)
@@ -101,15 +201,6 @@ while [ $# -gt 0 ]; do
 	shift
 done
 
-echo "Source: $source"
-echo "Location: $loc"
-
-if [ $debug -eq 2 ]; then
-	xrdargs="-d 2 --nopbar"
-else
-	xrdargs="-s"
-fi
-
 ## find chirp
 which condor_chirp 
 res=$?
@@ -135,141 +226,104 @@ fi
 ## set prefix to proper format
 if [[ $OSG_SITE_NAME == CIT* ]]; then
     STASHPREFIX="root://phiphi.t2.ucsd.edu"
-    myprefix=$STASHPREFIX
+    stashPrefix=$STASHPREFIX
 elif [ ${#STASHPREFIX} -lt 3 ]; then
-    myprefix="root://data.ci-connect.net"
+    stashPrefix="root://data.ci-connect.net"
 	echo "Empty prefix"
 else
 	lcs=$(echo "${STASHPREFIX: -1}")
 	if [ $lcs == "/" ]; then
-		myprefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
+		stashPrefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
 	else
-		myprefix=$STASHPREFIX
+		stashPrefix=$STASHPREFIX
 	fi
 fi
 
-## check to see if chosen path is a file or directory
-## get size and appropriate time limit
-isdir=$(xrdfs root://data.ci-connect.net stat $source | grep "IsDir" | wc -l)
-sz=$(xrdfs root://data.ci-connect.net stat $source | grep "Size: " | cut -d':' -f2)
-sz=$(echo -n "${sz//[[:space:]]/}")
-## if someone has 'Size: ' in their file path, they have bigger problems than this not working.
-mb=$((sz/1000000))
-tm=$((300+mb))
-if [ $debug -eq 2 ]; then
-	echo "Time limit is $tm s for $mb MB"
-fi
-if [ $isdir -eq 0 ]; then
-	files=($source)
-else
-	files=$(xrdfs root://data.ci-connect.net ls $source)
-	lc=$(echo "${source: -1}")
-	if [ $lc == "/" ]; then
-		dirname=$(echo $source | rev | cut -d/ -f2 | rev)
-	else
-		dirname=$(echo $source | rev | cut -d/ -f1 | rev)
-		loc=$loc/$dirname
-		mkdir -p $loc
-	fi
-	
-fi
-
+## deal with sites without variable set
 if [ ! -n "$OSG_SITE_NAME" ]; then
 	OSG_SITE_NAME="UNKNOWN"
 fi
 
-## try pulling from closest cache
-## if xrdcp doesn't finish in the time allotted, stop
+## set xrdargs
+if [ $debug -eq 2 ]; then
+	xrdargs="-d 2 --nopbar"
+else
+	xrdargs="-s"
+fi
+
 failed=0
-## iterate through list of files
+starts=()
+names=()
+sizes=()
+times=()
+failoverfiles=()
+failovertimes=()
+failfiles=()
+failtimes=()
+failcodes=()
+
+baseDir=$loc
+prefix=""
+
+source=$(echo $source | tr ',' ' ' | tr ';' ' ')
+files=($source)
+
 for file in ${files[@]}; do
 	## determine whether the input source is a directory or not
-	## if it is a directory, call stashcp on each file in the directory
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
-	if [ $fisdir -ne 0 ]; then
-		if [ $recursive -eq 1 ]; then
-			if [ $debug -eq 2 ]; then
-				fl="-d -r"
-			else
-				fl="-r"
-			fi
-			StashCache/bin/stashcp $fl -s $file -l $loc 
-		fi
-		continue
-	fi
-	## use included timeout script (timeout.sh) to timeout on xrdcp
-	st1=$(date +%s%3N)
-	timeout $tm xrdcp $xrdargs -f $myprefix://$file $loc 2>&1
-	res=$?
-	dl1=$(date +%s%3N)
-	## check to see if the pull worked
-	## if not, pull from trunk (currently hard-coded to data.ci-connect.net)
-	myfile=$(echo $file | rev | cut -d/ -f1 | rev)
-	if [ $res -ne 0 ]; then		
-		## pull failed
-	    if [ $debug -eq 2 ]; then	
-			## print out debug info
-			echo "Pull of $file from $myprefix failed."
-			echo "Command: xrdcp $xrdargs -f $myprefix://$file $loc 2>&1"
-			echo "Trying to pull from trunk."
-		fi
-		## chirp failure data
-		condor_chirp set_job_attr Chirp_StashCp_Error \"Pull of $file from $myprefix failed with code $res\"
-		condor_chirp set_job_attr Chirp_StashCp_Used true 
-		## try pulling from trunk			
-		st2=$(date +%s%3N)
-		timeout $tm xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1
-		res=$?
-		dl2=$(date +%s%3N)
-		if [ $res -ne 0 ]; then		
-			## pull from trunk failed; print debug info
-			condor_chirp set_job_attr Chirp_StashCp_Error \"Pull of $file from trunk failed with code $res\"
-			echo "Stashcp of $file failed."
-			echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$file $loc 2>&1"
-			failed=$((failed+1))
-		else		
-			## pull succeeded
-			dltm=$((dl2-st2))
-			if [ $debug -eq 2 ]; then
-				echo "Pull from trunk was successful."
-			fi
-			## send out data on usage to flume, chirp
-			hn="root://data.ci-connect.net"
-			timestamp=$(date +%s)
-			header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
-			body="\"body\" : \"$((st2/1000)),$file,$sz,$dltm,$OSG_SITE_NAME,$hn\"}]"
-			echo $header$body > data.json
-			timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json 2>&1
-			rm data.json 2>&1
-			doChirp Chirp_StashCp_DLStart $((st1/1000))
-			doChirp Chirp_StashCp_FileName $file
-			doChirp Chirp_StashCp_FileSize $sz
-			doChirp Chirp_StashCp_DLTimeMs $dltm
-			doChirp Chirp_StashCp_Source data.ci-connect.net
-			doChirp Chirp_StashCp_Dest $OSG_SITE_NAME
-			doChirp Chirp_StashCp_Used true
-		fi
+	#echo "File: $file"
+	if [ $fisdir -eq 0 ]; then
+		export prefix="$(echo $file | rev | cut -d/ -f1- | rev)"
+		#echo "Single prefix: $prefix"
+		baseDir=$loc
+		doStashCpSingle $file update
 	else
-		## pull from local cache succeeded
-		dltm=$((dl1-st1))
-		echo "Pull of $myfile from $myprefix was successful."
-		## send out data on usage to flume, chirp
-		hn=$myprefix
-		timestamp=$(date +%s)
-		header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
-		body="\"body\" : \"$((st1/1000)),$file,$sz,$dltm,$OSG_SITE_NAME,$hn\"}]"
-		echo $header$body > data.json
-		timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json 2>&1
-		rm data.json 2>&1
-		doChirp Chirp_StashCp_DLStart $((st1/1000))
-		doChirp Chirp_StashCp_FileName $file
-		doChirp Chirp_StashCp_FileSize $sz
-		doChirp Chirp_StashCp_DLTimeMs $dltm
-		doChirp Chirp_StashCp_Source $myprefix
-		doChirp Chirp_StashCp_Dest $OSG_SITE_NAME
-		doChirp Chirp_StashCp_Used true
+		lc=$(echo "${source: -1}")
+		if [ "x$lc" == "x/" ]; then
+			export prefix="$(echo $file | rev | cut -d/ -f1- | rev)"
+			baseSource=$file+
+			doStashCpDirectory $file update
+		else
+			dir=$(echo $file | rev | cut -d/ -f1 | rev)
+			export prefix="$(echo $file | rev | cut -d/ -f1- | rev)/"
+			mkdir $loc/$dir
+			#echo "Loc: $loc"
+			#echo "Made: $loc/$dir"
+			baseDir=$loc/$dir
+			baseSource=$file/+
+			#echo "Trying to CP Directory $file"
+			doStashCpDirectory $file update
+		fi
 	fi
 done
+
+## Setting classads as appropriate
+condor_chirp set_job_attr_delayed Chirp_StashCp_Dest \"$OSG_SITE_NAME\"
+condor_chirp set_job_attr_delayed Chirp_StashCp_Used true
+condor_chirp set_job_attr_delayed Chirp_StashCp_Prefix \"$stashPrefix\"
+## http://stackoverflow.com/a/2317171
+startString=$(printf ",%s" "${starts[@]}")
+condor_chirp set_job_attr_delayed Chirp_StashCp_DLStart \"${startString:1:1020}\"
+nameString=$(printf ",%s" "${names[@]}")
+condor_chirp set_job_attr_delayed Chirp_StashCp_FileName \"${nameString:1:1020}\"
+sizeString=$(printf ",%s" "${sizes[@]}")
+condor_chirp set_job_attr_delayed Chirp_StashCp_FileSize \"${sizeString:1:1020}\"
+timeString=$(printf ",%s" "${times[@]}")
+condor_chirp set_job_attr_delayed Chirp_StashCp_DlTimeMs \"${timeString:1:1020}\"
+if [ $failoverfiles ]; then
+	fofString=$(printf ",%s" "${failoverfiles[@]}")
+	condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverFiles \"${fofString:1:1020}\"
+	fotString=$(printf ",%s" "${failovertimes[@]}")
+	condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverTimes \"${fotString:1:1020}\"
+fi
+if [ $failfiles ]; then
+	ffString=$(printf ",%s" "${failfiles[@]}")
+	condor_chirp set_job_attr_delayed Chirp_StashCp_FailFiles \"${ffString:1:1020}\"
+	ftString=$(printf ",%s" "${failtimes[@]}")
+	condor_chirp set_job_attr_delayed Chirp_StashCp_FailTimes \"${ftString:1:1020}\"
+	fcString=$(printf ",%s" "${failcodes[@]}")
+	condor_chirp set_job_attr_delayed Chirp_StashCp_FailCodes \"${fcString:1:1020}\"
+fi
 
 #Note: if any one file transfer fails, then stashcp fails
 if [ $failed -ne 0 ]; then
