@@ -35,37 +35,48 @@ class HeartBeatThread(threading.Thread):
         threading.Thread.__init__(self)
         self.setDaemon(True)
 
-    def _raise_exception(self, exception):
-        '''Place exception in the queue so the main thread can raise it'''
-        self.exceptions.put(exception)
-        signal.alarm(1)
-        sys.exit(1)
-
     def run(self):
-        xrootd_addr = 'root://' + self.url
-        coll = htcondor.Collector(self.url)
-        master_ad = None
-        while not master_ad:
+        try:
+            local_coll = htcondor.Collector(self.url)
             try:
-                master_ad = coll.locate(htcondor.DaemonTypes.Master)
-            except ValueError: # Master has not advertised to the collector yet
-                pass
-            except IOError: # Failed communication with collector
-                self._raise_exception(CondorException('Could not locate Collector at %s' % self.url))
+                central_coll_url = htcondor.param['OSG_COLLECTOR_HOST']
+            except KeyError:
+                central_coll_url = 'collector.opensciencegrid.org'
+            central_coll = htcondor.Collector(central_coll_url)
 
-        while True:
-            cache_ad = xrootd_cache_stats.collect_cache_stats(xrootd_addr, '/stash')
-            if cache_ad['ping_response_status'] == 'ok':
+            local_master = None
+            while not local_master:
                 try:
-                    htcondor.send_alive(master_ad)
-                except RuntimeError:
-                    self._raise_exception(CondorException('Failed to deliver keepalive message'))
-                # ads expire every 15 min while heartbeats should be done every 30 min
-                for i in range(2):
-                    coll.advertise([cache_ad])
-                    time.sleep(900)
-            else:
-                self._raise_exception(XrootdException('No heartbeat from xrootd server'))
+                    local_master = local_coll.locate(htcondor.DaemonTypes.Master)
+                except ValueError: # Master has not advertised to the collector yet
+                    pass
+                except IOError: # Failed communication with collector
+                    raise CondorException('Could not locate Collector at %s' % self.url)
+
+            xrootd_addr = 'root://' + self.url
+            while True:
+                cache_ad = xrootd_cache_stats.collect_cache_stats(xrootd_addr, '/stash')
+                if cache_ad['ping_response_status'] == 'ok':
+                    try:
+                        htcondor.send_alive(local_master)
+                    except RuntimeError:
+                        raise CondorException('Failed to deliver keepalive message to condor_master at %s'
+                                              % self.url)
+                    # ads need to be updated every 15 min while heartbeats should be done every 30 min
+                    for _ in range(2):
+                        for collector in [local_coll, central_coll]:
+                            try:
+                                collector.advertise([cache_ad])
+                            except ValueError:
+                                pass 
+                        time.sleep(900)
+                else:
+                    raise XrootdException('No heartbeat from xrootd server')
+        except Exception, error:
+            # Exceptions don't rise to the main thread so we have to pass them via queue and SIGALARM
+            self.exceptions.put(error)
+            signal.alarm(1)
+            sys.exit(1)
 
 def raise_heartbeat_exception(signum, frame):
     '''Raise exception from heartbeat thread'''
@@ -92,11 +103,11 @@ def start_xrootd():
 
 def kill_xrootd():
     '''Sends SIGKILL to an unresponsive XRootD service'''
-    rc, stdout, _ = xrootd_service_command('status')
+    _, stdout, _ = xrootd_service_command('status')
     try:
         pid = int(re.search(r'\(pid\s+(\d+)\)', stdout).group(1))
     except AttributeError:
-        raise RuntimeError('Could not find XRootD service PID')
+        pass # xrootd already dead
     else:
         os.kill(pid, signal.SIGKILL)
 
