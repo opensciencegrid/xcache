@@ -252,6 +252,8 @@ else
 	fi
 fi
 
+echo "Line 255 stashPrefix: $stashPrefix"
+
 ## deal with sites without variable set
 if [ ! -n "$OSG_SITE_NAME" ]; then
 	OSG_SITE_NAME="UNKNOWN"
