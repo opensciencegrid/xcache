@@ -144,11 +144,11 @@ function doStashCpDirectory {
 }
 
 ## check if the relevant classad is there
-#classad=(`grep ^WantsStashCache $_CONDOR_JOB_AD`)
-#if [ ! $classad ]; then # break and return error
-#	echo "WantsStashCache classad not present"
-#	return 1
-#fi
+classad=(`grep ^WantsStashCache $_CONDOR_JOB_AD`)
+if [ ! $classad ]; then # break and return error
+	>&2 echo "WantsStashCache classad not present"
+	return 1
+fi
 
 module load xrootd/4.1.1
 export PATH=$PATH:$(pwd)
