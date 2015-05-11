@@ -230,6 +230,9 @@ if [ $res -ne 0 ]; then
 	fi
 fi
 
+## get prefix
+getClose
+
 ## set prefix to proper format
 if [[ $OSG_SITE_NAME == CIT* ]]; then
     STASHPREFIX="root://phiphi.t2.ucsd.edu"
