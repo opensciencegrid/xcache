@@ -11,6 +11,8 @@ usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to
 	Exit status 4 indicates that at least one file did not successfully copy over.
 	Exit status 1 indicates that the WantsStashCache classad was not present."
 
+export PATH=$PATH:/$(pwd)
+
 function getClose {
 	## for now, call Ilija's code, and hope that it is available nearby
 	setStashCache=`which setStashCache.sh 2>/dev/null`
