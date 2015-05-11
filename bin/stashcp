@@ -234,7 +234,6 @@ if [[ $OSG_SITE_NAME == CIT* ]]; then
     stashPrefix=$STASHPREFIX
 elif [ ${#STASHPREFIX} -lt 3 ]; then
 	getClose 
-	echo "Line 240 STASHPREFIX: $STASHPREFIX"
 	if [ ${#STASHPREFIX} -lt 3 ]; then
 		stashPrefix="root://data.ci-connect.net"
 		echo "Empty prefix"
@@ -249,8 +248,6 @@ else
 		stashPrefix=$STASHPREFIX
 	fi
 fi
-
-echo "Line 255 stashPrefix: $stashPrefix"
 
 ## deal with sites without variable set
 if [ ! -n "$OSG_SITE_NAME" ]; then
