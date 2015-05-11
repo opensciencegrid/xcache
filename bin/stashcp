@@ -58,6 +58,7 @@ function doStashCpSingle {
 	#echo "My prefix: $prefix"
 	#echo "Base Dir within for $myFile: $baseDir"
 	#echo "Rel Path within for $myFile: $relPath"
+	echo "timeout $tm xrdcp $xrdargs -f $stashPrefix://$myFile $baseDir/$relPath 2>&1"
 	st1=$(date +%s%3N)
 	timeout $tm xrdcp $xrdargs -f $stashPrefix://$myFile $baseDir/$relPath 2>&1
 	res=$?
