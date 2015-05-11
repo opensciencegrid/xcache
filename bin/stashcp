@@ -233,7 +233,7 @@ if [[ $OSG_SITE_NAME == CIT* ]]; then
     STASHPREFIX="root://phiphi.t2.ucsd.edu"
     stashPrefix=$STASHPREFIX
 elif [ ${#STASHPREFIX} -lt 3 ]; then
-	getClose 
+	getClose > /dev/null 2>&1
 	if [ ${#STASHPREFIX} -lt 3 ]; then
 		stashPrefix="root://data.ci-connect.net"
 		echo "Empty prefix"
