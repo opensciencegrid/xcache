@@ -17,8 +17,8 @@ function getClose {
 	## for now, call Ilija's code, and hope that it is available nearby
 	setStashCache=`which setStashCache.sh 2>/dev/null`
 	res=$?
-	echo "SetStashCache: $setStashCache"
-	echo "PATH: $PATH"
+	>&2 echo "SetStashCache: $setStashCache"
+	>&2 echo "PATH: $PATH"
 	if [ $res -ne '0' ]; then
 		>&2 echo "Cannot find setStashCache.sh, setting to defaults - PROBLEM"
 		echo "root://data.ci-connect.net"
