@@ -16,7 +16,9 @@ export PATH=$PATH:/$(pwd)
 function getClose {
 	## for now, call Ilija's code, and hope that it is available nearby
 	setStashCache=`which setStashCache.sh 2>/dev/null`
-	if [ $? -ne '0' ]; then
+	res=$?
+	echo "SetStashCache: $setStashCache"
+	if [ $res -ne '0' ]; then
 		>&2 echo "Cannot find setStashCache.sh, setting to defaults - PROBLEM"
 		echo "root://data.ci-connect.net"
 		exit 1
