@@ -21,6 +21,8 @@ function getClose {
 		echo "root://data.ci-connect.net"
 		exit 1
 	else 	
+		stashTools=$(which setStashCache.sh | rev | cut -d'/' -f2- | rev)
+		export StashToolsDir=$stashTools
 		cl=$(source $setStashCache)
 		export $STASHPREFIX=$cl
 		echo $STASHPREFIX
