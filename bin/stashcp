@@ -24,7 +24,7 @@ function getClose {
 	else 	
 		stashTools=$(which setStashCache.sh | rev | cut -d'/' -f2- | rev)
 		export StashToolsDir=$stashTools
-		echo "StashToolsDir: $StashToolsDir"
+		#echo "StashToolsDir: $StashToolsDir"
 		cl=$(source $setStashCache)
 		export STASHPREFIX=$cl
 		echo "StashPrefix = $STASHPREFIX"
@@ -237,6 +237,7 @@ if [[ $OSG_SITE_NAME == CIT* ]]; then
     stashPrefix=$STASHPREFIX
 elif [ ${#STASHPREFIX} -lt 3 ]; then
 	STASHPREFIX=$(getClose)
+	echo "Line 240 STASHPREFIX: $STASHPREFIX"
 	if [ ${#STASHPREFIX} -lt 3 ]; then
 		stashPrefix="root://data.ci-connect.net"
 		echo "Empty prefix"
