@@ -24,7 +24,7 @@ function getClose {
 	else 	
 		stashTools=$(which setStashCache.sh | rev | cut -d'/' -f2- | rev)
 		export StashToolsDir=$stashTools
-		source $setStashCache
+		source $setStashCache > /dev/null 2>&1 
 		echo $STASHPREFIX
 	fi
 }
