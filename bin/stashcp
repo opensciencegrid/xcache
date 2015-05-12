@@ -60,7 +60,6 @@ function doStashCpSingle {
 	timeout $tm xrdcp $xrdargs -f $stashPrefix://$myFile $baseDir/$relPath 2>&1
 	res=$?
 	dl1=$(date +%s%3N)
-	#echo "XRDCP (I hope)"
 	if [ $res -eq 0 ]; then
 		## pull from local cache succeeded
 		dltm=$((dl1-st1))
@@ -76,40 +75,59 @@ function doStashCpSingle {
 		timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1 
 		rm data.json 2>&1
 	else
-		## pull from local cache failed; pull from trunk
+		## pull from local cache failed; try again
 	    if [ $debug -eq 2 ]; then	
 			## print out debug info
 			echo "Pull of $myFile from $stashPrefix failed."
 			echo "Command: xrdcp $xrdargs -f $stashPrefix://$myFile $baseDir/$relPath 2>&1"
-			echo "Trying to pull from trunk."
 		fi
 		st2=$(date +%s%3N)
-		hn="root://data.ci-connect.net"
-		timeout $tm xrdcp $xrdargs -f $hn://$myFile $baseDir/$relPath 2>&1
+		timeout $tm xrdcp $xrdargs -f $stashPrefix://$myFile $baseDir/$relPath 2>&1
 		res=$?
 		dl2=$(date +%s%3N)
-		if [ $res -eq 0 ]; then
-			## pull from trunk succeeded
+		if [ $res -eq 0 ]; then 	# second try succeeded
+			## second attempt to pull from local cache succeeded
 			dltm=$((dl2-st2))
-			if [ $2 ]; then
+			if [ $2 ]; then 	# update info only if I want to
 				updateInfo $st2 $myFile $mySz $dltm
 			fi
-			failoverfiles=("${failoverfiles[@]}" $myFile)
-			failovertimes=("${failovertimes[@]}" $st1) # time that the failed pull started
 			## send info out to flume
+			hn=$stashPrefix
 			timestamp=$(date +%s)
 			header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
 			body="\"body\" : \"$((st2/1000)),$myFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 			echo $header$body > data.json
-			timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1
+			timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1 
 			rm data.json 2>&1
 		else
-			failfiles=("${failfiles[@]}" $myFile)
-			failtimes=("${failtimes[@]}" $st2)	# the last time something failed
-			failcodes=("${failcodes[@]}" $res)
-			echo "Stashcp of $myFile failed."
-			echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$myFile $baseDir/$relPath 2>&1"
-			failed=$((failed+1))
+			st3=$(date +%s%3N)
+			hn="root://data.ci-connect.net"
+			timeout $tm xrdcp $xrdargs -f $hn://$myFile $baseDir/$relPath 2>&1
+			res=$?
+			dl3=$(date +%s%3N)
+			if [ $res -eq 0 ]; then
+				## pull from trunk succeeded
+				dltm=$((dl3-st3))
+				if [ $2 ]; then
+					updateInfo $st3 $myFile $mySz $dltm
+				fi
+				failoverfiles=("${failoverfiles[@]}" $myFile)
+				failovertimes=("${failovertimes[@]}" $st2) # time that the failed pull started
+				## send info out to flume
+				timestamp=$(date +%s)
+				header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
+				body="\"body\" : \"$((st3/1000)),$myFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
+				echo $header$body > data.json
+				timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1
+				rm data.json 2>&1
+			else
+				failfiles=("${failfiles[@]}" $myFile)
+				failtimes=("${failtimes[@]}" $st2)	# the last time something failed
+				failcodes=("${failcodes[@]}" $res)
+				echo "Stashcp of $myFile failed."
+				echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$myFile $baseDir/$relPath 2>&1"
+				failed=$((failed+1))
+			fi
 		fi
 	fi
 }
