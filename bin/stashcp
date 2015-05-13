@@ -76,19 +76,14 @@ function doStashCpSingle {
 		rm data.json 2>&1
 	else
 		## pull from local cache failed; try again
-	    if [ $debug -eq 2 ]; then	
-			## print out debug info
-			echo "Pull of $myFile from $stashPrefix failed."
-			echo "Command: xrdcp $xrdargs -f $stashPrefix://$myFile $baseDir/$relPath 2>&1"
-		fi
 		st2=$(date +%s%3N)
 		timeout $tm xrdcp $xrdargs -f $stashPrefix://$myFile $baseDir/$relPath 2>&1
 		res=$?
 		dl2=$(date +%s%3N)
-		if [ $res -eq 0 ]; then 	# second try succeeded
+		if [ $res -eq 0 ]; then 	
 			## second attempt to pull from local cache succeeded
 			dltm=$((dl2-st2))
-			if [ $2 ]; then 	# update info only if I want to
+			if [ $2 ]; then 	## update info only if I want to
 				updateInfo $st2 $myFile $mySz $dltm
 			fi
 			## send info out to flume
@@ -99,7 +94,14 @@ function doStashCpSingle {
 			echo $header$body > data.json
 			timeout 10s curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1 
 			rm data.json 2>&1
-		else
+		else 	
+			## second attempt to pull from local cache failed, pulling from trunk
+		    if [ $debug -eq 2 ]; then	
+				## print out debug info
+				echo "Pull of $myFile from $stashPrefix failed."
+				echo "Command: xrdcp $xrdargs -f $stashPrefix://$myFile $baseDir/$relPath 2>&1"
+				echo "Pulling from trunk"
+			fi
 			st3=$(date +%s%3N)
 			hn="root://data.ci-connect.net"
 			timeout $tm xrdcp $xrdargs -f $hn://$myFile $baseDir/$relPath 2>&1
@@ -160,10 +162,13 @@ function doStashCpDirectory {
 }
 
 ## check if the relevant classad is there
-classad=(`grep ^WantsStashCache $_CONDOR_JOB_AD`)
-if [ ! $classad ]; then # break and return error
-	>&2 echo "WantsStashCache classad not present"
-	return 1
+if [ !-z ${$_CONDOR_JOB_AD+x} ]; then
+	## in a job environment, and this check is relevant
+	classad=(`grep ^WantsStashCache $_CONDOR_JOB_AD`)
+	if [ ! $classad ]; then # break and return error
+		>&2 echo "WantsStashCache classad not present"
+		return 1
+	fi
 fi
 
 module load xrootd/4.1.1
