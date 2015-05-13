@@ -230,7 +230,7 @@ while [ $# -gt 0 ]; do
 done
 
 ## find chirp
-which condor_chirp 
+which condor_chirp > /dev/null 2>&1
 res=$?
 if [ $res -ne 0 ]; then
 	if [ -s /usr/libexec/condor/condor_chirp ]; then
