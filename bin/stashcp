@@ -1,4 +1,4 @@
-#!/bin/bash +x
+#!/bin/bash
 
 usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
 
