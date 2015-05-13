@@ -162,7 +162,7 @@ function doStashCpDirectory {
 }
 
 ## check if the relevant classad is there
-if [ !-z ${_CONDOR_JOB_AD:+x} ]; then
+if [ !-z ${_CONDOR_JOB_AD} ]; then
 	## in a job environment, and this check is relevant
 	echo "Job environment"
 	classad=(`grep ^WantsStashCache $_CONDOR_JOB_AD`)
