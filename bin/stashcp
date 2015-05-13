@@ -162,7 +162,9 @@ function doStashCpDirectory {
 }
 
 ## check if the relevant classad is there
-if [ !-z ${_CONDOR_JOB_AD} ]; then
+if [ -z ${_CONDOR_JOB_AD+x} ]; then
+	echo "Interactive environment"
+else
 	## in a job environment, and this check is relevant
 	echo "Job environment"
 	classad=(`grep ^WantsStashCache $_CONDOR_JOB_AD`)
@@ -170,8 +172,6 @@ if [ !-z ${_CONDOR_JOB_AD} ]; then
 		>&2 echo "WantsStashCache classad not present"
 		return 1
 	fi
-else
-	echo "Interactive environment"
 fi
 
 module load xrootd/4.1.1
