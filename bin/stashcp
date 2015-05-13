@@ -264,13 +264,12 @@ elif [ ${#STASHPREFIX} -lt 3 ]; then
 	else
 		stashPrefix=$STASHPREFIX
 	fi
+fi
+lcs=$(echo "${STASHPREFIX: -1}")
+if [ $lcs == "/" ]; then
+	stashPrefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
 else
-	lcs=$(echo "${STASHPREFIX: -1}")
-	if [ $lcs == "/" ]; then
-		stashPrefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
-	else
-		stashPrefix=$STASHPREFIX
-	fi
+	stashPrefix=$STASHPREFIX
 fi
 
 ## deal with sites without variable set
