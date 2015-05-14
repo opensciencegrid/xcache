@@ -168,7 +168,11 @@ if [ ! -z ${_CONDOR_JOB_AD+x} ]; then
 	if [ -n "$classad" ]; then 
 		## check if classad is right
 		ans=$(echo "$classad" | cut -d' ' -f3)
-		if [ ! $ans=="true" ] && [ ! $ans=="1" ] && [ ! $ans=="WantsPosixStashCache" ]; then
+		if [ $ans=="WantsPosixStashCache" ]; then
+			ans=$(grep ^WantsPosixStashCache $_CONDOR_JOB_AD | cut -d' ' -f3)
+		fi
+		echo "My final answer is $ans"
+		if [ ! $ans=="true" ] && [ ! $ans=="1" ]; then
 			>&2 echo "WantsStashCache classad not set to true"
 			return 1
 		fi
