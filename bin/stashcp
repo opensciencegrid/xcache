@@ -9,9 +9,7 @@ usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to
 	--closest: return closest cache location
 
 	Exit status 4 indicates that at least one file did not successfully copy over.
-	Exit status 1 indicates that the WantsStashCache classad was not present.
-	
-	I'm version 2.4.2"
+	Exit status 1 indicates that the WantsStashCache classad was not present."
 
 function getClose {
 	## for now, call Ilija's code, and hope that it is available nearby
@@ -166,7 +164,7 @@ function doStashCpDirectory {
 ## check if the relevant classad is there
 if [ ! -z ${_CONDOR_JOB_AD+x} ]; then
 	echo "Job environment"
-	echo "$_CONDOR_JOB_AD"
+	cat $_CONDOR_JOB_AD
 	echo ""
 	## in a job environment, and this check is relevant
 	classad=(`grep ^WantsStashCache $_CONDOR_JOB_AD`)
@@ -339,7 +337,7 @@ done
 
 ## Setting classads as appropriate
 condor_chirp set_job_attr_delayed Chirp_StashCp_Dest \"$OSG_SITE_NAME\"
-condor_chirp set_job_attr_delayed Chirp_StashCp_Used true
+condor_chirp set_job_attr_delayed Chirp_StashCp_Used \"true\"
 condor_chirp set_job_attr_delayed Chirp_StashCp_Prefix \"$stashPrefix\"
 ## http://stackoverflow.com/a/2317171
 startString=$(printf ",%s" "${starts[@]}")
