@@ -168,6 +168,7 @@ if [ ! -z ${_CONDOR_JOB_AD+x} ]; then
 	echo ""
 	## in a job environment, and this check is relevant
 	classad=(`grep ^WantsStashCache $_CONDOR_JOB_AD`)
+	echo $classad
 	if [ ! $classad ]; then # break and return error
 		>&2 echo "WantsStashCache classad not present"
 		return 1
