@@ -170,6 +170,7 @@ if [ ! -z ${_CONDOR_JOB_AD+x} ]; then
 		ans=$(echo "$classad" | cut -d' ' -f3)
 		if [ $ans=="WantsPosixStashCache" ]; then
 			ans=$(grep ^WantsPosixStashCache $_CONDOR_JOB_AD | cut -d' ' -f3)
+			echo "I changed my answer to $ans"
 		fi
 		echo "My final answer is $ans"
 		if [ ! $ans=="true" ] && [ ! $ans=="1" ]; then
