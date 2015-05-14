@@ -168,7 +168,7 @@ if [ ! -z ${_CONDOR_JOB_AD+x} ]; then
 	if [ $classad ]; then 
 		## check if classad is right
 		ans=$(echo $classad | cut -d' ' -f3)
-		echo $ans
+		echo "Classad answer: $ans"
 	else
 		>&2 echo "WantsStashCache classad not present"
 		return 1
