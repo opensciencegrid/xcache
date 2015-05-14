@@ -167,9 +167,13 @@ if [ ! -z ${_CONDOR_JOB_AD+x} ]; then
 	classad=$(grep WantsStashCache $_CONDOR_JOB_AD)
 	if [ -n "$classad" ]; then 
 		## check if classad is right
+		echo "My classad: $classad"
 		ans=$(echo "$classad" | cut -d' ' -f3)
+		echo "My answer: $ans"
 		if [ $ans=="WantsPosixStashCache" ]; then
-			ans=$(grep ^WantsPosixStashCache $_CONDOR_JOB_AD | cut -d' ' -f3)
+			oclassad=$(grep ^WantsPosixStashCache $_CONDOR_JOB_AD)
+			echo "Other classad: $oclassad"
+			ans=$(echo $oclassad | cut -d' ' -f3)
 			echo "I changed my answer to $ans"
 		fi
 		echo "My final answer is $ans"
