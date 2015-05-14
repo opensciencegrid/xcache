@@ -166,7 +166,7 @@ if [ ! -z ${_CONDOR_JOB_AD+x} ]; then
 	## in a job environment, and this check is relevant
 	classad=$(grep WantsStashCache $_CONDOR_JOB_AD)
 	echo "My classad: $classad"
-	if [ $classad ]; then 
+	if [ -e $classad ]; then 
 		## check if classad is right
 		ans=$(echo $classad | cut -d' ' -f3)
 		echo "Classad answer: $ans"
