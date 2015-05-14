@@ -178,11 +178,11 @@ if [ ! -z ${_CONDOR_JOB_AD+x} ]; then
 		fi
 		echo "My final answer is $ans"
 		if [ ! "$ans" == "true" ] && [ ! "$ans" == "1" ]; then
-			>&2 echo "Error: WantsStashCache classad not set to true"
+			echo "Error: WantsStashCache classad not set to true" >&2
 			exit 1
 		fi
 	else
-		>&2 echo "Error: WantsStashCache classad not present"
+		echo "Error: WantsStashCache classad not present" >&2
 		exit 1
 	fi
 fi
