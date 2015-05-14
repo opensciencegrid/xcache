@@ -233,6 +233,8 @@ while [ $# -gt 0 ]; do
 	shift
 done
 
+echo "Hi, I'm going to be version 2.4.2!"
+
 ## find chirp
 which condor_chirp > /dev/null 2>&1
 res=$?
