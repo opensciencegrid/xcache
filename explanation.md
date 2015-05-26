@@ -31,7 +31,7 @@ When a directory is downloaded, the information variables will be updated as if 
 
 #### Arguments
 STASHCP only requires a single argument, the source.  Every other argument is optional.
-* `-s <source>`
+* `-s <source>` - where `<source>` is the comma-delimited list of files and/or directories that the user wishes to download.  The path of a given file will be of the form `user/<username>/public/<path in STASH>`.  
 * `-l <location>`
 * `-d`
 * `-r`
