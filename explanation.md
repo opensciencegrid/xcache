@@ -23,7 +23,7 @@ This is where all the downloading actually happens.
 ####Directory
 
 ###Finishing
-The information variables are chirped.  
+The information variables are chirped, as described [above](https://github.com/OSGConnect/StashCache/blob/master/explanation.md#information-variables)  .
 
 If any single download failed, STASHCP itself has failed.  In this case, STASHCP returns 4.
 
