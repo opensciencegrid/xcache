@@ -4,18 +4,18 @@ All the functions are defined above everything else, so the code is not simple t
 
 ###Startup
 Before any downloading happens, STASHCP checks for relevant classads, loads xrootd, initializes information variables and processes arguments.  
-##### Classads
+#### Classads
 In order to make sure that StashCache jobs are only sent to those sites that can handle them, users are required to add a StashCache classad to their jobs: `+WantsStashCache = true`  
 If that classad is not present, STASHCP will stop, return 1, and print out an error message.
-##### Information variables
+#### Information variables
 The information variables are shell arrays holding strings corresponding to the start and end times of downloads, as well as the file or folder name and the size.  At the end of STASHCP, the information variables will be turned into strings and set as classads for the job.  Right now, because  
-##### Argument processing
+#### Argument processing
 
 ###Downloading
-#####Location Logic
+####Location Logic
 **This is important to understand.**  
-#####Single file
-#####Directory
+####Single file
+####Directory
 
 # Known issues and concerns 
 
