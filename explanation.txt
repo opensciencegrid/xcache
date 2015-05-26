@@ -1,0 +1,12 @@
+====Overview of algorithm====
+
+
+====Known bugs and problems====
+
+- Relies on geoip to find closest cache
+  - Geoip doesn't always work
+  - Closest cache isn't necessarily the best cache
+- Call could be simpler, without requiring the use of flags for every argument
+  - Wanted: stashcp <FILE> <LOCATION> <FLAGS>
+  - Have: stashcp -s <FILE> -l <LOCATION> <FLAGS>
+- 

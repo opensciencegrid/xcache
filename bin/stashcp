@@ -11,6 +11,7 @@ usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to
 	Exit status 4 indicates that at least one file did not successfully copy over.
 	Exit status 1 indicates that the WantsStashCache classad was not present."
 
+## function to find closest cache
 function getClose {
 	## for now, call Ilija's code, and hope that it is available nearby
 	setStashCache=`which setStashCache.sh 2>/dev/null`
@@ -27,16 +28,17 @@ function getClose {
 	fi
 }
 
+## function to update global arrays containing stashcp behavior information
 function updateInfo {
-	## starts, names, sizes, times - in that order
+	## arguments are: starts, names, sizes, times - in that order
 	starts=("${starts[@]}" $1)
 	names=("${names[@]}" $2)
 	sizes=("${sizes[@]}" $3)
 	times=("${times[@]}" $4)
 }
 
+## address single-file case
 function doStashCpSingle {
-	## address single-file case
 	sourceFile=$1
 	## formatting
 	if [ ${sourceFile:0:1} == "/" ]; then
@@ -51,7 +53,7 @@ function doStashCpSingle {
 	mb=$((mySz/1000000))
 	tm=$((300+mb)) ## 5 minutes + 1MBps
 
-	## Try #1
+	## First attempt
 	st1=$(date +%s%3N)
 	timeout $tm xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 2>&1
 	res=$?
@@ -72,7 +74,7 @@ function doStashCpSingle {
 		rm data.json 2>&1
 	else
 		## pull from local cache failed; try again
-		## Try #2
+		## Second attempt
 		st2=$(date +%s%3N)
 		timeout $tm xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 2>&1
 		res=$?
@@ -100,7 +102,7 @@ function doStashCpSingle {
 				echo "Pulling from trunk"
 			fi
 			
-			## Try #3
+			## Third attempt
 			hn="root://data.ci-connect.net"
 			st3=$(date +%s%3N)
 			timeout $tm xrdcp $xrdargs -f $hn://$sourceFile $baseDir/$localPath 2>&1
@@ -133,8 +135,8 @@ function doStashCpSingle {
 	fi
 }
 
+## address directory case
 function doStashCpDirectory {
-	## address directory case
 	sourceDir=$1
 	sourceItems=$(xrdfs root://data.ci-connect.net ls $sourceDir)
 	sz=$(xrdfs root://data.ci-connect.net stat $sourceDir | grep "Size: " | cut -d':' -f2)
@@ -162,12 +164,14 @@ function doStashCpDirectory {
 	fi
 }
 
+### LOGIC TO RUN STASHCP ###
+
 ## check if the relevant classad is there
 if [ ! -z ${_CONDOR_JOB_AD+x} ]; then
 	## in a job environment, and this check is relevant
 	classad=$(grep WantsStashCache $_CONDOR_JOB_AD)
 	if [ -n "$classad" ]; then 
-		## check if classad is right
+		## check if classad is correct
 		ans=$(echo "$classad" | cut -d' ' -f3)
 		if [ "$ans" == "WantsPosixStashCache" ]; then
 			ans=$(grep ^WantsPosixStashCache $_CONDOR_JOB_AD | cut -d' ' -f3)
@@ -186,12 +190,12 @@ module load xrootd/4.1.1
 export PATH=$PATH:$(pwd)
 
 ## initialize variables
-
 debug=0
 file=""
 loc="."
 source=""
 recursive=0
+
 ## Process arguments
 ## http://stackoverflow.com/a/5230306
 ## http://stackoverflow.com/a/7948533
@@ -373,7 +377,7 @@ if [ $failfiles ]; then
 	condor_chirp set_job_attr_delayed Chirp_StashCp_FailCodes \"${fcString:1:1020}\"
 fi
 
-## If any one file transfer fails, then stashcp fails
+## If any one file transfer fails, then stashcp returns failure
 if [ $failed -ne 0 ]; then
 	exit 4
 else
