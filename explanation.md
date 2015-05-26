@@ -50,4 +50,4 @@ If any single download failed, STASHCP itself has failed.  In this case, STASHCP
   - Maybe if stashcp from the local cache and from the trunk fail, should try wget?  Hard to think of a situation when wget would work but stashcp from the trunk would not.
 	
 * Error messages are not informative for users
-  - Messages written for the coder to use
+  - Messages written only for the coder to use
