@@ -1,9 +1,9 @@
-====Overview of algorithm====
+==== Overview of algorithm ====
 
 
 
 
-====Known issues and concerns====
+==== Known issues and concerns ====
 
 * Relies on geoip to find closest cache
 	- Geoip doesn't always work
@@ -22,4 +22,9 @@
 	- In particular, relies on trunk being up in order to get size of file or to get contents of directory
 	- Could lead to unnecessary failure when the trunk is down but files are already present and accounted for on closest cache
 	
-* 
+* Does not do anything else if stashcp fails
+	- Maybe if stashcp from the local cache and from the trunk fail, should try wget?  Hard to think of a situation when wget would work but stashcp from the trunk would not.
+	
+* Error messages are not informative for users
+	- Messages written for the coder to use
+	
