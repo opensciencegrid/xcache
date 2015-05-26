@@ -61,7 +61,7 @@ STASHCP first determines the size of the file, and from that calculates a timeou
 STASHCP attempts to run `xrdcp` from the local cache, keeping track of start and end time.  If this pull is not successful, a second `xrdcp` from local is attempted.  Should that pull fail, STASHCP fails over to pulling from the trunk, and failover information is updated.  If no pull is successful, failure information is updated.  However, if any pull is successful, the usual information variables are updated.
 
 #### doStashCpDirectory
-Like [doStashCpSingle](#doStashCpSingle), this function can take two arguments.
+Like [doStashCpSingle](#dostashcpsingle), this function can take two arguments.
 
 ### Finishing
 The information variables are chirped, as described [above](#information-variables).
