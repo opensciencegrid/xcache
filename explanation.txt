@@ -1,5 +1,7 @@
 ==== Overview of algorithm ====
 
+	All the functions are defined above everything else, so the code is not simple to read.  Stashcp itself starts "running" after the comment line "### LOGIC TO RUN STASHCP ###".
+
 
 
 
