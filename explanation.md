@@ -1,5 +1,5 @@
 # Usage
-```stashcp [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
+>```stashcp [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
 
 	-d: show debugging information
 	-r: recursively copy
