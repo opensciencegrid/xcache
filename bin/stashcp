@@ -301,6 +301,12 @@ else
 	xrdargs="-s"
 fi
 
+## check if location exists
+if [ ! -e $loc ]; then
+	echo "Error: Desired location $loc does not exist." >&2
+	exit 1
+fi
+
 ## initialize info to be chirped
 failed=0
 starts=()
