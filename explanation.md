@@ -51,7 +51,7 @@ Due to numerous problems with trying to do this recursively, I decided to take a
 
 
 
-#### doStashCpSingle
+#### `doStashCpSingle`
 This is where all the downloading actually happens.  
 
 This function can take two arguments.  The first one, which is required, is the name of the file to be downloaded.  If the second argument is present, the function will update the information variables with information about this particular file download.  If the second argument is not present, no updating of information variables occurs (such as when the file being downloaded is but one member of a larger directory being downloaded).  
@@ -60,7 +60,7 @@ STASHCP first determines the size of the file, and from that calculates a timeou
 
 STASHCP attempts to run `xrdcp` from the local cache, keeping track of start and end time.  If this pull is not successful, a second `xrdcp` from local is attempted.  Should that pull fail, STASHCP fails over to pulling from the trunk, and failover information is updated.  If no pull is successful, failure information is updated.  However, if any pull is successful, the usual information variables are updated.
 
-#### doStashCpDirectory
+#### `doStashCpDirectory`
 Like [doStashCpSingle](#dostashcpsingle), this function can take two arguments.
 
 ### Finishing
