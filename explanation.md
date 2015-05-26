@@ -22,6 +22,11 @@ When a directory is downloaded, the information variables will be updated as if 
 This is where all the downloading actually happens.
 ####Directory
 
+###Finishing
+The information variables are chirped.  
+
+If any single download failed, STASHCP itself has failed.  In this case, STASHCP returns 4.
+
 # Known issues and concerns 
 
 * Relies on geoip to find closest cache
