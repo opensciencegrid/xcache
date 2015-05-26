@@ -45,7 +45,7 @@ function doStashCpSingle {
 		sourceFile=$(echo $sourceFile | cut -c2-)
 	fi
 	## http://stackoverflow.com/a/16623897
-	## Get localPath = source path without prefix to be removed (logic for determining this in main for-loop)
+	## Get localPath = source path without prefix to be removed (logic for determining this in main loop)
 	localPath=${sourceFile#$prefixRm}
 	mySz=$(xrdfs root://data.ci-connect.net stat $sourceFile | grep "Size: " | cut -d':' -f2)
 	mySz=$(echo -n "${mySz//[[:space:]]/}")
