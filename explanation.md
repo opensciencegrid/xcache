@@ -31,10 +31,10 @@ When a directory is downloaded, the information variables will be updated as if 
 
 #### Arguments
 STASHCP only requires a single argument, the source.  Every other argument is optional.
-* `-s <source>` - where `<source>` is the comma-delimited list of files and/or directories that the user wishes to download.  The path of a given file will be of the form `user/<username>/public/<path in STASH>`.  
-* `-l <location>`
-* `-d`
-* `-r`
+* `-s <source>` : `<source>` is the comma-delimited list of files and/or directories that the user wishes to download.  The path of a given file will be of the form `user/<username>/public/<path in STASH>`.  
+* `-l <location>` : `<location>` is the location within the job directory that the user wishes to download their files/directories to.  This can only be a single location.  If the directory does not exist when STASHCP is run, STASHCP will fail.
+* `-d` : if this flag is present, print debugging information.
+* `-r` : if this flag is present, download recursively (all subfolders).
 
 ### Main Loop
 
