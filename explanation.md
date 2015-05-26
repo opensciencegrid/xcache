@@ -12,7 +12,7 @@ The information variables are shell arrays holding strings corresponding to the 
 ##### Argument processing
 
 ###Downloading
-####Location Logic
+#####Location Logic
 #####Single file
 #####Directory
 
