@@ -63,6 +63,8 @@ This function can take two arguments.  The first one, which is required, is the 
 #### `doStashCpDirectory`
 Like [doStashCpSingle](#dostashcpsingle), this function can take two arguments - the first is the directory to be downloaded, and the second is a flag to let the function know if it should update information.  Information should not be updated if the directory being currently downloaded is a subdirectory of a larger directory being downloaded.
 
+`doStashCpDirectory` iterates through the contents of the input directory.  If an item is a file, `doStashCpDirectory` calls `doStashCpSingle`.  If an item is a directory, `doStashCpDirectory` calls itself on the item.
+
 ### Finishing
 The information variables are chirped, as described [above](#information-variables).
 
