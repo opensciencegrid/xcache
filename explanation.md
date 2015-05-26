@@ -45,7 +45,7 @@ This loop iterates over every file/directory that the user wishes to download.
 Before any downloading occurs, STASHCP checks to see if the source currently being examined is a file or a directory.  
 
 #### Location Logic
-**This is important to understand.**  
+**This is important to understand.  Check back later for the actual information.**  
 
 Due to numerous problems with trying to do this recursively, I decided to take a more direct approach and have STASHCP use the full source file path to direct location logic.  
 
