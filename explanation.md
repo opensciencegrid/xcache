@@ -1,5 +1,5 @@
 # Usage
-```bash
+```
 stashcp [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
 
 -d: show debugging information
