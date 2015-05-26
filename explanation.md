@@ -1,11 +1,11 @@
-==== Overview of algorithm ====
+# Overview of algorithm 
 
 	All the functions are defined above everything else, so the code is not simple to read.  STASHCP itself starts "running" after the comment line "### LOGIC TO RUN STASHCP ###".
 
 	Before any downloading happens, STASHCP checks for relevant classads, loads xrootd, initializes information variables and processes arguments.  The information variables are shell arrays holding strings corresponding to the start and end times of downloads, as well as the file or folder name and the size.  At the end of STASHCP, the information variables will be turned into strings and set as classads for the job.  Right 
 
 
-==== Known issues and concerns ====
+# Known issues and concerns 
 
 * Relies on geoip to find closest cache
 	- Geoip doesn't always work
