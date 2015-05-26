@@ -1,3 +1,16 @@
+# Usage
+`stashcp [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
+
+	-d: show debugging information
+	-r: recursively copy
+	-h: show this help text
+	
+	--closest: return closest cache location
+
+	Exit status 4 indicates that at least one file did not successfully copy over.
+	Exit status 1 indicates that the WantsStashCache classad was not present.`
+
+
 # Overview of algorithm 
 
 All the functions are defined above everything else, so the code is not simple to read.  STASHCP itself starts "running" after the comment line `### LOGIC TO RUN STASHCP ###`.
