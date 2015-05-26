@@ -1,6 +1,6 @@
 # Overview of algorithm 
 
-All the functions are defined above everything else, so the code is not simple to read.  STASHCP itself starts "running" after the comment line "### LOGIC TO RUN STASHCP ###".
+All the functions are defined above everything else, so the code is not simple to read.  STASHCP itself starts "running" after the comment line `### LOGIC TO RUN STASHCP ###`.
 
 ###Startup
 Before any downloading happens, STASHCP checks for relevant classads, loads xrootd, initializes information variables and processes arguments.  
@@ -14,10 +14,12 @@ The information variables are shell arrays holding strings corresponding to the 
 When a directory is downloaded, the information variables will be updated as if the directory were a single unit - the filename variable will hold just the directory path, the size will reflect the size of the directory, and the download times will reflect the downloading time for the directory.  This improves legibility and reduces space requirements.  If a user downloads a directory `mydir`, the information variable for filename will hold `mydir+`.  If a user downloads `mydir/`, the information variable for filename will hold `mydir/+`.
 #### Argument processing
 
+
 ###Downloading
 ####Location Logic
 **This is important to understand.**  
 ####Single file
+This is where all the downloading actually happens.
 ####Directory
 
 # Known issues and concerns 
