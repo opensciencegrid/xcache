@@ -35,8 +35,8 @@ If any single download failed, STASHCP itself has failed.  In this case, STASHCP
   - No checking for "next-closest" cache if closest cache is temporarily down and status is not yet reflected in caches.json
 	
 * Call could be simpler, without requiring the use of flags for every argument
-  - Want: stashcp <FILE> <LOCATION> <FLAGS>
-  - Have: stashcp -s <FILE> -l <LOCATION> <FLAGS>
+  - Want: `stashcp <FILE> <LOCATION> <FLAGS>`
+  - Have: `stashcp -s <FILE> -l <LOCATION> <FLAGS>`
 	
 * Static hard-coded number of attempts to pull from cache (2) and trunk (1)
   - Does not take type of error/failure into account
