@@ -13,6 +13,7 @@ The information variables are shell arrays holding strings corresponding to the 
 
 ###Downloading
 #####Location Logic
+**This is important to understand.**  
 #####Single file
 #####Directory
 
