@@ -57,7 +57,7 @@ function doStashCpSingle {
 
 	## First attempt
 	st1=$(date +%s%3N)
-	timeout $tm xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 2>&1
+	timeout.sh -t $tm xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 2>&1
 	res=$?
 	dl1=$(date +%s%3N)
 	if [ $res -eq 0 ]; then
