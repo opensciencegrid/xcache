@@ -19,6 +19,8 @@ start_watchdog(){
   echo "killing process after timeout of $timeout seconds"
   kill $$
 }
+
+echo $timeout
  
 start_watchdog "$timeout" 2>/dev/null &
 exec "$@"

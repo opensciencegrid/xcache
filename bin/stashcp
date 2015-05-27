@@ -53,7 +53,6 @@ function doStashCpSingle {
 	mb=$((mySz/1000000))
 	#tm=$((300+mb)) ## 5 minutes + 1MBps
 	tm=$((5+mb/10))
-	echo $tm
 
 	## First attempt
 	st1=$(date +%s%3N)
