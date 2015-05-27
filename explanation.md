@@ -94,3 +94,5 @@ If any single download failed, STASHCP itself has failed.  In this case, STASHCP
 	
 * Error messages are not informative for users
   - Messages written only for the coder to use
+  
+* Can't tell the difference between a slow download and a stalled download
