@@ -77,7 +77,7 @@ function doStashCpSingle {
 		## pull from local cache failed; try again
 		## Second attempt
 		st2=$(date +%s%3N)
-		timeout.sh -t $tm xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 2>&1
+		timeout.sh -t $tm xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 
 		res=$?
 		dl2=$(date +%s%3N)
 		if [ $res -eq 0 ]; then 	
@@ -108,7 +108,7 @@ function doStashCpSingle {
 			#tm=$((tm*10))
 			hn="root://data.ci-connect.net"
 			st3=$(date +%s%3N)
-			timeout.sh -t $tm xrdcp $xrdargs -f $hn://$sourceFile $baseDir/$localPath 2>&1
+			#timeout.sh -t $tm xrdcp $xrdargs -f $hn://$sourceFile $baseDir/$localPath 2>&1
 			res=$?
 			dl3=$(date +%s%3N)
 			if [ $res -eq 0 ]; then
