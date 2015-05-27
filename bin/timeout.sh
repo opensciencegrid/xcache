@@ -18,7 +18,6 @@ start_watchdog(){
  
   echo "killing process after timeout of $timeout seconds"
   kill $$
-  exit 1
 }
 
  
