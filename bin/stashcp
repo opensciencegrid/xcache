@@ -52,11 +52,11 @@ function doStashCpSingle {
 	## if someone has 'Size: ' in their file path, they have bigger problems than this not working.
 	mb=$((mySz/1000000))
 	#tm=$((300+mb)) ## 5 minutes + 1MBps
-	tm=$((5+mb/10))
+	tm=$((1+mb/100))
 
 	## First attempt
 	st1=$(date +%s%3N)
-	timeout.sh -t $tm xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 2>&1
+	timeout.sh -t $tm xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 
 	res=$?
 	dl1=$(date +%s%3N)
 	if [ $res -eq 0 ]; then
