@@ -96,3 +96,6 @@ If any single download failed, STASHCP itself has failed.  In this case, STASHCP
   - Messages written only for the coder to use
   
 * Can't tell the difference between a slow download and a stalled download
+
+* `timeout` utility might not exist on all sites
+  - Then again, the sites that seem to not have it are known trouble sites anyway.
