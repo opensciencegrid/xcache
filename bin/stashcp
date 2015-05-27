@@ -105,7 +105,7 @@ function doStashCpSingle {
 			
 			## Third attempt
 			## Timeout has been made longer
-			tm=$((tm*10))
+			#tm=$((tm*10))
 			hn="root://data.ci-connect.net"
 			st3=$(date +%s%3N)
 			timeout.sh -t $tm xrdcp $xrdargs -f $hn://$sourceFile $baseDir/$localPath 2>&1
