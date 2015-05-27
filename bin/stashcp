@@ -56,7 +56,7 @@ function doStashCpSingle {
 
 	## First attempt
 	st1=$(date +%s%3N)
-	timeout.sh -t $tm xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 
+	timeout $tm xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 
 	res=$?
 	dl1=$(date +%s%3N)
 	echo "First attempt result: $res"
@@ -72,13 +72,13 @@ function doStashCpSingle {
 		header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
 		body="\"body\" : \"$((st1/1000)),$sourceFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 		echo $header$body > data.json
-		timeout.sh -t 10 curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1 
+		timeout 10 curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1 
 		rm data.json 2>&1
 	else
 		## pull from local cache failed; try again
 		## Second attempt
 		st2=$(date +%s%3N)
-		timeout.sh -t $tm xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 
+		timeout $tm xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 
 		res=$?
 		dl2=$(date +%s%3N)
 		echo "Second attempt result: $res"
@@ -94,7 +94,7 @@ function doStashCpSingle {
 			header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
 			body="\"body\" : \"$((st2/1000)),$sourceFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 			echo $header$body > data.json
-			timeout.sh -t 10 curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1 
+			timeout 10 curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1 
 			rm data.json 2>&1
 		else 	
 			## second attempt to pull from local cache failed, pulling from trunk
@@ -110,7 +110,7 @@ function doStashCpSingle {
 			#tm=$((tm*10))
 			hn="root://data.ci-connect.net"
 			st3=$(date +%s%3N)
-			timeout.sh -t $tm xrdcp $xrdargs -f $hn://$sourceFile $baseDir/$localPath 
+			timeout $tm xrdcp $xrdargs -f $hn://$sourceFile $baseDir/$localPath 
 			res=$?
 			dl3=$(date +%s%3N)
 			echo "Third attempt result: $res"
@@ -127,7 +127,7 @@ function doStashCpSingle {
 				header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
 				body="\"body\" : \"$((st3/1000)),$sourceFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 				echo $header$body > data.json
-				timeout.sh -t 10 curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1
+				timeout 10 curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1
 				rm data.json 2>&1
 			else
 				failfiles=("${failfiles[@]}" $sourceFile)
@@ -172,9 +172,11 @@ function doStashCpDirectory {
 
 ### LOGIC TO RUN STASHCP ###
 
+isJob=0
 ## check if the relevant classad is there
 if [ ! -z ${_CONDOR_JOB_AD+x} ]; then
 	## in a job environment, and this check is relevant
+	isJob=1
 	classad=$(grep WantsStashCache $_CONDOR_JOB_AD)
 	if [ -n "$classad" ]; then 
 		## check if classad is correct
@@ -254,23 +256,25 @@ while [ $# -gt 0 ]; do
 done
 
 ## find chirp and add to path
-which condor_chirp > /dev/null 2>&1
-res=$?
-if [ $res -ne 0 ]; then
-	if [ -s /usr/libexec/condor/condor_chirp ]; then
-		PATH=$PATH:/usr/libexec/condor
-	else
-		cd ../../
-		pd=$(find . | grep "condor_chirp")
-		if [ -z $pd ]; then
-			echo "condor_chirp not found" >&2
+if [ $isJob ]; then
+	which condor_chirp > /dev/null 2>&1
+	res=$?
+	if [ $res -ne 0 ]; then
+		if [ -s /usr/libexec/condor/condor_chirp ]; then
+			PATH=$PATH:/usr/libexec/condor
 		else
-			p1=$(echo $pd | cut -c 2-)
-			p2=$(echo $p1 | rev | cut -d'/' -f2- | rev)
-			cwd=$(pwd)
-			PATH=$PATH:$cwd/$p2
+			cd ../../
+			pd=$(find . | grep "condor_chirp")
+			if [ -z $pd ]; then
+				echo "condor_chirp not found" >&2
+			else
+				p1=$(echo $pd | cut -c 2-)
+				p2=$(echo $p1 | rev | cut -d'/' -f2- | rev)
+				cwd=$(pwd)
+				PATH=$PATH:$cwd/$p2
+			fi
+			cd -
 		fi
-		cd -
 	fi
 fi
 
@@ -363,31 +367,33 @@ done
 
 ## Setting classads as appropriate
 ## Once they remove the 1024-character limit on chirped classads, remove string subsetting
-condor_chirp set_job_attr_delayed Chirp_StashCp_Dest \"$OSG_SITE_NAME\"
-condor_chirp set_job_attr_delayed Chirp_StashCp_Used \"true\"
-condor_chirp set_job_attr_delayed Chirp_StashCp_Prefix \"$sourcePrefix\"
-## http://stackoverflow.com/a/2317171
-startString=$(printf ",%s" "${starts[@]}")
-condor_chirp set_job_attr_delayed Chirp_StashCp_DLStart \"${startString:1:1020}\"
-nameString=$(printf ",%s" "${names[@]}")
-condor_chirp set_job_attr_delayed Chirp_StashCp_FileName \"${nameString:1:1020}\"
-sizeString=$(printf ",%s" "${sizes[@]}")
-condor_chirp set_job_attr_delayed Chirp_StashCp_FileSize \"${sizeString:1:1020}\"
-timeString=$(printf ",%s" "${times[@]}")
-condor_chirp set_job_attr_delayed Chirp_StashCp_DlTimeMs \"${timeString:1:1020}\"
-if [ $failoverfiles ]; then
-	fofString=$(printf ",%s" "${failoverfiles[@]}")
-	condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverFiles \"${fofString:1:1020}\"
-	fotString=$(printf ",%s" "${failovertimes[@]}")
-	condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverTimes \"${fotString:1:1020}\"
-fi
-if [ $failfiles ]; then
-	ffString=$(printf ",%s" "${failfiles[@]}")
-	condor_chirp set_job_attr_delayed Chirp_StashCp_FailFiles \"${ffString:1:1020}\"
-	ftString=$(printf ",%s" "${failtimes[@]}")
-	condor_chirp set_job_attr_delayed Chirp_StashCp_FailTimes \"${ftString:1:1020}\"
-	fcString=$(printf ",%s" "${failcodes[@]}")
-	condor_chirp set_job_attr_delayed Chirp_StashCp_FailCodes \"${fcString:1:1020}\"
+if [ $isJob ]; then
+	condor_chirp set_job_attr_delayed Chirp_StashCp_Dest \"$OSG_SITE_NAME\"
+	condor_chirp set_job_attr_delayed Chirp_StashCp_Used \"true\"
+	condor_chirp set_job_attr_delayed Chirp_StashCp_Prefix \"$sourcePrefix\"
+	## http://stackoverflow.com/a/2317171
+	startString=$(printf ",%s" "${starts[@]}")
+	condor_chirp set_job_attr_delayed Chirp_StashCp_DLStart \"${startString:1:1020}\"
+	nameString=$(printf ",%s" "${names[@]}")
+	condor_chirp set_job_attr_delayed Chirp_StashCp_FileName \"${nameString:1:1020}\"
+	sizeString=$(printf ",%s" "${sizes[@]}")
+	condor_chirp set_job_attr_delayed Chirp_StashCp_FileSize \"${sizeString:1:1020}\"
+	timeString=$(printf ",%s" "${times[@]}")
+	condor_chirp set_job_attr_delayed Chirp_StashCp_DlTimeMs \"${timeString:1:1020}\"
+	if [ $failoverfiles ]; then
+		fofString=$(printf ",%s" "${failoverfiles[@]}")
+		condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverFiles \"${fofString:1:1020}\"
+		fotString=$(printf ",%s" "${failovertimes[@]}")
+		condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverTimes \"${fotString:1:1020}\"
+	fi
+	if [ $failfiles ]; then
+		ffString=$(printf ",%s" "${failfiles[@]}")
+		condor_chirp set_job_attr_delayed Chirp_StashCp_FailFiles \"${ffString:1:1020}\"
+		ftString=$(printf ",%s" "${failtimes[@]}")
+		condor_chirp set_job_attr_delayed Chirp_StashCp_FailTimes \"${ftString:1:1020}\"
+		fcString=$(printf ",%s" "${failcodes[@]}")
+		condor_chirp set_job_attr_delayed Chirp_StashCp_FailCodes \"${fcString:1:1020}\"
+	fi
 fi
 
 ## If any one file transfer fails, then stashcp returns failure
