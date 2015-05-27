@@ -119,7 +119,7 @@ def read_cinfo(cinfo_file, now):
                "by_hour" : { "01": 0, "12": 0, "24": 0 },
              }
 
-    cf = open(cinfo_file + 'd', 'rb')
+    cf = open(cinfo_file, 'rb')
 
     # read and unpack the header
     buf = cf.read(_header_fmt.size)
