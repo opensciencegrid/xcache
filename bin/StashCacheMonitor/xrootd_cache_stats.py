@@ -9,6 +9,7 @@ import time
 import errno
 import struct
 import urlparse
+import collections
 
 import classad
 import XRootD.client
@@ -33,10 +34,13 @@ def scan_cache_dirs(rootdir):
 def scan_vo_dir(vodir):
     """ Scan a VO directory (assumed to be the whole directory tree after the top level """
 
+    now = time.time()
     totalsize = 0
     nfiles = 0
     naccesses = 0
+    accesses = collections.defaultdict(int)
     most_recent_access = 0
+    bad_cinfo_files = 0
     for root, dirs, files in os.walk(vodir):
         fnames = set(files)
         # Somebody might add a file ending in .cinfo in the cache
@@ -50,72 +54,136 @@ def scan_vo_dir(vodir):
                     continue
                 else: raise
             try:
-                access_count, access_time = read_cinfo(os.path.join(root, cinfo))
+                access_info = read_cinfo(os.path.join(root, cinfo), now)
             except OSError, ex:
                 if ex.errno == errno.ENOENT:
                     continue
-                else: raise
+                else:
+                    bad_cinfo_files += 1
+                    access_info = { "naccesses" : 0, "last_access": 0, "by_hour" : {} }
+            except ReadCInfoError, ex:
+                bad_cinfo_files += 1
+                access_info = ex.access_info
 
             nfiles += 1
-            totalsize += st.st_blocks*512 # allow for sparse files
-            naccesses += access_count
-            most_recent_access = max(most_recent_access, access_time)
+            file_size = st.st_blocks*512 # allow for sparse files
+            totalsize += file_size
+            naccesses += access_info["naccesses"]
+            most_recent_access = max(most_recent_access, access_info["last_access"])
 
-    result = classad.ClassAd({"used_bytes" : totalsize, "nfiles" : nfiles, "naccesses" : naccesses})
+            for h in access_info["by_hour"]:
+                accesses["naccesses_hr_" + h] += access_info["by_hour"][h]
+                accesses["bytes_hr_" + h] += access_info["by_hour"][h]*file_size
+
+    result = classad.ClassAd({
+                            "used_bytes" : totalsize,
+                            "nfiles" : nfiles,
+                            "naccesses" : naccesses,
+                            "bad_cinfo_files" : bad_cinfo_files
+                            })
+    result.update(accesses)
     if most_recent_access > 0:
         result["most_recent_access_time"] = most_recent_access
     return result
 
 
-def read_cinfo(cinfo_file):
+# Parsing the cinfo files
+
+# The header (not a c struct; consecutive separate values with no padding)
+# version + buffer size + download status array size (bits) + download status array
+#   int   +  long long  +              int                  +       variable
+_header_fmt = struct.Struct('=iqi')
+
+# then the number of accesses
+#   int
+_int_fmt = struct.Struct('@i')
+
+# each access contains a struct (native size + padding)
+# detach time + bytes disk + bytes ram + bytes missed
+# time_t      + long long  + long long + long long
+_status_fmt = struct.Struct('@lqqq')
+
+class ReadCInfoError(Exception):
+    def __init__(self, *args):
+        Exception.__init__(self, *args)
+        if len(args) > 1:
+            self.access_info = args[1]
+        else:
+            self.access_info = {}
+
+def read_cinfo(cinfo_file, now):
     """ Try to extract useful info from the cinfo file """
+
+    result = { "naccesses": 0,
+               "last_access": 0,
+               "by_hour" : { "01": 0, "12": 0, "24": 0 },
+             }
 
     cf = open(cinfo_file, 'rb')
 
-    # header (not a c struct; consecutive separate values with no padding)
-    # version + buffer size + download status array size (bits) + download status array
-    #   int   +  long long  +              int                  +       variable 
-    header_fmt = '=iqi'
-    header_size = struct.calcsize(header_fmt)
-    buf = cf.read(header_size)
-    if len(buf) > header_size:
+    # read and unpack the header
+    buf = cf.read(_header_fmt.size)
+    if len(buf) > _header_fmt.size:
         # a mangled file
-        return 0, 0
+        raise ReadCInfoError("%s header too short" % cinfo_file, result)
 
-    version, buffer_size, status_array_size_bits = struct.unpack(header_fmt, buf)
+    version, buffer_size, status_array_size_bits = _header_fmt.unpack(buf)
 
-    # only understand version 0
+    # we only understand version 0
     if version != 0:
-        return 0, 0
+        raise ReadCInfoError("%s unknown version: %s" % (cinfo_file, version), result)
 
     # get the size of the status array and skip over it
-    status_array_size_bytes = (status_array_size_bits -1)//8 + 1
+    status_array_size_bytes = (status_array_size_bits - 1)//8 + 1
     cf.seek(status_array_size_bytes, os.SEEK_CUR)
 
     # now the access count (an int)
-    buf = cf.read(4)
-    if len(buf) < 4:
-        return 0, 0
-    access_count, = struct.unpack('@i', buf)
+    buf = cf.read(_int_fmt.size)
+    if len(buf) < _int_fmt.size:
+        raise ReadCInfoError("%s: invalid access field" % cinfo_file, result)
 
-    if access_count <= 0:
-        return 0, 0
+    access_count, = _int_fmt.unpack(buf)
 
-    # each access contains a struct (native size + padding)
-    # detach time + bytes disk + bytes ram + bytes missed
-    # time_t      + long long  + long long + long long
-    status_fmt = '@lqqq'
-    status_size = struct.calcsize(status_fmt)
+    result["naccesses"] = access_count
 
-    # seek to the most recent access
-    cf.seek((access_count-1)*status_size, os.SEEK_CUR)
-    buf = cf.read(status_size)
-    if len(buf) < status_size:
-        # this may have caught a partially updated file; should it return the access count and current time?
-        return 0, 0
-    access_time, _, _, _ = struct.unpack(status_fmt, buf)
+    if access_count < 0:
+        raise ReadCInfoError("%s: invalid access count: %s" % (cinfo_file, access_count), result)
+    elif access_count == 0:
+        return result
 
-    return access_count, access_time
+    # read the access times
+
+    hr_01 = now - 60*60
+    hr_12 = now - 12*60*60
+    hr_24 = now - 24*60*60
+
+    # seek to the most recent access and work backwards
+    start_pos = cf.tell() # don't go before this
+
+    try:
+        cf.seek(-_status_fmt.size, os.SEEK_END)
+        buf = cf.read(_status_fmt.size)
+        access_time, _, _, _ = _status_fmt.unpack(buf)
+        result["last_access"] = access_time
+        while True:
+            if access_time >= hr_01: result["by_hour"]["01"] += 1
+            if access_time >= hr_12: result["by_hour"]["12"] += 1
+            if access_time >= hr_24: result["by_hour"]["24"] += 1
+            else:
+                # no longer interested
+                break
+
+            cf.seek(-2*_status_fmt.size, os.SEEK_CUR)
+            if cf.tell() < start_pos:
+                # done them all
+                break
+            buf = cf.read(_status_fmt.size)
+            access_time, _, _, _ = _status_fmt.unpack(buf)
+    except struct.error, ex:
+        # return what we've got
+        raise ReadCInfoError("%s unable to decode access time data: %s" % (cinfo_file, str(ex)), result)
+
+    return result
 
 
 def test_xrootd_server(url):
@@ -181,20 +249,19 @@ def collect_cache_stats(url, rootdir, cache_max_fs_fraction=1.0):
 
     stats_per_vo = scan_cache_dirs(rootdir)
     # add up the sizes
-    totalsize = 0
-    totalnfiles = 0
-    totalnaccesses = 0
+    totals = collections.defaultdict(int)
     most_recent_access = 0
     result['VO'] = {}
     for vo, vostats in stats_per_vo.items():
-        totalsize += vostats.get("used_bytes", 0)
-        totalnfiles += vostats.get("nfiles", 0)
-        totalnaccesses += vostats.get("naccesses", 0)
-        most_recent_access = max(most_recent_access, vostats.get("most_recent_access_time", 0))
+        for k, v in vostats.items():
+            if k == "most_recent_access_time":
+                most_recent_access = max(most_recent_access, v)
+            else:
+                totals[k] += v
         result['VO'][vo] = vostats
-    result['used_cache_bytes'] = totalsize
-    result["total_nfiles"] = totalnfiles
-    result["total_naccesses"] = totalnaccesses
+    result['used_cache_bytes'] = totals.pop("used_bytes", 0)
+    for k, v in totals.items():
+        result["total_" + k] = v
     if most_recent_access > 0:
         result["most_recent_access_time"] = most_recent_access
 
