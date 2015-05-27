@@ -51,12 +51,12 @@ function doStashCpSingle {
 	mySz=$(echo -n "${mySz//[[:space:]]/}")
 	## if someone has 'Size: ' in their file path, they have bigger problems than this not working.
 	mb=$((mySz/1000000))
-	#tm=$((300+mb)) ## 5 minutes + 1MBps
-	tm=$((1+mb/100))
+	tm=$((300+mb)) ## 5 minutes + 1MBps
+
 
 	## First attempt
 	st1=$(date +%s%3N)
-	timeout.sh -t $tm xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 
+	timeout $tm xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 
 	res=$?
 	dl1=$(date +%s%3N)
 	echo "First attempt result: $res"
@@ -72,13 +72,13 @@ function doStashCpSingle {
 		header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
 		body="\"body\" : \"$((st1/1000)),$sourceFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 		echo $header$body > data.json
-		timeout.sh -t 10 curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1 
+		timeout 10 curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1 
 		rm data.json 2>&1
 	else
 		## pull from local cache failed; try again
 		## Second attempt
 		st2=$(date +%s%3N)
-		timeout.sh -t $tm xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 
+		timeout $tm xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 
 		res=$?
 		dl2=$(date +%s%3N)
 		echo "Second attempt result: $res"
@@ -94,7 +94,7 @@ function doStashCpSingle {
 			header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
 			body="\"body\" : \"$((st2/1000)),$sourceFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 			echo $header$body > data.json
-			timeout.sh -t 10 curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1 
+			timeout 10 curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1 
 			rm data.json 2>&1
 		else 	
 			## second attempt to pull from local cache failed, pulling from trunk
@@ -107,10 +107,10 @@ function doStashCpSingle {
 			
 			## Third attempt
 			## Timeout has been made longer
-			#tm=$((tm*10))
+			tm=$((tm*5))
 			hn="root://data.ci-connect.net"
 			st3=$(date +%s%3N)
-			timeout.sh -t $tm xrdcp $xrdargs -f $hn://$sourceFile $baseDir/$localPath 
+			timeout $tm xrdcp $xrdargs -f $hn://$sourceFile $baseDir/$localPath 
 			res=$?
 			dl3=$(date +%s%3N)
 			echo "Third attempt result: $res"
@@ -127,7 +127,7 @@ function doStashCpSingle {
 				header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
 				body="\"body\" : \"$((st3/1000)),$sourceFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 				echo $header$body > data.json
-				timeout.sh -t 10 curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1
+				timeout 10 curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1
 				rm data.json 2>&1
 			else
 				failfiles=("${failfiles[@]}" $sourceFile)
