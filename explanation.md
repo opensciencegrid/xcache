@@ -91,11 +91,15 @@ If any single download failed, STASHCP itself has failed.  In this case, STASHCP
 	
 * Does not do anything else if stashcp fails
   - Maybe if stashcp from the local cache and from the trunk fail, should try wget?  Hard to think of a situation when wget would work but stashcp from the trunk would not.
+  - Relatedly, stashcp returns failure even if only one file isn't downloaded.  We should consider breaking out of stashcp immediately upon failure.
 	
 * Error messages are not informative for users
   - Messages written only for the coder to use
   
 * Can't tell the difference between a slow download and a stalled download
+  - Idea: xrdcp has a progress bar option, perhaps we could use that?  Maybe write the output of xrdcp to a temp file and watch the last line and if it hasn't changed in a certain period we could abort the download?
 
 * `timeout` utility might not exist on all sites
   - Then again, the sites that seem to not have it are known trouble sites anyway.
+  
+  
