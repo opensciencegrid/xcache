@@ -39,15 +39,15 @@ function updateInfo {
 
 ## address single-file case
 function doStashCpSingle {
-	sourceFile=$1
+	downloadFile=$1
 	## formatting
-	if [ ${sourceFile:0:1} == "/" ]; then
-		sourceFile=$(echo $sourceFile | cut -c2-)
+	if [ ${downloadFile:0:1} == "/" ]; then
+		downloadFile=$(echo $downloadFile | cut -c2-)
 	fi
 	## http://stackoverflow.com/a/16623897
 	## Get localPath = source path without prefix to be removed (logic for determining this in main loop)
-	localPath=${sourceFile#$prefixRm}
-	mySz=$(xrdfs root://data.ci-connect.net stat $sourceFile | grep "Size: " | cut -d':' -f2)
+	localPath=${downloadFile#$prefixRm}
+	mySz=$(xrdfs root://data.ci-connect.net stat $downloadFile | grep "Size: " | cut -d':' -f2)
 	mySz=$(echo -n "${mySz//[[:space:]]/}")
 	## if someone has 'Size: ' in their file path, they have bigger problems than this not working.
 	mb=$((mySz/1000000))
@@ -56,20 +56,20 @@ function doStashCpSingle {
 
 	## First attempt
 	st1=$(date +%s%3N)
-	timeout $tm xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 
+	timeout $tm xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath 
 	res=$?
 	dl1=$(date +%s%3N)
 	if [ $res -eq 0 ]; then
 		## pull from local cache succeeded
 		dltm=$((dl1-st1))
 		if [ $2 ]; then 	## update info only if I want to
-			updateInfo $st1 $sourceFile $mySz $dltm
+			updateInfo $st1 $downloadFile $mySz $dltm
 		fi
 		## send info out to flume
 		hn=$sourcePrefix
 		timestamp=$(date +%s)
 		header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
-		body="\"body\" : \"$((st1/1000)),$sourceFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
+		body="\"body\" : \"$((st1/1000)),$downloadFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 		echo $header$body > data.json
 		timeout 10 curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1 
 		rm data.json 2>&1
@@ -77,20 +77,20 @@ function doStashCpSingle {
 		## pull from local cache failed; try again
 		## Second attempt
 		st2=$(date +%s%3N)
-		timeout $tm xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 
+		timeout $tm xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath 
 		res=$?
 		dl2=$(date +%s%3N)
 		if [ $res -eq 0 ]; then 	
 			## second attempt to pull from local cache succeeded
 			dltm=$((dl2-st2))
 			if [ $2 ]; then 	## update info only if I want to
-				updateInfo $st2 $sourceFile $mySz $dltm
+				updateInfo $st2 $downloadFile $mySz $dltm
 			fi
 			## send info out to flume
 			hn=$sourcePrefix
 			timestamp=$(date +%s)
 			header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
-			body="\"body\" : \"$((st2/1000)),$sourceFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
+			body="\"body\" : \"$((st2/1000)),$downloadFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 			echo $header$body > data.json
 			timeout 10 curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1 
 			rm data.json 2>&1
@@ -98,8 +98,8 @@ function doStashCpSingle {
 			## second attempt to pull from local cache failed, pulling from trunk
 		    if [ $debug -eq 2 ]; then	
 				## print out debug info
-				echo "Pull of $sourceFile from $sourcePrefix failed."
-				echo "Command: xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath 2>&1"
+				echo "Pull of $downloadFile from $sourcePrefix failed."
+				echo "Command: xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath 2>&1"
 				echo "Pulling from trunk"
 			fi
 			
@@ -108,30 +108,30 @@ function doStashCpSingle {
 			tm=$((tm*5))
 			hn="root://data.ci-connect.net"
 			st3=$(date +%s%3N)
-			timeout $tm xrdcp $xrdargs -f $hn://$sourceFile $baseDir/$localPath 
+			timeout $tm xrdcp $xrdargs -f $hn://$downloadFile $baseDir/$localPath 
 			res=$?
 			dl3=$(date +%s%3N)
 			if [ $res -eq 0 ]; then
 				## pull from trunk succeeded
 				dltm=$((dl3-st3))
 				if [ $2 ]; then
-					updateInfo $st3 $sourceFile $mySz $dltm
+					updateInfo $st3 $downloadFile $mySz $dltm
 				fi
-				failoverfiles=("${failoverfiles[@]}" $sourceFile)
+				failoverfiles=("${failoverfiles[@]}" $downloadFile)
 				failovertimes=("${failovertimes[@]}" $st2) # time that the failed pull started
 				## send info out to flume
 				timestamp=$(date +%s)
 				header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
-				body="\"body\" : \"$((st3/1000)),$sourceFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
+				body="\"body\" : \"$((st3/1000)),$downloadFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
 				echo $header$body > data.json
 				timeout 10 curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1
 				rm data.json 2>&1
 			else
-				failfiles=("${failfiles[@]}" $sourceFile)
+				failfiles=("${failfiles[@]}" $downloadFile)
 				failtimes=("${failtimes[@]}" $st2)	## this is the last time something failed
 				failcodes=("${failcodes[@]}" $res)
-				echo "Stashcp of $sourceFile failed."
-				echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$sourceFile $baseDir/$localPath 2>&1"
+				echo "Stashcp of $downloadFile failed."
+				echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$downloadFile $baseDir/$localPath 2>&1"
 				failed=$((failed+1))
 			fi
 		fi

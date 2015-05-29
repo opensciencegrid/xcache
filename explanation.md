@@ -40,7 +40,7 @@ STASHCP only requires a single argument, the source.  Every other argument is op
 Simply calls `setStashCache.sh` and holds the result.  The called code uses geoip information and the `caches.json` file to determine to closest active cache.
 
 ### Main Loop
-This loop iterates over every file/directory that the user wishes to download. 
+This loop iterates over every file/directory that the user wishes to download.  Each of these items is referred to as a source item.
 
 Before any downloading occurs, STASHCP checks to see if the source currently being examined is a file or a directory.  If the source is a file, [`doStashCpSingle`](#doStashCpSingle) is called; otherwise, [`doStashCpDirectory`](#doStashCpDirectory) is called.  The source item is downloaded to the user-specified directory.  In both cases, a flag is set to indicate that the information variables are to be updated with respect to the source being downloaded.
 
@@ -49,20 +49,23 @@ Before any downloading occurs, STASHCP checks to see if the source currently bei
 
 Due to numerous problems with trying to do this recursively, I decided to take a more direct approach and have STASHCP use the full source file path to direct location logic.
 
-Simply speaking, STASHCP swaps out the prefix in the full path of the source item (the source prefix, denoted in the code as `$prefixRm`) for the prefix that the downloaded item should have in the job space).  That prefix is set per original source argument in the main loop.  The job prefix is a little more complicated, consisting of a base directory (the user-specified location) and a local path (defined as the source path with `$prefixRm` removed from the beginning).  The ultimate command is this: `xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath` 
+Simply speaking, STASHCP swaps out the prefix in the full path of the source item (the source prefix, denoted in the code as `$prefixRm`) for the prefix that the downloaded item should have in the job space).  That prefix is set per original source argument in the main loop.  The job prefix is a little more complicated, consisting of a base directory (the user-specified location) and a local path (defined as the source path with `$prefixRm` removed from the beginning).  The ultimate command is this: `xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath` 
 
 This can be better understood in the examination of a few different cases.  In every case, the user-specified location is the home directory, and so `$loc=.`  `$sourcePrefix` is just the location of the closest cache.  The `xrdcp` commands are simplified for legibility.
 * The source item is a file `user/jsmith/public/data.dat`.
+  - `$downloadFile = user/jsmith/public/data.dat`
   - `$prefixRm = user/jsmith/public/` 
   - `$baseDir = .`
   - `$localPath = data.dat`
   - Command: `xrdcp $sourcePrefix://user/jsmith/public/data.dat ./data.dat`
 * The source item is a directory `user/jsmith/public/folderA`, and STASHCP is downloading a file `A1.dat` from `folderA`.
+  - `$downloadFile = user/jsmith/public/folderA/A1.dat`
   - `$prefixRm = user/jsmith/public/folderA/`
   - `$baseDir = ./folderA`
   - `$localPath = A1.dat`
   - Command: `xrdcp $sourcePrefix://user/jsmith/public/folderA/A1.dat folderA/A1.dat`
 * The source item is a directory `user/jsmith/public/folderB`, and STASHCP is downloading a file `beta1.dat` from one of its subdirectories `beta`.
+  - `$downloadFile = user/jsmith/public/folderB/beta/beta1.dat`
   - `$prefixRm = user/jsmith/public/folderB`
   - `$baseDir = ./folderB`
   - `$localPath = beta/beta1.dat`
