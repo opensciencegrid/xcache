@@ -81,6 +81,7 @@ function doStashCpSingle {
 		timeout $tm xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath 
 		res=$?
 		dl2=$(date +%s%3N)
+		echo "Res after 2nd attempt: $res"
 		if [ $res -eq 0 ]; then 	
 			## second attempt to pull from local cache succeeded
 			dltm=$((dl2-st2))
