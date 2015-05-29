@@ -42,14 +42,16 @@ Simply calls `setStashCache.sh` and holds the result.  The called code uses geoi
 ### Main Loop
 This loop iterates over every file/directory that the user wishes to download. 
 
-Before any downloading occurs, STASHCP checks to see if the source currently being examined is a file or a directory.  If the source is a file, [`doStashCpSingle`](#doStashCpSingle) is called; otherwise, [doStashCpDirectory](#doStashCpDirectory) is called.  The source item is downloaded to the user-specified directory.  In both cases, a flag is set to indicate that the information variables are to be updated with respect to the source being downloaded.
+Before any downloading occurs, STASHCP checks to see if the source currently being examined is a file or a directory.  If the source is a file, [`doStashCpSingle`](#doStashCpSingle) is called; otherwise, [`doStashCpDirectory`](#doStashCpDirectory) is called.  The source item is downloaded to the user-specified directory.  In both cases, a flag is set to indicate that the information variables are to be updated with respect to the source being downloaded.
+
 
 #### Location Logic
-**This is important to understand.**
 
 Due to numerous problems with trying to do this recursively, I decided to take a more direct approach and have STASHCP use the full source file path to direct location logic.
 
+Simply speaking, STASHCP swaps out the prefix in the full path of the source item (the source prefix, denoted in the code as `$prefixRm`) for the prefix that the downloaded item should have in the job space).  That prefix is set per original source argument in the main loop.  The job prefix is a little more complicated, consisting of a base directory (the user-specified location) and a local path.
 
+| Source item 	| `$loc`	| Item to be downloaded	| `$prefixRm`	| `$baseDir`	| `$localDir`	|
 
 #### doStashCpSingle
 This is where all the downloading actually happens.
@@ -61,7 +63,7 @@ This function can take two arguments.  The first one, which is required, is the 
 `doStashCpSingle` attempts to run `xrdcp` from the local cache, keeping track of start and end time.  If this pull is not successful, a second `xrdcp` from local is attempted.  Should that pull fail, STASHCP fails over to pulling from the trunk, and failover information is updated.  The last pull, directly from the trunk, is given a 10x longer timeout period.  If no pull is successful, failure information is updated.  However, if any pull is successful, the usual information variables are updated.
 
 #### doStashCpDirectory
-Like [doStashCpSingle](#dostashcpsingle), this function can take two arguments - the first is the directory to be downloaded, and the second is a flag to let the function know if it should update information.  Information should not be updated if the directory being currently downloaded is a subdirectory of a larger directory being downloaded.
+Like [`doStashCpSingle`](#dostashcpsingle), this function can take two arguments - the first is the directory to be downloaded, and the second is a flag to let the function know if it should update information.  Information should not be updated if the directory being currently downloaded is a subdirectory of a larger directory being downloaded.
 
 `doStashCpDirectory` iterates through the contents of the input directory.  If an item is a file, `doStashCpSingle` is called on the item.  If the item is a directory, and the recursive flag `-r` has been set, then the appropriate directory is created and `doStashCpDirectory` is called on the item recursively.   The time it takes to iterate and download all of the contents is recorded and, if appropriate, updated to the information variables.
 
