@@ -81,7 +81,7 @@ This function can take two arguments.  The first one, which is required, is the 
 
 `doStashCpSingle` first determines the size of the file, and from that calculates a timeout period (5m + 1s/MB).  The built-in timeout utility is used.
 
-`doStashCpSingle` attempts to run `xrdcp` from the local cache, keeping track of start and end time.  If this pull is not successful, a second `xrdcp` from local is attempted.  Should that pull fail, STASHCP fails over to pulling from the trunk, and failover information is updated.  The last pull, directly from the trunk, is given a 10x longer timeout period.  If no pull is successful, failure information is updated.  However, if any pull is successful, the usual information variables are updated.
+`doStashCpSingle` attempts to run `xrdcp` from the local cache, keeping track of start and end time.  If this pull is not successful, a second `xrdcp` from local is attempted.  Should that pull fail, STASHCP fails over to pulling from the trunk, and failover information is updated.  The last pull, directly from the trunk, is given a 5x longer timeout period.  If no pull is successful, failure information is updated.  However, if any pull is successful, the usual information variables are updated.
 
 #### doStashCpDirectory
 Like [`doStashCpSingle`](#dostashcpsingle), this function can take two arguments - the first is the directory to be downloaded, and the second is a flag to let the function know if it should update information.  Information should not be updated if the directory being currently downloaded is a subdirectory of a larger directory being downloaded.
