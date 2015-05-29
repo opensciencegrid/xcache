@@ -153,6 +153,7 @@ function doStashCpDirectory {
 		fi
 		## Logic for copying files vs. directories
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
+			## creating local directory for subfolder
 			localPath=${item#$prefixRm}
 			mkdir -p $baseDir/$localPath
 			doStashCpDirectory $item

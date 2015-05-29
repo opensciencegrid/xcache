@@ -59,9 +59,14 @@ This can be better understood in the examination of a few different cases.  In e
   - Command: `xrdcp $sourcePrefix://user/jsmith/public/data.dat ./data.dat`
 * The source item is a directory `user/jsmith/public/folderA`, and STASHCP is downloading a file `A1.dat` from `folderA`.
   - `$prefixRm = user/jsmith/public/folderA/`
-  - `$baseDir = $loc/folderA`
+  - `$baseDir = ./folderA`
   - `$localPath = A1.dat`
   - Command: `xrdcp $sourcePrefix://user/jsmith/public/folderA/A1.dat folderA/A1.dat`
+* The source item is a directory `user/jsmith/public/folderB`, and STASHCP is downloading a file `beta1.dat` from one of its subdirectories `beta`.
+  - `$prefixRm = user/jsmith/public/folderB`
+  - `$baseDir = ./folderB`
+  - `$localPath = beta/beta1.dat`
+  - Command: `xrdcp $sourcePrefix://user/jsmith/public/folderB/beta/beta1.dat folderB/beta/beta1.dat`
 
 #### doStashCpSingle
 This is where all the downloading actually happens.
@@ -75,7 +80,7 @@ This function can take two arguments.  The first one, which is required, is the 
 #### doStashCpDirectory
 Like [`doStashCpSingle`](#dostashcpsingle), this function can take two arguments - the first is the directory to be downloaded, and the second is a flag to let the function know if it should update information.  Information should not be updated if the directory being currently downloaded is a subdirectory of a larger directory being downloaded.
 
-`doStashCpDirectory` iterates through the contents of the input directory.  If an item is a file, `doStashCpSingle` is called on the item.  If the item is a directory, and the recursive flag `-r` has been set, then the appropriate directory is created and `doStashCpDirectory` is called on the item recursively.   The time it takes to iterate and download all of the contents is recorded and, if appropriate, updated to the information variables.
+`doStashCpDirectory` iterates through the contents of the input directory.  If an item is a file, `doStashCpSingle` is called on the item.  If the item is a directory, and the recursive flag `-r` has been set, then the appropriate directory is created (look for the `## creating local directory for subfolder` comment) and `doStashCpDirectory` is called on the item recursively.   The time it takes to iterate and download all of the contents is recorded and, if appropriate, updated to the information variables.
 
 ### Finishing
 The information variables are chirped, as described [above](#information-variables).
