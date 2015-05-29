@@ -1,4 +1,5 @@
 # Usage
+
 ```
 stashcp [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
 
@@ -9,7 +10,7 @@ stashcp [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
 --closest: return closest cache location
 
 Exit status 4 indicates that at least one file did not successfully copy over.
-Exit status 1 indicates that the WantsStashCache classad was not present.
+Exit status 1 indicates that the WantsStashCache classad was not present in job environment.
 ```
 
 # Overview of algorithm 
@@ -23,6 +24,8 @@ Before any downloading happens, STASHCP checks for relevant classads, loads xroo
 In order to make sure that StashCache jobs are only sent to those sites that can handle them, users are required to add a StashCache classad to their jobs: `+WantsStashCache = true`
 
 If that classad is not present, STASHCP will stop, return 1, and print out an error message.
+
+**Note:** This classad is not required if STASHCP is being run interactively, i.e., outside of a job environment.
 
 #### Information variables
 The information variables are shell arrays holding strings corresponding to the start and end times of downloads, as well as the file or folder name and the size.  At the end of STASHCP, the information variables will be turned into strings and set as classads for the job.  Right now, because HTCondor limits classads to 1024 characters, the strings are truncated.
