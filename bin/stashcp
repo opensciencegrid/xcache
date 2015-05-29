@@ -348,7 +348,7 @@ for file in ${files[@]}; do
 		if [ "x$lc" == "x/" ]; then
 			## directory *contents* copied to $loc
 			export prefixRm="$(echo $file | rev | cut -d/ -f1- | rev)"
-			chirpedSource=$file+
+			chirpedSource=$file/+
 			doStashCpDirectory $file update
 		else
 			## directory copied to $loc
@@ -356,7 +356,7 @@ for file in ${files[@]}; do
 			export prefixRm="$(echo $file | rev | cut -d/ -f1- | rev)/"
 			mkdir $loc/$dir
 			baseDir=$loc/$dir
-			chirpedSource=$file/+
+			chirpedSource=$file+
 			doStashCpDirectory $file update
 		fi
 	fi

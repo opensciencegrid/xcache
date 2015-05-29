@@ -49,9 +49,19 @@ Before any downloading occurs, STASHCP checks to see if the source currently bei
 
 Due to numerous problems with trying to do this recursively, I decided to take a more direct approach and have STASHCP use the full source file path to direct location logic.
 
-Simply speaking, STASHCP swaps out the prefix in the full path of the source item (the source prefix, denoted in the code as `$prefixRm`) for the prefix that the downloaded item should have in the job space).  That prefix is set per original source argument in the main loop.  The job prefix is a little more complicated, consisting of a base directory (the user-specified location) and a local path.
+Simply speaking, STASHCP swaps out the prefix in the full path of the source item (the source prefix, denoted in the code as `$prefixRm`) for the prefix that the downloaded item should have in the job space).  That prefix is set per original source argument in the main loop.  The job prefix is a little more complicated, consisting of a base directory (the user-specified location) and a local path (defined as the source path with `$prefixRm` removed from the beginning).  The ultimate command is this: `xrdcp $xrdargs -f $sourcePrefix://$sourceFile $baseDir/$localPath` 
 
-| Source item 	| `$loc`	| Item to be downloaded	| `$prefixRm`	| `$baseDir`	| `$localDir`	|
+This can be better understood in the examination of a few different cases.  In every case, the user-specified location is the home directory, and so `$loc=.`  `$sourcePrefix` is just the location of the closest cache.  The `xrdcp` commands are simplified for legibility.
+A) The source item is a file `user/jsmith/public/data.dat`.
+  - `$prefixRm = user/jsmith/public/` 
+  - `$baseDir = .`
+  - `$localPath = data.dat`
+  - Command: `xrdcp $sourcePrefix://user/jsmith/public/data.dat ./data.dat`
+B) The source item is a directory `user/jsmith/public/folderA`, and STASHCP is downloading a file `A1.dat` from `folderA`.
+  - `$prefixRm = user/jsmith/public/folderA/`
+  - `$baseDir = $loc/folderA`
+  - `$localPath = A1.dat`
+  - Command: `xrdcp $sourcePrefix://user/jsmith/public/folderA/A1.dat folderA/A1.dat`
 
 #### doStashCpSingle
 This is where all the downloading actually happens.
