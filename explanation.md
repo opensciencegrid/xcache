@@ -20,7 +20,7 @@ All the functions are defined above everything else, so the code is not simple t
 Before any downloading happens, STASHCP checks for relevant classads, loads xrootd, initializes information variables and processes arguments.  It also determines the closest local cache.
 
 #### Classads
-In order to make sure that StashCache jobs are only sent to those sites that can handle them, users are required to add a StashCache classad to their jobs: `+WantsStashCache = true`  
+In order to make sure that StashCache jobs are only sent to those sites that can handle them, users are required to add a StashCache classad to their jobs: `+WantsStashCache = true`
 
 If that classad is not present, STASHCP will stop, return 1, and print out an error message.
 
@@ -31,7 +31,7 @@ When a directory is downloaded, the information variables will be updated as if 
 
 #### Arguments
 STASHCP only requires a single argument, the source.  Every other argument is optional.
-* `-s <source>` : `<source>` is the *comma-delimited* list of files and/or directories that the user wishes to download.  The path of a given file will be of the form `user/<username>/public/<path in STASH>`.  
+* `-s <source>` : `<source>` is the *comma-delimited* list of files and/or directories that the user wishes to download.  The path of a given file will be of the form `user/<username>/public/<path in STASH>`.
 * `-l <location>` : `<location>` is the location within the job directory that the user wishes to download their files/directories to.  This can only be a single location.  If the directory does not exist when STASHCP is run, STASHCP will fail and return 1.
 * `-d` : if this flag is present, print debugging information.
 * `-r` : if this flag is present, download recursively (all subfolders).
@@ -42,19 +42,19 @@ Simply calls `setStashCache.sh` and holds the result.  The called code uses geoi
 ### Main Loop
 This loop iterates over every file/directory that the user wishes to download. 
 
-Before any downloading occurs, STASHCP checks to see if the source currently being examined is a file or a directory.  
+Before any downloading occurs, STASHCP checks to see if the source currently being examined is a file or a directory.  If the source is a file, [`doStashCpSingle`](#doStashCpSingle) is called; otherwise, [doStashCpDirectory](#doStashCpDirectory) is called.  The source item is downloaded to the user-specified directory.  In both cases, a flag is set to indicate that the information variables are to be updated with respect to the source being downloaded.
 
 #### Location Logic
-**This is important to understand.  Check back later for the actual information.**  
+**This is important to understand.**
 
-Due to numerous problems with trying to do this recursively, I decided to take a more direct approach and have STASHCP use the full source file path to direct location logic.  
+Due to numerous problems with trying to do this recursively, I decided to take a more direct approach and have STASHCP use the full source file path to direct location logic.
 
 
 
 #### doStashCpSingle
-This is where all the downloading actually happens.  
+This is where all the downloading actually happens.
 
-This function can take two arguments.  The first one, which is required, is the name of the file to be downloaded.  If the second argument is present, the function will update the information variables with information about this particular file download.  If the second argument is not present, no updating of information variables occurs (such as when the file being downloaded is but one member of a larger directory being downloaded).  
+This function can take two arguments.  The first one, which is required, is the name of the file to be downloaded.  If the second argument is present, the function will update the information variables with information about this particular file download.  If the second argument is not present, no updating of information variables occurs (such as when the file being downloaded is but one member of a larger directory being downloaded).
 
 `doStashCpSingle` first determines the size of the file, and from that calculates a timeout period (5m + 1s/MB).  The built-in timeout utility is used.
 
@@ -101,5 +101,3 @@ If any single download failed, STASHCP itself has failed.  In this case, STASHCP
 
 * `timeout` utility might not exist on all sites
   - Then again, the sites that seem to not have it are known trouble sites anyway.
-  
-  
