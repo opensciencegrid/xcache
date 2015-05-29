@@ -55,7 +55,6 @@ function doStashCpSingle {
 
 
 	## First attempt
-	echo "First attempt"
 	st1=$(date +%s%3N)
 	./timeout.sh -t 1 -f $baseDir/$localPath -d 1000000000 -s $mySz xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath 
 	res=$?
@@ -344,7 +343,6 @@ for file in ${files[@]}; do
 		## Single file
 		export prefixRm="$(echo $file | rev | cut -d/ -f1- | rev)"
 		baseDir=$loc
-		echo "Working on file: $file"
 		doStashCpSingle $file update
 	else
 		## directory 
