@@ -254,7 +254,7 @@ while [ $# -gt 0 ]; do
 done
 
 ## find chirp and add to path
-if [ $isJob ]; then
+if [ $isJob -eq 1 ]; then
 	which condor_chirp > /dev/null 2>&1
 	res=$?
 	if [ $res -ne 0 ]; then
@@ -365,7 +365,7 @@ done
 
 ## Setting classads as appropriate
 ## Once they remove the 1024-character limit on chirped classads, remove string subsetting
-if [ $isJob ]; then
+if [ $isJob -eq 1 ]; then
 	condor_chirp set_job_attr_delayed Chirp_StashCp_Dest \"$OSG_SITE_NAME\"
 	condor_chirp set_job_attr_delayed Chirp_StashCp_Used \"true\"
 	condor_chirp set_job_attr_delayed Chirp_StashCp_Prefix \"$sourcePrefix\"
