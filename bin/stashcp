@@ -113,6 +113,7 @@ function doStashCpSingle {
 			timeout $tm xrdcp $xrdargs -f $hn://$downloadFile $baseDir/$localPath 
 			res=$?
 			dl3=$(date +%s%3N)
+			echo "Res after 3rd attempt: $res"
 			if [ $res -eq 0 ]; then
 				## pull from trunk succeeded
 				dltm=$((dl3-st3))
