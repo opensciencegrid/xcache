@@ -39,7 +39,6 @@ function updateInfo {
 
 ## address single-file case
 function doStashCpSingle {
-	echo $1
 	downloadFile=$1
 	## formatting
 	if [ ${downloadFile:0:1} == "/" ]; then
@@ -345,6 +344,7 @@ for file in ${files[@]}; do
 		## Single file
 		export prefixRm="$(echo $file | rev | cut -d/ -f1- | rev)"
 		baseDir=$loc
+		echo "Working on file: $file"
 		doStashCpSingle $file update
 	else
 		## directory 
