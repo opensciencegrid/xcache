@@ -39,6 +39,7 @@ function updateInfo {
 
 ## address single-file case
 function doStashCpSingle {
+	echo $1
 	downloadFile=$1
 	## formatting
 	if [ ${downloadFile:0:1} == "/" ]; then
