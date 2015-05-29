@@ -56,8 +56,9 @@ function doStashCpSingle {
 
 
 	## First attempt
+	echo "First attempt"
 	st1=$(date +%s%3N)
-	timeout.sh -t 1 -f $baseDir/$localPath -d 1000000000 -s $mySz xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath 
+	./timeout.sh -t 1 -f $baseDir/$localPath -d 1000000000 -s $mySz xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath 
 	res=$?
 	dl1=$(date +%s%3N)
 	echo "Res after 1st attempt: $res"
