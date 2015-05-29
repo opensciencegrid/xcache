@@ -14,6 +14,7 @@ start_watchdog(){
 	file="$2"
 	diff="$3"
 	expSize="$4"
+	echo "$timeout		$file		$diff		$expSize"
 	(( i = timeout ))
 	prevSize=0
 	while (( i > 0 ))
