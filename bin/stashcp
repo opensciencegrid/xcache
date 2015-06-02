@@ -55,7 +55,7 @@ function doStashCpSingle {
 
 	## First attempt
 	st1=$(date +%s%3N)
-	downloading_timeout.sh -t 5 -f $baseDir/$localPath -d 500000000 -s $mySz xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath 
+	downloading_timeout.sh -t $seconds -d $diff -f $baseDir/$localPath -s $mySz xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath 
 	res=$?
 	dl1=$(date +%s%3N)
 	echo "$downloadFile: Res after 1st attempt: $res"
@@ -77,7 +77,7 @@ function doStashCpSingle {
 		## pull from local cache failed; try again
 		## Second attempt
 		st2=$(date +%s%3N)
-		timeout $tm xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath 
+		downloading_timeout.sh -t $seconds -d $diff -f $baseDir/$localPath -s $mySz $tm xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath 
 		res=$?
 		dl2=$(date +%s%3N)
 		echo "$downloadFile: Res after 2nd attempt: $res"
@@ -105,11 +105,9 @@ function doStashCpSingle {
 			fi
 			
 			## Third attempt
-			## Timeout has been made longer
-			tm=$((tm*5))
 			hn="root://data.ci-connect.net"
 			st3=$(date +%s%3N)
-			timeout $tm xrdcp $xrdargs -f $hn://$downloadFile $baseDir/$localPath 
+			downloading_timeout.sh -t $seconds -d $diff -f $baseDir/$localPath -s $mySz xrdcp $xrdargs -f $hn://$downloadFile $baseDir/$localPath 
 			res=$?
 			dl3=$(date +%s%3N)
 			echo "$downloadFile: Res after 3rd attempt: $res"
@@ -203,6 +201,8 @@ file=""
 loc="."
 source=""
 recursive=0
+seconds=5
+diff=$((seconds * 1000000000))
 
 ## Process arguments
 ## http://stackoverflow.com/a/5230306
