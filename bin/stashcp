@@ -201,8 +201,8 @@ file=""
 loc="."
 source=""
 recursive=0
-seconds=2
-diff=$((seconds * 1000000000))
+seconds=3
+diff=$((seconds * 1000)) ## 1 KBps
 
 ## Process arguments
 ## http://stackoverflow.com/a/5230306
