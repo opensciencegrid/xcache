@@ -201,7 +201,7 @@ file=""
 loc="."
 source=""
 recursive=0
-seconds=5
+seconds=2
 diff=$((seconds * 1000000000))
 
 ## Process arguments
