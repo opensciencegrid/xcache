@@ -79,9 +79,9 @@ This is where all the downloading actually happens.
 
 This function can take two arguments.  The first one, which is required, is the name of the file to be downloaded.  If the second argument is present, the function will update the information variables with information about this particular file download.  If the second argument is not present, no updating of information variables occurs (such as when the file being downloaded is but one member of a larger directory being downloaded).
 
-`doStashCpSingle` first determines the size of the file, and from that calculates a timeout period (5m + 1s/MB).  The built-in timeout utility is used.
+`doStashCpSingle` depends on another script, [`downloading_timeout.sh`](#downloading_timeout.sh) for all timeout logic.  
 
-`doStashCpSingle` attempts to run `xrdcp` from the local cache, keeping track of start and end time.  If this pull is not successful, a second `xrdcp` from local is attempted.  Should that pull fail, STASHCP fails over to pulling from the trunk, and failover information is updated.  The last pull, directly from the trunk, is given a 5x longer timeout period.  If no pull is successful, failure information is updated.  However, if any pull is successful, the usual information variables are updated.
+`doStashCpSingle` attempts to run `xrdcp` from the local cache, keeping track of start and end time.  If this pull is not successful, a second `xrdcp` from local is attempted.  Should that pull fail, STASHCP fails over to pulling from the trunk, and failover information is updated.  If the final pull is not successful, failure information is updated.  However, if any pull is successful, the usual information variables are updated.
 
 #### doStashCpDirectory
 Like [`doStashCpSingle`](#dostashcpsingle), this function can take two arguments - the first is the directory to be downloaded, and the second is a flag to let the function know if it should update information.  Information should not be updated if the directory being currently downloaded is a subdirectory of a larger directory being downloaded.
@@ -93,10 +93,19 @@ The information variables are chirped, as described [above](#information-variabl
 
 If any single download failed, STASHCP itself has failed.  In this case, STASHCP returns 4.
 
+### downloading_timeout.sh
+This is a separate script that tracks the size of a file being downloaded, and cuts off the download command if the file's size does not change enough in a given period of time.
+
+Usage: `downloading_timeout.sh -t <TIMEOUT> -d <DIFF> -f <FILE> -s <EXPSIZE> <DOWNLOADING COMMAND>`
+
+The script waits until `$file` exists, at which point it stores `$prevSize`, the size of the file in bytes.  Every `$timeout` seconds, the script computes the expected size of the file using `$prevSize`, `$expSize` and `$diff`: `$wantSize := min($prevSize + $diff, $expSize)`.  Thus, the script is asking for at least an increase of `$diff` bytes, unless `$prevSize + $diff > $expSize`.  If the file size has not increased appropriately, the script shuts down the downloading command.
+
+It is recommended that `$timeout` not be set to 1 second, as tests showed that download times varied on a second-by-second level.  A better value is in the range of 3-10 seconds.  These variables are set in STASHCP.  
+
 # Known issues and concerns 
 
-* Relies on geoip to find closest cache
-  - Geoip doesn't always work
+* Relies on GEOIP to find closest cache
+  - GEOIP doesn't always work
   - Closest cache isn't necessarily the best cache
   - No checking for "next-closest" cache if closest cache is temporarily down and status is not yet reflected in caches.json
 	
@@ -112,15 +121,9 @@ If any single download failed, STASHCP itself has failed.  In this case, STASHCP
   - In particular, relies on trunk being up in order to get size of file or to get contents of directory
   - Could lead to unnecessary failure when the trunk is down but files are already present and accounted for on closest cache
 	
-* Does not do anything else if stashcp fails
-  - Maybe if stashcp from the local cache and from the trunk fail, should try wget?  Hard to think of a situation when wget would work but stashcp from the trunk would not.
-  - Relatedly, stashcp returns failure even if only one file isn't downloaded.  We should consider breaking out of stashcp immediately upon failure.
+* Does not do anything else if STASHCP fails
+  - Maybe if STASHCP from the local cache and from the trunk fail, should try wget?  Hard to think of a situation when wget would work but stashcp from the trunk would not.
+  - Relatedly, STASHCP returns failure even if only one file isn't downloaded.  We should consider breaking out of STASHCP immediately upon failure.
 	
 * Error messages are not informative for users
   - Messages written only for the coder to use
-  
-* Can't tell the difference between a slow download and a stalled download
-  - Idea: xrdcp has a progress bar option, perhaps we could use that?  Maybe write the output of xrdcp to a temp file and watch the last line and if it hasn't changed in a certain period we could abort the download?
-
-* `timeout` utility might not exist on all sites
-  - Then again, the sites that seem to not have it are known trouble sites anyway.
