@@ -58,7 +58,6 @@ function doStashCpSingle {
 	downloading_timeout.sh -t $seconds -d $diff -f $baseDir/$localPath -s $mySz xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath 
 	res=$?
 	dl1=$(date +%s%3N)
-	echo "$downloadFile: Res after 1st attempt: $res"
 	if [ $res -eq 0 ]; then
 		## pull from local cache succeeded
 		dltm=$((dl1-st1))
@@ -80,7 +79,6 @@ function doStashCpSingle {
 		downloading_timeout.sh -t $seconds -d $diff -f $baseDir/$localPath -s $mySz $tm xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath 
 		res=$?
 		dl2=$(date +%s%3N)
-		echo "$downloadFile: Res after 2nd attempt: $res"
 		if [ $res -eq 0 ]; then 	
 			## second attempt to pull from local cache succeeded
 			dltm=$((dl2-st2))
@@ -110,7 +108,6 @@ function doStashCpSingle {
 			downloading_timeout.sh -t $seconds -d $diff -f $baseDir/$localPath -s $mySz xrdcp $xrdargs -f $hn://$downloadFile $baseDir/$localPath 
 			res=$?
 			dl3=$(date +%s%3N)
-			echo "$downloadFile: Res after 3rd attempt: $res"
 			if [ $res -eq 0 ]; then
 				## pull from trunk succeeded
 				dltm=$((dl3-st3))

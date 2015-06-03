@@ -22,7 +22,6 @@ start_watchdog(){
 			newSize=$(du -b $file | cut -f1)
 			nextSize=$((prevSize+diff))
 			wantSize=$((nextSize<expSize?nextSize:expSize))
-			echo -e "$prevSize\t$newSize\t$nextSize\t$wantSize" >> sizes.track.txt
 			if [ $newSize -lt $((wantSize)) ]; then
 				kill -0 $$ || exit 0
 				sleep 1
@@ -43,4 +42,4 @@ start_watchdog "$timeout" "$file" "$diff" "$expSize" 2>/dev/null &
 exec "$@"
 return $?
 
-#http://fahdshariff.blogspot.com/2013/08/executing-shell-command-with-timeout.html
+## Based on: http://fahdshariff.blogspot.com/2013/08/executing-shell-command-with-timeout.html
