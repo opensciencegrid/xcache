@@ -81,7 +81,7 @@ This function can take two arguments.  The first one, which is required, is the 
 
 `doStashCpSingle` depends on another script, [`downloading_timeout.sh`](#downloading_timeoutsh) for all timeout logic.  
 
-`doStashCpSingle` attempts to run `xrdcp` from the local cache, keeping track of start and end time.  If this pull is not successful, a second `xrdcp` from local is attempted.  Should that pull fail, STASHCP fails over to pulling from the trunk, and failover information is updated.  If the final pull is not successful, failure information is updated.  However, if any pull is successful, the usual information variables are updated.
+`doStashCpSingle` attempts to run `xrdcp` from the local cache, keeping track of start and end time.  If this pull is not successful, a second `xrdcp` from local is attempted.  Should that pull fail, STASHCP fails over to pulling from the trunk, and failover information is updated.  If the final pull is not successful, failure information is updated.  However, if any pull is successful, the usual information variables are updated.  Furthermore, information about the successful download is uploaded to our Hadoop machine.
 
 #### doStashCpDirectory
 Like [`doStashCpSingle`](#dostashcpsingle), this function can take two arguments - the first is the directory to be downloaded, and the second is a flag to let the function know if it should update information.  Information should not be updated if the directory being currently downloaded is a subdirectory of a larger directory being downloaded.
@@ -127,3 +127,6 @@ It is recommended that `$timeout` not be set to 1 second, as tests showed that d
 	
 * Error messages are not informative for users
   - Messages written only for the coder to use
+  
+* Hadoop messages still rely on timeout utility, which may not be available on all sites.
+  - On the other hand, the sites that don't have timeout are likely to be troublemakers in other ways, and would not support STASHCP for many other reasons.
