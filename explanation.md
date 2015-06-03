@@ -79,7 +79,7 @@ This is where all the downloading actually happens.
 
 This function can take two arguments.  The first one, which is required, is the name of the file to be downloaded.  If the second argument is present, the function will update the information variables with information about this particular file download.  If the second argument is not present, no updating of information variables occurs (such as when the file being downloaded is but one member of a larger directory being downloaded).
 
-`doStashCpSingle` depends on another script, [`downloading_timeout.sh`](#downloading_timeout.sh) for all timeout logic.  
+`doStashCpSingle` depends on another script, [`downloading_timeout.sh`](#downloading_timeoutsh) for all timeout logic.  
 
 `doStashCpSingle` attempts to run `xrdcp` from the local cache, keeping track of start and end time.  If this pull is not successful, a second `xrdcp` from local is attempted.  Should that pull fail, STASHCP fails over to pulling from the trunk, and failover information is updated.  If the final pull is not successful, failure information is updated.  However, if any pull is successful, the usual information variables are updated.
 
@@ -94,7 +94,7 @@ The information variables are chirped, as described [above](#information-variabl
 If any single download failed, STASHCP itself has failed.  In this case, STASHCP returns 4.
 
 ### downloading_timeout.sh
-This is a separate script that tracks the size of a file being downloaded, and cuts off the download command if the file's size does not change enough in a given period of time.
+This is a separate script that tracks the size of a file being downloaded, and cuts off the download command if the file's size does not change enough in a given period of time.  This helps to tell the difference between a stalled download and a slow download.
 
 Usage: `downloading_timeout.sh -t <TIMEOUT> -d <DIFF> -f <FILE> -s <EXPSIZE> <DOWNLOADING COMMAND>`
 
