@@ -79,7 +79,7 @@ This is where all the downloading actually happens.
 
 This function can take two arguments.  The first one, which is required, is the name of the file to be downloaded.  If the second argument is present, the function will update the information variables with information about this particular file download.  If the second argument is not present, no updating of information variables occurs (such as when the file being downloaded is but one member of a larger directory being downloaded).
 
-`doStashCpSingle` depends on another script, [`downloading_timeout.sh`](#downloading_timeoutsh) for all timeout logic.  
+`doStashCpSingle` depends on another script, [`downloading_timeout.sh`](#downloading_timeoutsh) for all timeout logic.
 
 `doStashCpSingle` attempts to run `xrdcp` from the local cache, keeping track of start and end time.  If this pull is not successful, a second `xrdcp` from local is attempted.  Should that pull fail, STASHCP fails over to pulling from the trunk, and failover information is updated.  If the final pull is not successful, failure information is updated.  However, if any pull is successful, the usual information variables are updated.  Furthermore, information about the successful download is uploaded to our Hadoop machine.
 
@@ -100,7 +100,7 @@ Usage: `downloading_timeout.sh -t <TIMEOUT> -d <DIFF> -f <FILE> -s <EXPSIZE> <DO
 
 The script waits until `$file` exists, at which point it stores `$prevSize`, the size of the file in bytes.  Every `$timeout` seconds, the script computes the expected size of the file using `$prevSize`, `$expSize` and `$diff`: `$wantSize := min($prevSize + $diff, $expSize)`.  Thus, the script is asking for at least an increase of `$diff` bytes, unless `$prevSize + $diff > $expSize`.  If the file size has not increased appropriately, the script shuts down the downloading command.
 
-It is recommended that `$timeout` not be set to 1 second, as tests showed that download times varied on a second-by-second level.  A better value is in the range of 3-10 seconds.  These variables are set in STASHCP.  
+It is recommended that `$timeout` not be set to 1 second, as tests showed that download times varied on a second-by-second level.  A better value is in the range of 3-10 seconds.  These variables are set in STASHCP.
 
 # Known issues and concerns 
 
@@ -130,3 +130,7 @@ It is recommended that `$timeout` not be set to 1 second, as tests showed that d
   
 * Hadoop messages still rely on timeout utility, which may not be available on all sites.
   - On the other hand, the sites that don't have timeout are likely to be troublemakers in other ways, and would not support STASHCP for many other reasons.
+
+* STASHCP assumes the following:
+  * The Owner ClassAd is present and not Undefined
+  * The ProjectName ClassAd exists
