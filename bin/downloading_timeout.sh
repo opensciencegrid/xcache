@@ -30,6 +30,8 @@ start_watchdog(){
 				prevSize=$(du -b $file | cut -f1)
 				(( i = timeout ))
 			fi
+		else
+			(( i -= 1 )) ## to avoid infinite loop
 		fi
 	done
 	
