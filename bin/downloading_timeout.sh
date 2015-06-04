@@ -31,6 +31,7 @@ start_watchdog(){
 				(( i = timeout ))
 			fi
 		else
+			sleep 1
 			(( i -= 1 )) ## to avoid infinite loop
 		fi
 	done
