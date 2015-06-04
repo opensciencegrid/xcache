@@ -134,3 +134,5 @@ It is recommended that `$timeout` not be set to 1 second, as tests showed that d
 * STASHCP assumes the following:
   * The Owner ClassAd is present and not Undefined
   * The ProjectName ClassAd exists
+
+* STASHCP does not transfer files back from the worker node
