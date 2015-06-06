@@ -1,4 +1,4 @@
-# Usage
+## Usage
 
 ```
 stashcp [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
@@ -13,7 +13,7 @@ Exit status 4 indicates that at least one file did not successfully copy over.
 Exit status 1 indicates that the WantsStashCache classad was not present in job environment.
 ```
 
-# Overview of algorithm 
+## Overview of algorithm 
 
 All the functions are defined above everything else, so the code is not simple to read.  STASHCP itself starts "running" after the comment line `### LOGIC TO RUN STASHCP ###`.
 
@@ -102,7 +102,7 @@ The script waits until `$file` exists, at which point it stores `$prevSize`, the
 
 It is recommended that `$timeout` not be set to 1 second, as tests showed that download times varied on a second-by-second level.  A better value is in the range of 3-10 seconds.  These variables are set in STASHCP.
 
-# Known issues and concerns 
+## Known issues and concerns 
 
 * Relies on GEOIP to find closest cache
   - GEOIP doesn't always work
@@ -134,3 +134,9 @@ It is recommended that `$timeout` not be set to 1 second, as tests showed that d
 * STASHCP assumes the following:
   * The Owner ClassAd is present and not Undefined
   * The ProjectName ClassAd exists
+
+* STASHCP does not transfer files back from the worker node
+
+* No record of whether the file was new to the cache it was pulled from or not
+
+
