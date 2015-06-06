@@ -199,7 +199,7 @@ loc="."
 source=""
 recursive=0
 seconds=3
-diff=$((seconds * 1000)) ## 1 KBps
+diff=$((seconds * 100)) ## 100Bps
 
 ## Process arguments
 ## http://stackoverflow.com/a/5230306
