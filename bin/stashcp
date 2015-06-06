@@ -198,8 +198,8 @@ file=""
 loc="."
 source=""
 recursive=0
-seconds=3
-diff=$((seconds * 100)) ## 100Bps
+seconds=15
+diff=$((seconds * 10)) ## 10Bps
 
 ## Process arguments
 ## http://stackoverflow.com/a/5230306
