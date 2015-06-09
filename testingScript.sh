@@ -1,14 +1,12 @@
 #!/bin/bash
 
-source /cvmfs/oasis.opensciencegrid.org/osg/modules/lmod/5.6.2/init/bash
-module load xrootd/4.1.1 
-echo "$(date): Loaded XrootD"
-source ./setStashCache.sh
-echo "$(date): Got prefix"
+source /cvmfs/oasis.opensciencegrid.org/osg/modules/lmod/current/init/bash
+module load stashcp
+stashcp --closest
 arrFiles=$(echo $1 | tr "," "\n") 
 for f in $arrFiles; do
     echo $f
-    bash ./stashcp -d -s $f -l $2 2>&1
+    stashcp -d -s $f -l $2 2>&1
     file=$(echo $f | rev | cut -d'/' -f1 | rev)
 #    rm $2/$file
     f1=$(echo $f | cut -d'/' -f4-)
@@ -28,3 +26,5 @@ for f in $arrFiles; do
 	printf "WGET of $file failed.\n"
     fi
 done 
+
+#Pulls a file using stashcp first, then pulls the same file using WGET.  Results from WGET are printed out; results from STASHCP are available on Hadoop node.
