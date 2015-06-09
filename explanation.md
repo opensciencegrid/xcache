@@ -98,7 +98,7 @@ This is a separate script that tracks the size of a file being downloaded, and c
 
 Usage: `downloading_timeout.sh -t <TIMEOUT> -d <DIFF> -f <FILE> -s <EXPSIZE> <DOWNLOADING COMMAND>`
 
-The script waits until `$file` exists, at which point it stores `$prevSize`, the size of the file in bytes.  Every `$timeout` seconds, the script computes the expected size of the file using `$prevSize`, `$expSize` and `$diff`: `$wantSize := min($prevSize + $diff, $expSize)`.  Thus, the script is asking for at least an increase of `$diff` bytes, unless `$prevSize + $diff > $expSize`.  If the file size has not increased appropriately, the script shuts down the downloading command.
+The script waits at most `$timeout` seconds until `$file` exists, at which point it stores `$prevSize`, the size of the file in bytes.  If `$file` does not exist after `$timeout` seconds, the command stops.  Every `$timeout` seconds, the script computes the expected size of the file using `$prevSize`, `$expSize` and `$diff`: `$wantSize := min($prevSize + $diff, $expSize)`.  Thus, the script is asking for at least an increase of `$diff` bytes, unless `$prevSize + $diff > $expSize`.  If the file size has not increased appropriately, the script shuts down the downloading command.
 
 It is recommended that `$timeout` not be set to 1 second, as tests showed that download times varied on a second-by-second level.  A better value is in the range of 3-10 seconds.  These variables are set in STASHCP.
 
@@ -139,4 +139,4 @@ It is recommended that `$timeout` not be set to 1 second, as tests showed that d
 
 * No record of whether the file was new to the cache it was pulled from or not
 
-
+* Does not currently allow for file renaming.
