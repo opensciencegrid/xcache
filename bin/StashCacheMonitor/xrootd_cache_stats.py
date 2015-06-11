@@ -123,7 +123,7 @@ def read_cinfo(cinfo_file, now):
 
     # read and unpack the header
     buf = cf.read(_header_fmt.size)
-    if len(buf) > _header_fmt.size:
+    if len(buf) < _header_fmt.size:
         # a mangled file
         raise ReadCInfoError("%s header too short" % cinfo_file, result)
 
