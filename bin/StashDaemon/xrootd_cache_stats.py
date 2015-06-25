@@ -238,10 +238,10 @@ def collect_cache_stats(url, rootdir, cache_max_fs_fraction=1.0):
 
     parsed_url = urlparse.urlparse(url)
 
-    if parsed_url.scheme not in ('root', 'xroot'):
+    if parsed_url[0] not in ('root', 'xroot'):
         raise Exception("URL '%s' is not an xrootd url" % url)
 
-    hostname = parsed_url.netloc
+    hostname = parsed_url[1]
 
     result = {'MyType' : 'Machine', 'Name': 'xrootd@%s' % hostname, 'stats_time' : int(start_time)}
     result.update(test_xrootd_server(url))
