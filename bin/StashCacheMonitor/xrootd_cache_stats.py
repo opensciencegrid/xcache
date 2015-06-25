@@ -123,7 +123,7 @@ def read_cinfo(cinfo_file, now):
 
     # read and unpack the header
     buf = cf.read(_header_fmt.size)
-    if len(buf) > _header_fmt.size:
+    if len(buf) < _header_fmt.size:
         # a mangled file
         raise ReadCInfoError("%s header too short" % cinfo_file, result)
 
@@ -161,7 +161,7 @@ def read_cinfo(cinfo_file, now):
     start_pos = cf.tell() # don't go before this
 
     try:
-        cf.seek(-_status_fmt.size, os.SEEK_END)
+        cf.seek(start_pos + (access_count-1)*_status_fmt.size, os.SEEK_SET)
         buf = cf.read(_status_fmt.size)
         access_time, _, _, _ = _status_fmt.unpack(buf)
         result["last_access"] = access_time
