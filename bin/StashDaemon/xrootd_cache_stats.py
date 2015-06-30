@@ -92,16 +92,19 @@ def scan_vo_dir(vodir):
 # The header (not a c struct; consecutive separate values with no padding)
 # version + buffer size + download status array size (bits) + download status array
 #   int   +  long long  +              int                  +       variable
-_header_fmt = struct.Struct('=iqi')
+_header_fmt = '=iqi'
+_header_fmt_size = struct.calcsize(_header_fmt)
 
 # then the number of accesses
 #   int
-_int_fmt = struct.Struct('@i')
+_int_fmt = '@i'
+_int_fmt_size = struct.calcsize(_int_fmt)
 
 # each access contains a struct (native size + padding)
 # detach time + bytes disk + bytes ram + bytes missed
 # time_t      + long long  + long long + long long
-_status_fmt = struct.Struct('@lqqq')
+_status_fmt = '@lqqq'
+_status_fmt_size = struct.calcsize(_status_fmt)
 
 class ReadCInfoError(Exception):
     def __init__(self, *args):
@@ -122,12 +125,12 @@ def read_cinfo(cinfo_file, now):
     cf = open(cinfo_file, 'rb')
 
     # read and unpack the header
-    buf = cf.read(_header_fmt.size)
-    if len(buf) < _header_fmt.size:
+    buf = cf.read(_header_fmt_size)
+    if len(buf) < _header_fmt_size:
         # a mangled file
         raise ReadCInfoError("%s header too short" % cinfo_file, result)
 
-    version, buffer_size, status_array_size_bits = _header_fmt.unpack(buf)
+    version, buffer_size, status_array_size_bits = struct.unpack(_header_fmt, buf)
 
     # we only understand version 0
     if version != 0:
@@ -138,11 +141,11 @@ def read_cinfo(cinfo_file, now):
     cf.seek(status_array_size_bytes, os.SEEK_CUR)
 
     # now the access count (an int)
-    buf = cf.read(_int_fmt.size)
-    if len(buf) < _int_fmt.size:
+    buf = cf.read(_int_fmt_size)
+    if len(buf) < _int_fmt_size:
         raise ReadCInfoError("%s: invalid access field" % cinfo_file, result)
 
-    access_count, = _int_fmt.unpack(buf)
+    access_count, = struct.unpack(_int_fmt, buf)
 
     result["naccesses"] = access_count
 
@@ -161,9 +164,9 @@ def read_cinfo(cinfo_file, now):
     start_pos = cf.tell() # don't go before this
 
     try:
-        cf.seek(start_pos + (access_count-1)*_status_fmt.size, os.SEEK_SET)
-        buf = cf.read(_status_fmt.size)
-        access_time, _, _, _ = _status_fmt.unpack(buf)
+        cf.seek(start_pos + (access_count-1)*_status_fmt_size, os.SEEK_SET)
+        buf = cf.read(_status_fmt_size)
+        access_time, _, _, _ = struct.unpack(_status_fmt, buf)
         result["last_access"] = access_time
         while True:
             if access_time >= hr_01: result["by_hour"]["01"] += 1
@@ -173,12 +176,12 @@ def read_cinfo(cinfo_file, now):
                 # no longer interested
                 break
 
-            cf.seek(-2*_status_fmt.size, os.SEEK_CUR)
+            cf.seek(-2*_status_fmt_size, os.SEEK_CUR)
             if cf.tell() < start_pos:
                 # done them all
                 break
-            buf = cf.read(_status_fmt.size)
-            access_time, _, _, _ = _status_fmt.unpack(buf)
+            buf = cf.read(_status_fmt_size)
+            access_time, _, _, _ = struct.unpack(_status_fmt, buf)
     except struct.error, ex:
         # return what we've got
         raise ReadCInfoError("%s unable to decode access time data: %s" % (cinfo_file, str(ex)), result)
@@ -238,10 +241,19 @@ def collect_cache_stats(url, rootdir, cache_max_fs_fraction=1.0):
 
     parsed_url = urlparse.urlparse(url)
 
-    if parsed_url[0] not in ('root', 'xroot'):
-        raise Exception("URL '%s' is not an xrootd url" % url)
+    # Python 2.6's urlparse returns a ParseResult object whereas
+    # Python 2.4's urlparse returns a tuple that doesn't handle
+    # root:// properly
+    try:
+        if parsed_url.scheme not in ('root', 'xroot'):
+            raise Exception("URL '%s' is not an xrootd url" % url)
 
-    hostname = parsed_url[1]
+        hostname = parsed_url.netloc
+    except AttributeError:
+        if parsed_url[0] not in ('root', 'xroot'):
+            raise Exception("URL '%s' is not an xrootd url" % url)
+
+        hostname = parsed_url[2][2:] # Avoid the '//' prefix
 
     result = {'MyType' : 'Machine', 'Name': 'xrootd@%s' % hostname, 'stats_time' : int(start_time)}
     result.update(test_xrootd_server(url))
@@ -249,7 +261,7 @@ def collect_cache_stats(url, rootdir, cache_max_fs_fraction=1.0):
 
     stats_per_vo = scan_cache_dirs(rootdir)
     # add up the sizes
-    totals = collections.defaultdict(int)
+    totals = dict()
     most_recent_access = 0
     result['VO'] = {}
     for vo, vostats in stats_per_vo.items():
@@ -257,7 +269,10 @@ def collect_cache_stats(url, rootdir, cache_max_fs_fraction=1.0):
             if k == "most_recent_access_time":
                 most_recent_access = max(most_recent_access, v)
             else:
-                totals[k] += v
+                try:
+                    totals[k] += v
+                except KeyError:
+                    totals[k] = v
         result['VO'][vo] = vostats
     result['used_cache_bytes'] = totals.pop("used_bytes", 0)
     for k, v in totals.items():
