@@ -44,17 +44,17 @@ class HeartBeatThread(threading.Thread):
                 central_coll_url = 'collector.opensciencegrid.org'
             central_coll = htcondor.Collector(central_coll_url)
 
-            local_master = None
-            while not local_master:
-                try:
-                    local_master = local_coll.locate(htcondor.DaemonTypes.Master)
-                except ValueError: # Master has not advertised to the collector yet
-                    pass
-                except IOError: # Failed communication with collector
-                    raise CondorException('Could not locate Collector at %s' % self.url)
-
             xrootd_addr = 'root://' + self.url
             while True:
+                local_master = None
+                while not local_master:
+                    try:
+                        local_master = local_coll.locate(htcondor.DaemonTypes.Master)
+                    except ValueError: # Master has not advertised to the collector yet
+                        pass
+                    except IOError: # Failed communication with collector
+                        raise CondorException('Could not locate Collector at %s' % self.url)
+
                 cache_ad = xrootd_cache_stats.collect_cache_stats(xrootd_addr, '/stash')
                 if cache_ad['ping_response_status'] == 'ok':
                     try:
@@ -64,11 +64,14 @@ class HeartBeatThread(threading.Thread):
                                               % self.url)
                     # ads need to be updated every 15 min while heartbeats should be done every 30 min
                     for _ in range(2):
-                        for collector in [local_coll, central_coll]:
-                            try:
-                                collector.advertise([cache_ad])
-                            except ValueError:
-                                pass 
+                        try:
+                            local_coll.advertise([cache_ad])
+                            # The central collector has more stringent security reqs (SOFTWARE-1804)
+                            for command, ad in {'UPDATE_MASTER_AD':[local_master],
+                                                'UPDATE_STARTD_AD':[cache_ad]}.iteritems():
+                                central_coll.advertise(ad, command)
+                        except ValueError:
+                            pass
                         time.sleep(900)
                 else:
                     raise XrootdException('No heartbeat from xrootd server')
