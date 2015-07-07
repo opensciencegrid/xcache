@@ -11,6 +11,7 @@ import signal
 import Queue
 import threading
 import time
+import traceback
 import htcondor
 import xrootd_cache_stats
 
@@ -75,17 +76,22 @@ class HeartBeatThread(threading.Thread):
                         time.sleep(900)
                 else:
                     raise XrootdException('No heartbeat from xrootd server')
-        except Exception, error:
+        except Exception:
             # Exceptions don't rise to the main thread so we have to pass them via queue and SIGALARM
+            error = sys.exc_info()
             self.exceptions.put(error)
             signal.alarm(1)
             sys.exit(1)
 
 def raise_heartbeat_exception(signum, frame):
     '''Raise exception from heartbeat thread'''
-    error = _exception_queue.get()
+    exc_type, exc_value, exc_tb = _exception_queue.get()
     kill_xrootd()
-    raise error
+    if exc_type in [XrootdException, CondorException, RuntimeError]:
+        print exc_value
+    else:
+        traceback.print_exception(exc_type, exc_value, exc_tb)
+    sys.exit(1)
 
 def manage_xrootd(signum, frame):
     '''Signal handler for the XRootD service'''
@@ -138,9 +144,5 @@ def main():
         signal.pause()
 
 if __name__ == '__main__':
-    try:
-        main()
-    except (XrootdException, CondorException, RuntimeError), e:
-        print e
-        sys.exit(1)
+    main()
 
