@@ -42,7 +42,7 @@ class HeartBeatThread(threading.Thread):
             try:
                 central_coll_url = htcondor.param['OSG_COLLECTOR_HOST']
             except KeyError:
-                central_coll_url = 'collector.opensciencegrid.org'
+                central_coll_url = 'collector.opensciencegrid.org:9619'
             central_coll = htcondor.Collector(central_coll_url)
 
             xrootd_addr = 'root://' + self.url
