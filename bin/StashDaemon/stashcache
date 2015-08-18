@@ -66,11 +66,10 @@ class HeartBeatThread(threading.Thread):
                     # ads need to be updated every 15 min while heartbeats should be done every 30 min
                     for _ in range(2):
                         try:
-                            local_coll.advertise([cache_ad])
-                            # The central collector has more stringent security reqs (SOFTWARE-1804)
-                            for command, ad in {'UPDATE_MASTER_AD':[local_master],
-                                                'UPDATE_STARTD_AD':[cache_ad]}.iteritems():
-                                central_coll.advertise(ad, command)
+                            for collector in local_coll, central_coll:
+                                for args in [([local_master], 'UPDATE_MASTER_AD', True),
+                                             ([cache_ad], 'UPDATE_STARTD_AD', True)]:
+                                    collector.advertise(*args)
                         except ValueError:
                             pass
                         time.sleep(900)
