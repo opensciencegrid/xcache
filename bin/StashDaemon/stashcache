@@ -6,6 +6,7 @@ Shim script to manage XRootD server under condor_master
 import os
 import re
 import sys
+import errno
 import socket
 import signal
 import Queue
@@ -125,10 +126,7 @@ def start_xrootd():
             pid = get_xrootd_pid()
         except AttributeError:
             pid = 'unknown'
-        if re.search(r'OK', stdout):
-            htcondor.log(htcondor.LogLevel.Always, 'Started XRootD service successfully (PID: %s)' % pid)
-        else:
-            htcondor.log(htcondor.LogLevel.Always, 'XRootD service already running (PID: %s)' % pid)
+        htcondor.log(htcondor.LogLevel.Always, 'XRootD service running (PID: %s)' % pid)
 
 def kill_xrootd():
     '''Sends SIGKILL to an unresponsive XRootD service'''
@@ -142,14 +140,31 @@ def get_xrootd_pid():
     '''Finds the xrootd pid via `service xrootd status`'''
     _, stdout, _ = xrootd_service_command('status')
     try:
-        return re.search(r'\(pid\s+(\d+)\)', stdout).group(1)
+        return re.search(r'(?:pid|PID)[:\s\(]*(\d+)', stdout).group(1)
     except AttributeError:
         htcondor.log(htcondor.LogLevel.Error, 'ERROR: Could not find XRootD service PID')
         raise
 
 def xrootd_service_command(cmd):
     '''Accepts an init command and passes it to the XRootD init script'''
-    rc, stdout, stderr = run_command(['service', 'xrootd', cmd])
+    service_name = 'xrootd'
+    try:
+        # To support systemd, we need to specify which configuration xrootd should use
+        rc, _, _ = run_command(['systemctl', '--version'])
+        for config in ('cache', 'origin'):
+            if os.path.exists('/etc/xrootd/xrootd-stashcache-%s-server.cfg' % cache_config):
+                service_name = 'xrootd@stashcache-%s-server' % cache_config
+                break
+        if service_name is 'xrootd':
+            htcondor.log(htcondor.LogLevel.Error, 'ERROR: Could not %s XRootD service + ' \
+                         'due to missing cache and origin configurations.' % cmd)
+            sys.exit(1)
+    except OSError, e:
+        # systemctl isn't installed, assume sysvinit
+        if e.errno == errno.EACCES:
+            pass
+
+    rc, stdout, stderr = run_command(['service', service_name, cmd])
     return rc, stdout, stderr
 
 def run_command(command):
@@ -182,4 +197,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
