@@ -169,7 +169,7 @@ def main():
 
     # Start XRootD and monitor the service
     start_xrootd()
-    hostname = socket.gethostname()
+    hostname = socket.getfqdn()
     heartbeat = HeartBeatThread(hostname, _exception_queue)
     heartbeat.start()
 
