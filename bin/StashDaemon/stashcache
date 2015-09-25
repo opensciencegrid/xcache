@@ -59,7 +59,7 @@ class HeartBeatThread(threading.Thread):
                     except IOError: # Failed communication with collector
                         raise CondorException('Could not locate Collector at %s' % self.url)
 
-                local_master['STASHCACHE_DaemonVersion'] = 0.3
+                local_master['STASHCACHE_DaemonVersion'] = ##VERSION##
                 cache_ad = xrootd_cache_stats.collect_cache_stats(xrootd_addr, '/stash')
                 if cache_ad['ping_response_status'] == 'ok':
                     htcondor.log(htcondor.LogLevel.FullDebug, 'XRootD server (%s) status: OK' % xrootd_addr)
