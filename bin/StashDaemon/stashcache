@@ -126,7 +126,10 @@ def start_xrootd():
             pid = get_xrootd_pid()
         except AttributeError:
             pid = 'unknown'
-        htcondor.log(htcondor.LogLevel.Always, 'Started XRootD service successfully (PID: %s)' % pid)
+        if re.search(r'OK', stdout):
+            htcondor.log(htcondor.LogLevel.Always, 'Started XRootD service successfully (PID: %s)' % pid)
+        else:
+            htcondor.log(htcondor.LogLevel.Always, 'XRootD service already running (PID: %s)' % pid)
 
 def kill_xrootd():
     '''Sends SIGKILL to an unresponsive XRootD service'''
