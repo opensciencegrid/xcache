@@ -14,7 +14,6 @@ import time
 import traceback
 
 import htcondor
-import classad
 import xrootd_cache_stats
 
 from subprocess import Popen, PIPE
@@ -94,7 +93,7 @@ def raise_heartbeat_exception(signum, frame):
     exc_type, exc_value, exc_tb = _exception_queue.get()
     kill_xrootd()
     if exc_type in [XrootdException, CondorException, RuntimeError]:
-        htcondor.log(htcondor.LogLevel.Error, str(exc_value))
+        htcondor.log(htcondor.LogLevel.Error, 'ERROR: ' + str(exc_value))
     else:
         exc_str = traceback.format_exception(exc_type, exc_value, exc_tb)
         htcondor.log(htcondor.LogLevel.Error, ''.join(exc_str))
@@ -106,7 +105,7 @@ def manage_xrootd(signum, frame):
     command = _accepted_signals[signum]
     htcondor.log(htcondor.LogLevel.Always,
                  "Received signal %s: Running '%s' on the XRootD server " % (signum, command))
-    
+
     rc, _, _ = xrootd_service_command(command)
     if rc != 0:
         kill_xrootd()
@@ -120,7 +119,7 @@ def start_xrootd():
     '''Starts the XRootD init service'''
     rc, stdout, _ = xrootd_service_command('start')
     if rc != 0:
-        htcondor.log(htcondor.LogLevel.Error, 'Could not start XRootD service: %s' % stdout)
+        htcondor.log(htcondor.LogLevel.Error, 'ERROR: Could not start XRootD service: %s' % stdout)
     else:
         try:
             pid = get_xrootd_pid()
@@ -138,14 +137,14 @@ def kill_xrootd():
         os.kill(int(pid), signal.SIGKILL)
     except (AttributeError, OSError):
         pass # xrootd already dead
-    
+
 def get_xrootd_pid():
     '''Finds the xrootd pid via `service xrootd status`'''
     _, stdout, _ = xrootd_service_command('status')
     try:
         return re.search(r'\(pid\s+(\d+)\)', stdout).group(1)
     except AttributeError:
-        htcondor.log(htcondor.LogLevel.Error, 'Could not find XRootD service PID')
+        htcondor.log(htcondor.LogLevel.Error, 'ERROR: Could not find XRootD service PID')
         raise
 
 def xrootd_service_command(cmd):
@@ -160,8 +159,16 @@ def run_command(command):
 
 def main():
     htcondor.enable_log()
+
+    # Check for existence of host cert/key pair
+    for pki in 'cert', 'key':
+        pki_path = '/etc/grid-security/host%s.pem' % pki
+        if not os.path.exists(pki_path):
+            htcondor.log(htcondor.LogLevel.Error, 'ERROR: Could not find host %s at %s' % (pki, pki_path))
+            sys.exit(1)
+
+    # Start XRootD and monitor the service
     start_xrootd()
-    
     hostname = socket.gethostname()
     heartbeat = HeartBeatThread(hostname, _exception_queue)
     heartbeat.start()
