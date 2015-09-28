@@ -6,6 +6,7 @@ Shim script to manage XRootD server under condor_master
 import os
 import re
 import sys
+import errno
 import socket
 import signal
 import Queue
@@ -14,7 +15,6 @@ import time
 import traceback
 
 import htcondor
-import classad
 import xrootd_cache_stats
 
 from subprocess import Popen, PIPE
@@ -44,7 +44,8 @@ class HeartBeatThread(threading.Thread):
             try:
                 central_coll_url = htcondor.param['OSG_COLLECTOR_HOST']
             except KeyError:
-                central_coll_url = 'collector.opensciencegrid.org:9619'
+                central_coll_url = 'collector1.opensciencegrid.org:9619,collector2.opensciencegrid.org:9619'
+            htcondor.log(htcondor.LogLevel.FullDebug, 'Using %s as the central collector' % central_coll_url)
             central_coll = htcondor.Collector(central_coll_url)
 
             xrootd_addr = 'root://' + self.url
@@ -58,9 +59,10 @@ class HeartBeatThread(threading.Thread):
                     except IOError: # Failed communication with collector
                         raise CondorException('Could not locate Collector at %s' % self.url)
 
-                local_master['STASHCACHE_DaemonVersion'] = 0.3
+                local_master['STASHCACHE_DaemonVersion'] = ##VERSION##
                 cache_ad = xrootd_cache_stats.collect_cache_stats(xrootd_addr, '/stash')
                 if cache_ad['ping_response_status'] == 'ok':
+                    htcondor.log(htcondor.LogLevel.FullDebug, 'XRootD server (%s) status: OK' % xrootd_addr)
                     try:
                         htcondor.send_alive(local_master)
                     except RuntimeError:
@@ -70,14 +72,16 @@ class HeartBeatThread(threading.Thread):
                     for _ in range(2):
                         try:
                             for collector in local_coll, central_coll:
-                                for args in [([local_master], 'UPDATE_MASTER_AD', True),
-                                             ([cache_ad], 'UPDATE_STARTD_AD', True)]:
+                                pool = collector.query(htcondor.AdTypes.Collector)[0]['Machine']
+                                htcondor.log(htcondor.LogLevel.Always, 'Advertising StashCache ads to %s' % pool)
+                                for args in [([local_master], 'UPDATE_MASTER_AD'),
+                                             ([cache_ad], 'UPDATE_STARTD_AD')]:
                                     collector.advertise(*args)
                         except ValueError:
-                            pass
+                            raise ValueError
                         time.sleep(900)
                 else:
-                    raise XrootdException('No heartbeat from xrootd server')
+                    raise XrootdException('No heartbeat from XRootD server')
         except Exception:
             # Exceptions don't rise to the main thread so we have to pass them via queue and SIGALARM
             error = sys.exc_info()
@@ -90,14 +94,20 @@ def raise_heartbeat_exception(signum, frame):
     exc_type, exc_value, exc_tb = _exception_queue.get()
     kill_xrootd()
     if exc_type in [XrootdException, CondorException, RuntimeError]:
-        print exc_value
+        htcondor.log(htcondor.LogLevel.Error, 'ERROR: ' + str(exc_value))
     else:
-        traceback.print_exception(exc_type, exc_value, exc_tb)
+        exc_str = traceback.format_exception(exc_type, exc_value, exc_tb)
+        htcondor.log(htcondor.LogLevel.Error, ''.join(exc_str))
+    htcondor.log(htcondor.LogLevel.Always, 'Stopping StashCache daemon')
     sys.exit(1)
 
 def manage_xrootd(signum, frame):
     '''Signal handler for the XRootD service'''
-    rc, _, _ = xrootd_service_command(_accepted_signals[signum])
+    command = _accepted_signals[signum]
+    htcondor.log(htcondor.LogLevel.Always,
+                 "Received signal %s: Running '%s' on the XRootD server " % (signum, command))
+
+    rc, _, _ = xrootd_service_command(command)
     if rc != 0:
         kill_xrootd()
         # Restart service if user requested it
@@ -110,21 +120,51 @@ def start_xrootd():
     '''Starts the XRootD init service'''
     rc, stdout, _ = xrootd_service_command('start')
     if rc != 0:
-        raise RuntimeError('Could not start XRootD service: %s' % stdout)
+        htcondor.log(htcondor.LogLevel.Error, 'ERROR: Could not start XRootD service: %s' % stdout)
+    else:
+        try:
+            pid = get_xrootd_pid()
+        except AttributeError:
+            pid = 'unknown'
+        htcondor.log(htcondor.LogLevel.Always, 'XRootD service running (PID: %s)' % pid)
 
 def kill_xrootd():
     '''Sends SIGKILL to an unresponsive XRootD service'''
+    try:
+        pid = get_xrootd_pid()
+        os.kill(int(pid), signal.SIGKILL)
+    except (AttributeError, OSError):
+        pass # xrootd already dead
+
+def get_xrootd_pid():
+    '''Finds the xrootd pid via `service xrootd status`'''
     _, stdout, _ = xrootd_service_command('status')
     try:
-        pid = int(re.search(r'\(pid\s+(\d+)\)', stdout).group(1))
+        return re.search(r'(?:pid|PID)[:\s\(]*(\d+)', stdout).group(1)
     except AttributeError:
-        pass # xrootd already dead
-    else:
-        os.kill(pid, signal.SIGKILL)
+        htcondor.log(htcondor.LogLevel.Error, 'ERROR: Could not find XRootD service PID')
+        raise
 
 def xrootd_service_command(cmd):
     '''Accepts an init command and passes it to the XRootD init script'''
-    rc, stdout, stderr = run_command(['service', 'xrootd', cmd])
+    service_name = 'xrootd'
+    try:
+        # To support systemd, we need to specify which configuration xrootd should use
+        rc, _, _ = run_command(['systemctl', '--version'])
+        for config in ('cache', 'origin'):
+            if os.path.exists('/etc/xrootd/xrootd-stashcache-%s-server.cfg' % cache_config):
+                service_name = 'xrootd@stashcache-%s-server' % cache_config
+                break
+        if service_name is 'xrootd':
+            htcondor.log(htcondor.LogLevel.Error, 'ERROR: Could not %s XRootD service + ' \
+                         'due to missing cache and origin configurations.' % cmd)
+            sys.exit(1)
+    except OSError, e:
+        # systemctl isn't installed, assume sysvinit
+        if e.errno == errno.EACCES:
+            pass
+
+    rc, stdout, stderr = run_command(['service', service_name, cmd])
     return rc, stdout, stderr
 
 def run_command(command):
@@ -133,8 +173,18 @@ def run_command(command):
     return p.returncode, stdout, stderr
 
 def main():
+    htcondor.enable_log()
+
+    # Check for existence of host cert/key pair
+    for pki in 'cert', 'key':
+        pki_path = '/etc/grid-security/host%s.pem' % pki
+        if not os.path.exists(pki_path):
+            htcondor.log(htcondor.LogLevel.Error, 'ERROR: Could not find host %s at %s' % (pki, pki_path))
+            sys.exit(1)
+
+    # Start XRootD and monitor the service
     start_xrootd()
-    hostname = socket.gethostname()
+    hostname = socket.getfqdn()
     heartbeat = HeartBeatThread(hostname, _exception_queue)
     heartbeat.start()
 
@@ -147,4 +197,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

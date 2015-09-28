@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 PACKAGE := stashcache-daemon
-VERSION := 0.3
+VERSION := 0.5
 
 
 # ------------------------------------------------------------------------------
@@ -64,6 +64,7 @@ $(TARBALL_NAME): $(DIST_FILES)
 	$(eval TEMP_DIR := $(shell mktemp -d -p . $(DIST_DIR_PREFIX)XXXXXXXXXX))
 	mkdir -p $(TEMP_DIR)/$(TARBALL_DIR)
 	cp -pr $(DIST_FILES) $(TEMP_DIR)/$(TARBALL_DIR)/
+	sed -i -e 's/##VERSION##/$(VERSION)/g' $(TEMP_DIR)/$(TARBALL_DIR)/stashcache
 	tar czf $(TARBALL_NAME) -C $(TEMP_DIR) $(TARBALL_DIR)
 	rm -rf $(TEMP_DIR)
 
