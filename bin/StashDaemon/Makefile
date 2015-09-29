@@ -5,8 +5,8 @@
 # Release information: Update for each release
 # ------------------------------------------------------------------------------
 
-PACKAGE := stashcache-daemon
-VERSION := 0.5
+PACKAGE := stashcache
+VERSION := 0.6
 
 
 # ------------------------------------------------------------------------------
