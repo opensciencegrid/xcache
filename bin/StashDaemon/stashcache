@@ -161,8 +161,11 @@ def xrootd_service_command(cmd):
             sys.exit(1)
     except OSError, e:
         # systemctl isn't installed, assume sysvinit
-        if e.errno == errno.EACCES:
+        if e.errno == errno.ENOENT:
             pass
+        else:
+            htcondor.log(htcondor.LogLevel.Error, 'ERROR: Could not determine how to %s the XRootD service' % cmd)
+            raise
 
     rc, stdout, stderr = run_command(['service', service_name, cmd])
     return rc, stdout, stderr
