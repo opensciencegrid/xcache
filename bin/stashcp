@@ -37,6 +37,42 @@ function updateInfo {
 	times=("${times[@]}" $4)
 }
 
+
+
+function findCondorChirp {
+
+	## find chirp and add to path
+	if [ $isJob -eq 1 ]; then
+	        # First, try to use the glidein's condor_chirp.
+		# It's probably the most up to date, and we control it (more or less)
+		pushd ../../
+		pd=$(find . | grep "condor_chirp")
+		if ! [ -z $pd ]; then
+			p1=$(echo $pd | cut -c 2-)
+			p2=$(echo $p1 | rev | cut -d'/' -f2- | rev)
+			cwd=$(pwd)
+			PATH=$cwd/$p2:$PATH
+                        popd
+			return
+		fi
+		popd
+
+	        # Check if condor_chirp is in the path
+		which condor_chirp > /dev/null 2>&1
+		res=$?
+		if [ $res -eq 0 ]; then
+			return
+		fi
+
+		# Finally, check if condor_chirp is available in a well known directory
+		if [ -s /usr/libexec/condor/condor_chirp ]; then
+			PATH=$PATH:/usr/libexec/condor
+		fi
+	fi
+	
+
+}
+
 ## address single-file case
 function doStashCpSingle {
 	downloadFile=$1
@@ -252,28 +288,7 @@ while [ $# -gt 0 ]; do
 	shift
 done
 
-## find chirp and add to path
-if [ $isJob -eq 1 ]; then
-	which condor_chirp > /dev/null 2>&1
-	res=$?
-	if [ $res -ne 0 ]; then
-		if [ -s /usr/libexec/condor/condor_chirp ]; then
-			PATH=$PATH:/usr/libexec/condor
-		else
-			cd ../../
-			pd=$(find . | grep "condor_chirp")
-			if [ -z $pd ]; then
-				echo "condor_chirp not found" >&2
-			else
-				p1=$(echo $pd | cut -c 2-)
-				p2=$(echo $p1 | rev | cut -d'/' -f2- | rev)
-				cwd=$(pwd)
-				PATH=$PATH:$cwd/$p2
-			fi
-			cd -
-		fi
-	fi
-fi
+findCondorChirp
 
 ## set sourcePrefix to proper format
 if [[ $OSG_SITE_NAME == CIT* ]]; then
