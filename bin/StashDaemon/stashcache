@@ -152,8 +152,8 @@ def xrootd_service_command(cmd):
         # To support systemd, we need to specify which configuration xrootd should use
         rc, _, _ = run_command(['systemctl', '--version'])
         for config in ('cache', 'origin'):
-            if os.path.exists('/etc/xrootd/xrootd-stashcache-%s-server.cfg' % cache_config):
-                service_name = 'xrootd@stashcache-%s-server' % cache_config
+            if os.path.exists('/etc/xrootd/xrootd-stashcache-%s-server.cfg' % config):
+                service_name = 'xrootd@stashcache-%s-server' % config
                 break
         if service_name is 'xrootd':
             htcondor.log(htcondor.LogLevel.Error, 'ERROR: Could not %s XRootD service + ' \
@@ -161,8 +161,11 @@ def xrootd_service_command(cmd):
             sys.exit(1)
     except OSError, e:
         # systemctl isn't installed, assume sysvinit
-        if e.errno == errno.EACCES:
+        if e.errno == errno.ENOENT:
             pass
+        else:
+            htcondor.log(htcondor.LogLevel.Error, 'ERROR: Could not determine how to %s the XRootD service' % cmd)
+            raise
 
     rc, stdout, stderr = run_command(['service', service_name, cmd])
     return rc, stdout, stderr
