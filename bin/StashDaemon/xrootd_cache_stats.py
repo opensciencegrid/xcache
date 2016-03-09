@@ -16,19 +16,57 @@ import XRootD.client
 
 __all__ = ['collect_cache_stats']
 
+# these paths in the cache are to be treated as top level "VOs" for stats collection
+vo_paths = [ '/user', '/pnfs/fnal.gov/usr' ]
+
+def _split_path(path):
+    """ Split a path into a list of directory names """
+    if path[0] != '/':
+        raise Exception("Not absolute path")
+    result = []
+    while path != '/':
+        path, tail = os.path.split(path)
+        if tail: result.append(tail)
+    return list(reversed(result))
+
+def _is_prefix(lhs, rhs):
+    """ return True if the first list is a prefix of the second """
+    rhs = list(rhs)
+    while rhs:
+        if lhs == rhs: return True
+        rhs.pop()
+    return False
+
 def scan_cache_dirs(rootdir):
     """ Scan the top level directory of the cache.
-    Assume that each subdir is a separate VO which should be summarized """
+    Walks the path looking for directories that are not in vo_paths.
+    For each of these generate a cache summary
+    """
 
     results = {}
     try:
-        subdirs = os.listdir(rootdir)
-        for name in subdirs:
-            if os.path.isdir(os.path.join(rootdir, name)):
-                results[name] = scan_vo_dir(os.path.join(rootdir, name))
+        root_components = _split_path(rootdir)
+        for dirpath, dirnames, filenames in os.walk(rootdir, topdown=True):
+            # get the path components as a list, removing the rootdir part
+            dirpath_components = _split_path(dirpath)[len(root_components):]
+            for name in list(dirnames):
+                path_components = dirpath_components + [name]
+                for p in [ _split_path(p) for p in vo_paths]:
+                    # if this directory is in vo_paths, keep recursing
+                    if _is_prefix( path_components, p):
+                        break
+                else:
+                    # if nothing is in vo_paths, get the stats and remove from dirnames
+                    # so this walk goes no further
+                    vo_name = os.path.join('/', *path_components)
+                    try:
+                        results[vo_name] = scan_vo_dir(os.path.join(dirpath, name))
+                    except (OSError, IOError), ex:
+                        results[vo_name] = {'scan_vo_dir_error': str(ex) }
+                    dirnames.remove(name)
         return results
     except (OSError, IOError), ex:
-        return {} # error message?
+        return { 'scan_cache_dirs_error' : { 'message' : str(ex) } } # error message?
 
 
 def scan_vo_dir(vodir):
