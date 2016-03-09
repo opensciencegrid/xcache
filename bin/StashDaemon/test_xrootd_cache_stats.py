@@ -99,12 +99,12 @@ class TestStatsCollection(unittest.TestCase):
             with mock.patch.multiple('os', listdir=oslistdir, stat=osstat):
                 with mock.patch('os.path.isdir', ospathisdir):
                     result = xrootd_cache_stats.scan_cache_dirs('/foo')
-        assert result['a']['nfiles'] == 2
-        assert result['a']['used_bytes'] == 262144
-        assert result['b']['nfiles'] == 2
-        assert result['b']['used_bytes'] == 262144
-        assert result['c']['nfiles'] == 2
-        assert result['c']['used_bytes'] == 262144
+        assert result['/a']['nfiles'] == 2
+        assert result['/a']['used_bytes'] == 262144
+        assert result['/b']['nfiles'] == 2
+        assert result['/b']['used_bytes'] == 262144
+        assert result['/c']['nfiles'] == 2
+        assert result['/c']['used_bytes'] == 262144
 
     def test_get_cache_info(self):
 
