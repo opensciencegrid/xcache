@@ -292,7 +292,7 @@ findCondorChirp
 
 ## set sourcePrefix to proper format
 if [[ $OSG_SITE_NAME == CIT* ]]; then
-    STASHPREFIX="root://phiphi.t2.ucsd.edu"
+    STASHPREFIX="root://xrd-cache-1.t2.ucsd.edu"
     sourcePrefix=$STASHPREFIX
 elif [ ${#STASHPREFIX} -lt 3 ]; then
 	## look for closest site
