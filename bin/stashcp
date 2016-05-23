@@ -234,7 +234,7 @@ file=""
 loc="."
 source=""
 recursive=0
-seconds=15
+seconds=60
 diff=$((seconds * 10)) ## 10Bps
 
 ## Process arguments
