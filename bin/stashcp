@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/bash -x
 
-usage="$(basename "$0") [-d] [-r] [-h] <source> <destination>
+usage="$(basename $0) [-d] [-r] [-h] <source> <destination>
 
 	-d: show debugging information
 	-r: recursively copy
@@ -219,7 +219,8 @@ if [ ! -z ${_CONDOR_JOB_AD+x} ]; then
 fi
 
 module load xrootd/4.1.1
-export PATH=$PATH:$(pwd)
+DIR=`dirname $(readlink -f $0)`
+export PATH=$PATH:$DIR
 
 ## initialize variables
 debug=0
@@ -250,16 +251,8 @@ while [ $# -gt 0 ]; do
 	-d)
 		debug=2
 		;;
-	-s)
-		source=$2
-		shift
-	    ;;
 	-r)
 	    recursive=1
-	    ;;
-	-l)
-	    loc=$2
-		shift
 	    ;;
 	--closest)
 		getClose
