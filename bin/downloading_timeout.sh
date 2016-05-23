@@ -23,12 +23,16 @@ start_watchdog(){
 			nextSize=$((prevSize+diff))
 			wantSize=$((nextSize<expSize?nextSize:expSize))
 			if [ $newSize -lt $((wantSize)) ]; then
-				kill -0 $$ || exit 0
+				# kill -0 $$ || exit 0
 				sleep 1
 				(( i -= 1 ))
+			elif [ $newSize -eq $expSize ]; then
+				# Finished file
+				exit 0
 			else
 				prevSize=$(du -b $file | cut -f1)
 				(( i = timeout ))
+				sleep 1
 			fi
 		else
 			sleep 1
@@ -41,8 +45,13 @@ start_watchdog(){
 }
 
 
-start_watchdog "$timeout" "$file" "$diff" "$expSize" 2>/dev/null &
-exec "$@"
-return $?
+start_watchdog "$timeout" "$file" "$diff" "$expSize" &
+watchdog_pid=$!
+"$@"
+cp_exit=$?
+
+# If the cp command exits, kill the watchdog
+kill $watchdog_pid
+exit $cp_exit
 
 ## Based on: http://fahdshariff.blogspot.com/2013/08/executing-shell-command-with-timeout.html

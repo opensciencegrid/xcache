@@ -359,7 +359,7 @@ for file in ${files[@]}; do
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
 	if [ $fisdir -eq 0 ]; then
 		## Single file
-		export prefixRm="$(echo $file | rev | cut -d/ -f1- | rev)"
+		export prefixRm=`dirname $file`
 		baseDir=$dest
 		doStashCpSingle $file $dest update
 	else
