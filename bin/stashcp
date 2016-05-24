@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/bash 
 
-usage="$(basename "$0") [-d] [-r] [-h] -s <source> [-l <location to be copied to>]
+usage="$(basename $0) [-d] [-r] [-h] <source> <destination>
 
 	-d: show debugging information
 	-r: recursively copy
@@ -76,12 +76,9 @@ function findCondorChirp {
 ## address single-file case
 function doStashCpSingle {
 	downloadFile=$1
-	## formatting
-	if [ ${downloadFile:0:1} == "/" ]; then
-		downloadFile=$(echo $downloadFile | cut -c2-)
-	fi
-	## http://stackoverflow.com/a/16623897
+	dest=$2
 	## Get localPath = source path without prefix to be removed (logic for determining this in main loop)
+	#localPath=$dest
 	localPath=${downloadFile#$prefixRm}
 	mySz=$(xrdfs root://data.ci-connect.net stat $downloadFile | grep "Size: " | cut -d':' -f2)
 	mySz=$(echo -n "${mySz//[[:space:]]/}")
@@ -97,7 +94,7 @@ function doStashCpSingle {
 	if [ $res -eq 0 ]; then
 		## pull from local cache succeeded
 		dltm=$((dl1-st1))
-		if [ $2 ]; then 	## update info only if I want to
+		if [ $3 ]; then 	## update info only if I want to
 			updateInfo $st1 $downloadFile $mySz $dltm
 		fi
 		## send info out to flume
@@ -180,10 +177,6 @@ function doStashCpDirectory {
 	st=$(date +%s%3N)
 	for item in $sourceItems; do
 		isdir=$(xrdfs root://data.ci-connect.net stat $item | grep "IsDir" | wc -l)
-		## Formatting
-		if [ ${item:0:1} == "/" ]; then
-			item=$(echo $item | cut -c2- )
-		fi
 		## Logic for copying files vs. directories
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
 			## creating local directory for subfolder
@@ -226,7 +219,8 @@ if [ ! -z ${_CONDOR_JOB_AD+x} ]; then
 fi
 
 module load xrootd/4.1.1
-export PATH=$PATH:$(pwd)
+DIR=`dirname $(readlink -f $0)`
+export PATH=$PATH:$DIR
 
 ## initialize variables
 debug=0
@@ -257,16 +251,8 @@ while [ $# -gt 0 ]; do
 	-d)
 		debug=2
 		;;
-	-s)
-		source=$2
-		shift
-	    ;;
 	-r)
 	    recursive=1
-	    ;;
-	-l)
-	    loc=$2
-		shift
 	    ;;
 	--closest)
 		getClose
@@ -287,6 +273,18 @@ while [ $# -gt 0 ]; do
     esac
 	shift
 done
+
+# All further arguments are sources and 1 destination (like cp)
+# All n-1 elements are sources
+if [ $# -lt 2 ]; then
+    echo "Not enough arguments, require source and destination" >&2
+    exit 1
+fi
+sources=("${@:1:$#-1}")
+# Last argument is the destination
+dest=("${@:$#}") 
+#source=$1
+#loc=$2
 
 findCondorChirp
 
@@ -324,8 +322,8 @@ else
 fi
 
 ## check if location exists
-if [ ! -e $loc ]; then
-	echo "Error: Desired location $loc does not exist." >&2
+if [ ! -e $dest ]; then
+	echo "Error: Desired location $dest does not exist." >&2
 	exit 1
 fi
 
@@ -341,12 +339,12 @@ failfiles=()
 failtimes=()
 failcodes=()
 
-baseDir=$loc
+baseDir=$dest
 prefixRm=""
 
 ## get list of files
-source=$(echo $source | tr ',' ' ' | tr ';' ' ')
-files=($source)
+#source=$(echo $source | tr ',' ' ' | tr ';' ' ')
+files=($sources)
 
 ### MAIN LOOP ###
 for file in ${files[@]}; do
@@ -354,12 +352,12 @@ for file in ${files[@]}; do
 	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
 	if [ $fisdir -eq 0 ]; then
 		## Single file
-		export prefixRm="$(echo $file | rev | cut -d/ -f1- | rev)"
-		baseDir=$loc
-		doStashCpSingle $file update
+		export prefixRm=`dirname $file`
+		baseDir=$dest
+		doStashCpSingle $file $dest update
 	else
 		## directory 
-		lc=$(echo "${source: -1}")
+		lc=$(echo "${file: -1}")
 		if [ "x$lc" == "x/" ]; then
 			## directory *contents* copied to $loc
 			export prefixRm="$(echo $file | rev | cut -d/ -f1- | rev)"
@@ -369,8 +367,8 @@ for file in ${files[@]}; do
 			## directory copied to $loc
 			dir=$(echo $file | rev | cut -d/ -f1 | rev)
 			export prefixRm="$(echo $file | rev | cut -d/ -f1- | rev)/"
-			mkdir $loc/$dir
-			baseDir=$loc/$dir
+			baseDir=$dest/$dir
+			mkdir $baseDir
 			chirpedSource=$file+
 			doStashCpDirectory $file update
 		fi
