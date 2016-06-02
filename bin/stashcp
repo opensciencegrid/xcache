@@ -85,6 +85,7 @@ function doStashCpSingle {
 	## if someone has 'Size: ' in their file path, they have bigger problems than this not working.
 	mb=$((mySz/1000000))
 	tm=$((300+mb)) ## 5 minutes + 1MBps
+	month=$(date +%m)
 
 	## First attempt
 	st1=$(date +%s%3N)
@@ -100,10 +101,9 @@ function doStashCpSingle {
 		## send info out to flume
 		hn=$sourcePrefix
 		timestamp=$(date +%s)
-		header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
-		body="\"body\" : \"$((st1/1000)),$downloadFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
-		echo $header$body > data.json
-		timeout 10 curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1 
+		payload="{ \"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\",\"filename\" : \"${downloadFile}\", \"filesize\" : \"${mySz}\", \"download_time\" : \"${dltm}\", \"sitename\" : \"${OSG_SITE_NAME}\"}"
+		echo $payload > data.json
+		timeout 10 curl -XPOST http://uct2-es-door.mwt2.org:9200/stashcp-$month/rec/ -d @data.json > /dev/null 2>&1 
 		rm data.json 2>&1
 	else
 		## pull from local cache failed; try again
@@ -121,10 +121,9 @@ function doStashCpSingle {
 			## send info out to flume
 			hn=$sourcePrefix
 			timestamp=$(date +%s)
-			header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
-			body="\"body\" : \"$((st2/1000)),$downloadFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
-			echo $header$body > data.json
-			timeout 10 curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1 
+			payload="{ \"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\",\"filename\" : \"${downloadFile}\", \"filesize\" : \"${mySz}\", \"download_time\" : \"${dltm}\", \"sitename\" : \"${OSG_SITE_NAME}\"}"
+			echo $payload > data.json
+			timeout 10 curl -XPOST http://uct2-es-door.mwt2.org:9200/stashcp-$month/rec/ -d @data.json > /dev/null 2>&1
 			rm data.json 2>&1
 		else 	
 			## second attempt to pull from local cache failed, pulling from trunk
@@ -151,10 +150,9 @@ function doStashCpSingle {
 				failovertimes=("${failovertimes[@]}" $st2) # time that the failed pull started
 				## send info out to flume
 				timestamp=$(date +%s)
-				header="[{ \"headers\" : {\"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\" },"
-				body="\"body\" : \"$((st3/1000)),$downloadFile,$mySz,$dltm,$OSG_SITE_NAME,$hn\"}]"
-				echo $header$body > data.json
-				timeout 10 curl -X POST -H 'Content-Type: application/json; charset=UTF-8' http://hadoop-dev.mwt2.org:80/ -d @data.json > /dev/null 2>&1
+				payload="{ \"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\",\"filename\" : \"${downloadFile}\", \"filesize\" : \"${mySz}\", \"download_time\" : \"${dltm}\", \"sitename\" : \"${OSG_SITE_NAME}\"}"
+				echo $payload > data.json
+				timeout 10 curl -XPOST http://uct2-es-door.mwt2.org:9200/stashcp-$month/rec/ -d @data.json > /dev/null 2>&1
 				rm data.json 2>&1
 			else
 				failfiles=("${failfiles[@]}" $downloadFile)
