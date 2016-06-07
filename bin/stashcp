@@ -90,6 +90,7 @@ function doStashCpSingle {
 	## First attempt
 	## Check destination directory for space
 	dirSpace=$(df -k $baseDir | tail -1 | awk '{print $3}')
+	noSpace=false
 	if [ $dirSpace -lt $mySz ]; then
 		noSpace=true
 		echo "Stashcp of $downloadFile failed - not enough space in $baseDir. $dirSpace bytes available, file is $mySz bytes."
