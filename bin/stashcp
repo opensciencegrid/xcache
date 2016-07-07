@@ -1,13 +1,11 @@
 #!/bin/bash 
 
 usage="$(basename $0) [-d] [-r] [-h] <source> <destination>
-
 	-d: show debugging information
 	-r: recursively copy
 	-h: show this help text
 	
 	--closest: return closest cache location
-
 	Exit status 4 indicates that at least one file did not successfully copy over.
 	Exit status 1 indicates that the WantsStashCache classad was not present in job environment."
 
@@ -85,33 +83,43 @@ function doStashCpSingle {
 	## if someone has 'Size: ' in their file path, they have bigger problems than this not working.
 	mb=$((mySz/1000000))
 	tm=$((300+mb)) ## 5 minutes + 1MBps
-	month=$(date +%m)
+	xrdcpVersion="$(xrdcp -V 2>&1)"
+	st2=0
+	dl2=0
+	st3=0
+	cache=$sourcePrefix
+	xrdexit2=-1
+	xrdexit3=-1
 
 	## First attempt
-	## Check destination directory for space
+	## Check destination directory for space in bytes
 	dirSpace=$(df -k $baseDir | tail -1 | awk '{print $3}')
-	noSpace=false
-	if [ $dirSpace -lt $mySz ]; then
-		noSpace=true
-		echo "Stashcp of $downloadFile failed - not enough space in $baseDir. $dirSpace bytes available, file is $mySz bytes."
-		exit 1
-	fi
+	dirSpace=$(echo $((dirSpace *1000)))
 	
 	st1=$(date +%s%3N)
-	downloading_timeout.sh -t $seconds -d $diff -f $baseDir/$localPath -s $mySz xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath 
+	downloading_timeout.sh -t $seconds -d $diff -f $baseDir/$localPath -s $mySz xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath
 	res=$?
+	xrdexit1=$res
+	dSz=$(du -b -s $baseDir/$localPath | cut -f -1)
 	dl1=$(date +%s%3N)
 	if [ $res -eq 0 ]; then
 		## pull from local cache succeeded
+		if [ $dSz -eq $mySz ]; then
+			jobStatus="Success"
+			tries=1
+		else
+			jobStatus="No timeout but filesize does not match downloaded size"
+		fi
 		dltm=$((dl1-st1))
 		if [ $3 ]; then 	## update info only if I want to
 			updateInfo $st1 $downloadFile $mySz $dltm
 		fi
-		## send info out to flume
+		## send info out to ES
 		hn=$sourcePrefix
 		timestamp=$(date +%s)
+		timestamp=$(echo $((timestamp*1000)))
 		xrdcpVersion="$(xrdcp -V 2>&1)"
-		payload="{ \"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\",\"filename\" : \"${downloadFile}\", \"filesize\" : \"${mySz}\", \"download_time\" : \"${dltm}\", \"sitename\" : \"${OSG_SITE_NAME}\", \"destination_space\" : \"${dirSpace}\", \"no_space\" : \"${noSpace}\", \"xrdcp_version\" : \"${xrdcpVersion}\"}"
+		payload="{ \"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\",\"filename\" : \"${downloadFile}\", \"filesize\" : \"${mySz}\", \"download_size\" : \"${dSz}\", \"download_time\" : \"${dltm}\",  \"sitename\" : \"${OSG_SITE_NAME}\", \"destination_space\" : \"${dirSpace}\", \"status\" : \"${jobStatus}\", \"xrdexit1\" : \"${xrdexit1}\", \"xrdexit2\" : \"${xrdexit2}\", \"xrdexit3\" : \"${xrdexit3}\", \"tries\" : \"${tries}\", \"xrdcp_version\" : \"${xrdcpVersion}\", \"start1\" : \"${st1}\", \"end1\" : \"${dl1}\", \"start2\" : \"${st2}\", \"end2\" : \"${dl2}\", \"start3\" : \"${st3}\", \"cache\" : \"${cache}\"}"
 		echo $payload > data.json
 		timeout 10 curl -XPOST uct2-int.mwt2.org:9951 -d @data.json > /dev/null 2>&1 
 		rm data.json 2>&1
@@ -119,25 +127,34 @@ function doStashCpSingle {
 		## pull from local cache failed; try again
 		## Second attempt
 		st2=$(date +%s%3N)
-		downloading_timeout.sh -t $seconds -d $diff -f $baseDir/$localPath -s $mySz $tm xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath 
+		downloading_timeout.sh -t $seconds -d $diff -f $baseDir/$localPath -s $mySz xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath		
 		res=$?
+		xrdexit2=$res
+		dSz=$(du -b -s $baseDir/$localPath | cut -f -1)
 		dl2=$(date +%s%3N)
-		if [ $res -eq 0 ]; then 	
+		if [ $res -eq 0 ]; then 
 			## second attempt to pull from local cache succeeded
+			if [ $dSz -eq $mySz ]; then
+				jobStatus="Success"
+				tries=2
+			else
+				jobStatus="No timeout but filesize does not match downloaded size"
+			fi
 			dltm=$((dl2-st2))
 			if [ $2 ]; then 	## update info only if I want to
 				updateInfo $st2 $downloadFile $mySz $dltm
 			fi
-			## send info out to flume
+			## send info out to ES
 			hn=$sourcePrefix
 			timestamp=$(date +%s)
-			payload="{ \"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\",\"filename\" : \"${downloadFile}\", \"filesize\" : \"${mySz}\", \"download_time\" : \"${dltm}\", \"sitename\" : \"${OSG_SITE_NAME}\", \"destination_space\" : \"${dirSpace}\", \"no_space\" : \"${noSpace}\", \"xrdcp_version\" : \"${xrdcpVersion}\"}"
+			timestamp=$(echo $((timestamp*1000)))
+			payload="{ \"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\",\"filename\" : \"${downloadFile}\", \"filesize\" : \"${mySz}\", \"download_size\" : \"${dSz}\", \"download_time\" : \"${dltm}\",  \"sitename\" : \"${OSG_SITE_NAME}\", \"destination_space\" : \"${dirSpace}\", \"status\" : \"${jobStatus}\", \"xrdexit1\" : \"${xrdexit1}\", \"xrdexit2\" : \"${xrdexit2}\", \"xrdexit3\" : \"${xrdexit3}\", \"tries\" : \"${tries}\", \"xrdcp_version\" : \"${xrdcpVersion}\", \"start1\" : \"${st1}\", \"end1\" : \"${dl1}\", \"start2\" : \"${st2}\", \"end2\" : \"${dl2}\", \"start3\" : \"${st3}\", \"cache\" : \"${cache}\"}"
 			echo $payload > data.json
 			timeout 10 curl -XPOST uct2-int.mwt2.org:9951 -d @data.json > /dev/null 2>&1
 			rm data.json 2>&1
 		else 	
 			## second attempt to pull from local cache failed, pulling from trunk
-		    if [ $debug -eq 2 ]; then	
+		    	if [ $debug -eq 2 ]; then	
 				## print out debug info
 				echo "Pull of $downloadFile from $sourcePrefix failed."
 				echo "Command: xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath 2>&1"
@@ -147,24 +164,29 @@ function doStashCpSingle {
 			## Third attempt
 			hn="root://data.ci-connect.net"
 			st3=$(date +%s%3N)
-			downloading_timeout.sh -t $seconds -d $diff -f $baseDir/$localPath -s $mySz xrdcp $xrdargs -f $hn://$downloadFile $baseDir/$localPath 
+			downloading_timeout.sh -t $seconds -d $diff -f $baseDir/$localPath -s $mySz xrdcp $xrdargs -f $hn://$downloadFile $baseDir/$localPath
 			res=$?
+			xrdexit3=$res
+			dSz=$(du -b -s $baseDir/$localPath | cut -f -1)
 			dl3=$(date +%s%3N)
+			dltm=$((dl3-st3))
 			if [ $res -eq 0 ]; then
 				## pull from trunk succeeded
-				dltm=$((dl3-st3))
+				if [ $dSz -eq $mySz ]; then
+					jobStatus="Trunk Success"
+					tries=3
+				else
+					jobStatus="Downloaded from trunk - No timeout but filesize does not match downloaded size"
+				fi
+				#dltm=$((dl3-st3))
 				if [ $2 ]; then
 					updateInfo $st3 $downloadFile $mySz $dltm
 				fi
 				failoverfiles=("${failoverfiles[@]}" $downloadFile)
 				failovertimes=("${failovertimes[@]}" $st2) # time that the failed pull started
-				## send info out to flume
-				timestamp=$(date +%s)
-				payload="{ \"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\",\"filename\" : \"${downloadFile}\", \"filesize\" : \"${mySz}\", \"download_time\" : \"${dltm}\", \"sitename\" : \"${OSG_SITE_NAME}\", \"destination_space\" : \"${dirSpace}\", \"no_space\" : \"${noSpace}\", \"xrdcp_version\" : \"${xrdcpVersion}\"}"
-				echo $payload > data.json
-				timeout 10 curl -XPOST uct2-int.mwt2.org:9951 -d @data.json > /dev/null 2>&1
-				rm data.json 2>&1
 			else
+				tries=3
+				jobStatus="Timeout"
 				failfiles=("${failfiles[@]}" $downloadFile)
 				failtimes=("${failtimes[@]}" $st2)	## this is the last time something failed
 				failcodes=("${failcodes[@]}" $res)
@@ -172,6 +194,13 @@ function doStashCpSingle {
 				echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$downloadFile $baseDir/$localPath 2>&1"
 				failed=$((failed+1))
 			fi
+			
+			timestamp=$(date +%s)
+			timestamp=$(echo $((timestamp*1000)))
+			payload="{ \"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\",\"filename\" : \"${downloadFile}\", \"filesize\" : \"${mySz}\", \"download_size\" : \"${dSz}\", \"download_time\" : \"${dltm}\",  \"sitename\" : \"${OSG_SITE_NAME}\", \"destination_space\" : \"${dirSpace}\", \"status\" : \"${jobStatus}\", \"xrdexit1\" : \"${xrdexit1}\", \"xrdexit2\" : \"${xrdexit2}\", \"xrdexit3\" : \"${xrdexit3}\", \"tries\" : \"${tries}\", \"xrdcp_version\" : \"${xrdcpVersion}\", \"start1\" : \"${st1}\", \"end1\" : \"${dl1}\", \"start2\" : \"${st2}\", \"end2\" : \"${dl2}\", \"start3\" : \"${st3}\", \"cache\" : \"${cache}\"}"
+			echo $payload > data.json
+			timeout 10 curl -XPOST uct2-int.mwt2.org:9951 -d @data.json > /dev/null 2>&1
+			rm data.json 2>&1
 		fi
 	fi
 }
@@ -226,7 +255,7 @@ if [ ! -z ${_CONDOR_JOB_AD+x} ]; then
 	fi
 fi
 
-module load xrootd/4.1.1
+module load xrootd/4.2.1
 DIR=`dirname $(readlink -f $0)`
 export PATH=$PATH:$DIR
 
