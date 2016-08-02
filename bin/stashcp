@@ -119,7 +119,7 @@ function doStashCpSingle {
 		timestamp=$(date +%s)
 		timestamp=$(echo $((timestamp*1000)))
 		xrdcpVersion="$(xrdcp -V 2>&1)"
-		payload="{ \"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\",\"filename\" : \"${downloadFile}\", \"filesize\" : \"${mySz}\", \"download_size\" : \"${dSz}\", \"download_time\" : \"${dltm}\",  \"sitename\" : \"${OSG_SITE_NAME}\", \"destination_space\" : \"${dirSpace}\", \"status\" : \"${jobStatus}\", \"xrdexit1\" : \"${xrdexit1}\", \"xrdexit2\" : \"${xrdexit2}\", \"xrdexit3\" : \"${xrdexit3}\", \"tries\" : \"${tries}\", \"xrdcp_version\" : \"${xrdcpVersion}\", \"start1\" : \"${st1}\", \"end1\" : \"${dl1}\", \"start2\" : \"${st2}\", \"end2\" : \"${dl2}\", \"start3\" : \"${st3}\", \"cache\" : \"${cache}\"}"
+		payload="{ \"timestamp\" : ${timestamp}, \"host\" : \"${hn}\",\"filename\" : \"${downloadFile}\", \"filesize\" : ${mySz}, \"download_size\" : ${dSz}, \"download_time\" : ${dltm},  \"sitename\" : \"${OSG_SITE_NAME}\", \"destination_space\" : ${dirSpace}, \"status\" : \"${jobStatus}\", \"xrdexit1\" : ${xrdexit1}, \"xrdexit2\" : ${xrdexit2}, \"xrdexit3\" : ${xrdexit3}, \"tries\" : ${tries}, \"xrdcp_version\" : \"${xrdcpVersion}\", \"start1\" : ${st1}, \"end1\" : ${dl1}, \"start2\" : ${st2}, \"end2\" : ${dl2}, \"start3\" : ${st3}, \"cache\" : \"${cache}\"}"
 		echo $payload > data.json
 		timeout 10 curl -XPOST uct2-int.mwt2.org:9951 -d @data.json > /dev/null 2>&1 
 		rm data.json 2>&1
@@ -148,7 +148,7 @@ function doStashCpSingle {
 			hn=$sourcePrefix
 			timestamp=$(date +%s)
 			timestamp=$(echo $((timestamp*1000)))
-			payload="{ \"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\",\"filename\" : \"${downloadFile}\", \"filesize\" : \"${mySz}\", \"download_size\" : \"${dSz}\", \"download_time\" : \"${dltm}\",  \"sitename\" : \"${OSG_SITE_NAME}\", \"destination_space\" : \"${dirSpace}\", \"status\" : \"${jobStatus}\", \"xrdexit1\" : \"${xrdexit1}\", \"xrdexit2\" : \"${xrdexit2}\", \"xrdexit3\" : \"${xrdexit3}\", \"tries\" : \"${tries}\", \"xrdcp_version\" : \"${xrdcpVersion}\", \"start1\" : \"${st1}\", \"end1\" : \"${dl1}\", \"start2\" : \"${st2}\", \"end2\" : \"${dl2}\", \"start3\" : \"${st3}\", \"cache\" : \"${cache}\"}"
+			payload="{ \"timestamp\" : ${timestamp}, \"host\" : \"${hn}\",\"filename\" : \"${downloadFile}\", \"filesize\" : ${mySz}, \"download_size\" : ${dSz}, \"download_time\" : ${dltm},  \"sitename\" : \"${OSG_SITE_NAME}\", \"destination_space\" : ${dirSpace}, \"status\" : \"${jobStatus}\", \"xrdexit1\" : ${xrdexit1}, \"xrdexit2\" : ${xrdexit2}, \"xrdexit3\" : ${xrdexit3}, \"tries\" : ${tries}, \"xrdcp_version\" : \"${xrdcpVersion}\", \"start1\" : ${st1}, \"end1\" : ${dl1}, \"start2\" : ${st2}, \"end2\" : ${dl2}, \"start3\" : ${st3}, \"cache\" : \"${cache}\"}"
 			echo $payload > data.json
 			timeout 10 curl -XPOST uct2-int.mwt2.org:9951 -d @data.json > /dev/null 2>&1
 			rm data.json 2>&1
@@ -197,7 +197,7 @@ function doStashCpSingle {
 			
 			timestamp=$(date +%s)
 			timestamp=$(echo $((timestamp*1000)))
-			payload="{ \"timestamp\" : \"${timestamp}\", \"host\" : \"${hn}\",\"filename\" : \"${downloadFile}\", \"filesize\" : \"${mySz}\", \"download_size\" : \"${dSz}\", \"download_time\" : \"${dltm}\",  \"sitename\" : \"${OSG_SITE_NAME}\", \"destination_space\" : \"${dirSpace}\", \"status\" : \"${jobStatus}\", \"xrdexit1\" : \"${xrdexit1}\", \"xrdexit2\" : \"${xrdexit2}\", \"xrdexit3\" : \"${xrdexit3}\", \"tries\" : \"${tries}\", \"xrdcp_version\" : \"${xrdcpVersion}\", \"start1\" : \"${st1}\", \"end1\" : \"${dl1}\", \"start2\" : \"${st2}\", \"end2\" : \"${dl2}\", \"start3\" : \"${st3}\", \"cache\" : \"${cache}\"}"
+			payload="{ \"timestamp\" : ${timestamp}, \"host\" : \"${hn}\",\"filename\" : \"${downloadFile}\", \"filesize\" : ${mySz}, \"download_size\" : ${dSz}, \"download_time\" : ${dltm},  \"sitename\" : \"${OSG_SITE_NAME}\", \"destination_space\" : ${dirSpace}, \"status\" : \"${jobStatus}\", \"xrdexit1\" : ${xrdexit1}, \"xrdexit2\" : ${xrdexit2}, \"xrdexit3\" : ${xrdexit3}, \"tries\" : ${tries}, \"xrdcp_version\" : \"${xrdcpVersion}\", \"start1\" : ${st1}, \"end1\" : ${dl1}, \"start2\" : ${st2}, \"end2\" : ${dl2}, \"start3\" : ${st3}, \"cache\" : \"${cache}\"}"
 			echo $payload > data.json
 			timeout 10 curl -XPOST uct2-int.mwt2.org:9951 -d @data.json > /dev/null 2>&1
 			rm data.json 2>&1
