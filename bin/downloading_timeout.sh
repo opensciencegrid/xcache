@@ -24,12 +24,12 @@ start_watchdog(){
             nextSize=$((prevSize+diff))
             wantSize=$((nextSize<expSize?nextSize:expSize))
             if [ $newSize -lt $wantSize ]; then #if time out
-                kill -9 $xrdpid
+                kill -9 $xrdpid 2>/dev/null
             else #if file increases accordingly
                 prevSize=$(du -b $file | cut -f1)
             fi
         else
-            kill -9 $xrdpid
+            kill -9 $xrdpid 2>/dev/null
         fi
     done   
 }
