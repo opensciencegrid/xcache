@@ -16,7 +16,7 @@ function getClose {
 	res=$?
 	if [ $res -ne '0' ]; then
 		>&2 echo "Cannot find setStashCache.sh, setting to defaults - PROBLEM"
-		echo "root://data.ci-connect.net"
+		echo "root://stash.osgconnect.net"
 		exit 1
 	else 	
 		stashTools=$(which setStashCache.sh | rev | cut -d'/' -f2- | rev)
@@ -78,7 +78,7 @@ function doStashCpSingle {
 	## Get localPath = source path without prefix to be removed (logic for determining this in main loop)
 	#localPath=$dest
 	localPath=${downloadFile#$prefixRm}
-	mySz=$(xrdfs root://data.ci-connect.net stat $downloadFile | grep "Size: " | cut -d':' -f2)
+	mySz=$(xrdfs root://stash.osgconnect.net stat $downloadFile | grep "Size: " | cut -d':' -f2)
 	mySz=$(echo -n "${mySz//[[:space:]]/}")
 	## if someone has 'Size: ' in their file path, they have bigger problems than this not working.
 	mb=$((mySz/1000000))
@@ -162,7 +162,7 @@ function doStashCpSingle {
 			fi
 			
 			## Third attempt
-			hn="root://data.ci-connect.net"
+			hn="root://stash.osgconnect.net"
 			st3=$(date +%s%3N)
 			downloading_timeout.sh -t $seconds -d $diff -f $baseDir/$localPath -s $mySz xrdcp $xrdargs -f $hn://$downloadFile $baseDir/$localPath
 			res=$?
@@ -191,7 +191,7 @@ function doStashCpSingle {
 				failtimes=("${failtimes[@]}" $st2)	## this is the last time something failed
 				failcodes=("${failcodes[@]}" $res)
 				echo "Stashcp of $downloadFile failed."
-				echo "Command: xrdcp $xrdargs -f root://data.ci-connect.net://$downloadFile $baseDir/$localPath 2>&1"
+				echo "Command: xrdcp $xrdargs -f root://stash.osgconnect.net://$downloadFile $baseDir/$localPath 2>&1"
 				failed=$((failed+1))
 			fi
 			
@@ -208,12 +208,12 @@ function doStashCpSingle {
 ## address directory case
 function doStashCpDirectory {
 	sourceDir=$1
-	sourceItems=$(xrdfs root://data.ci-connect.net ls $sourceDir)
-	sz=$(xrdfs root://data.ci-connect.net stat $sourceDir | grep "Size: " | cut -d':' -f2)
+	sourceItems=$(xrdfs root://stash.osgconnect.net ls $sourceDir)
+	sz=$(xrdfs root://stash.osgconnect.net stat $sourceDir | grep "Size: " | cut -d':' -f2)
 	sz=$(echo -n "${sz//[[:space:]]/}")
 	st=$(date +%s%3N)
 	for item in $sourceItems; do
-		isdir=$(xrdfs root://data.ci-connect.net stat $item | grep "IsDir" | wc -l)
+		isdir=$(xrdfs root://stash.osgconnect.net stat $item | grep "IsDir" | wc -l)
 		## Logic for copying files vs. directories
 		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
 			## creating local directory for subfolder
@@ -333,7 +333,7 @@ elif [ ${#STASHPREFIX} -lt 3 ]; then
 	## look for closest site
 	getClose > /dev/null 2>&1
 	if [ ${#STASHPREFIX} -lt 3 ]; then
-		sourcePrefix="root://data.ci-connect.net"
+		sourcePrefix="root://stash.osgconnect.net"
 		echo "Empty prefix"
 	else
 		sourcePrefix=$STASHPREFIX
@@ -386,7 +386,7 @@ files=($sources)
 ### MAIN LOOP ###
 for file in ${files[@]}; do
 	## determine whether the input source is a directory or not
-	fisdir=$(xrdfs root://data.ci-connect.net stat $file | grep "IsDir" | wc -l)
+	fisdir=$(xrdfs root://stash.osgconnect.net stat $file | grep "IsDir" | wc -l)
 	if [ $fisdir -eq 0 ]; then
 		## Single file
 		export prefixRm=`dirname $file`
