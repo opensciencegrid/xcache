@@ -1,0 +1,12 @@
+
+language: python
+sudo: required
+
+notifications:
+  email:
+    recipients:
+      - taburaad@uchicago.edu
+    
+script:
+  # Run tests in Container
+  - tests/test.sh
