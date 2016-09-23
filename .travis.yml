@@ -2,10 +2,10 @@ language: python
 sudo: required
 
 notifications:
-	email:
-		recipients:
-		            - taburaad@uchicago.edu
-				          
+  email:
+    recipients:
+      - taburaad@uchicago.edu
+    
 script:
-	# Run tests in Container
-	- tests/test.sh
+  # Run tests in Container
+  - bin/stashcp2/tests/test.sh
