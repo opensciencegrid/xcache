@@ -11,18 +11,33 @@ yum -y clean expire-cache
 # First, install all the needed packages.
 rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_VERSION}.noarch.rpm
 
-# Broken mirror?
-echo "exclude=mirror.beyondhosting.net" >> /etc/yum/pluginconf.d/fastestmirror.conf
-
 yum -y install yum-plugin-priorities
 rpm -Uvh https://repo.grid.iu.edu/osg/3.3/osg-3.3-el${OS_VERSION}-release-latest.rpm
-yum -y install rpm-build gcc gcc-c++ boost-devel cmake git tar gzip make autotools
 
-# Prepare the RPM environment
-mkdir -p /tmp/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-cat >> /etc/rpm/macros.dist << EOF
-%dist .osg.el${OS_VERSION}
-%osg 1
-EOF
+yum -y install osg-oasis
+
+echo "user_allow_other" >> /etc/fuse.conf
+
+echo "CVMFS_HTTP_PROXY=DIRECT" >> /etc/cvmfs/default.local
+#echo "CVMFS_EXTERNAL_URL=$CVMFS_EXTERNAL_URL" >> /etc/cvmfs/domain.d/osgstorage.org.local
+
+mkdir -p /cvmfs/config-osg.opensciencegrid.org
+mkdir -p /cvmfs/oasis.opensciencegrid.org
+
+mount -t cvmfs config-osg.opensciencegrid.org /cvmfs/config-osg.opensciencegrid.org
+mount -t cvmfs oasis.opensciencegrid.org /cvmfs/oasis.opensciencegrid.org
+
+# Load modules
+. /cvmfs/oasis.opensciencegrid.org/osg/modules/lmod/current/init/bash 
+module load xrootd
 
 # Perform tests
+python /StashCache/bin/stashcp2/stashcpy.py /user/dweitzel/public/blast/queries/query1 ./
+
+result=`md5sum query1`
+
+if [ "$result" != "12bdb9a96cd5e8ca469b727a81593201" ]; then
+  exit 1
+fi
+
+
