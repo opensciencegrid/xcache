@@ -13,32 +13,13 @@ import math
 import socket
 
 
-parser = optparse.OptionParser()
-parser.add_option('--debug', dest='debug', action='store_true', help='debug')
-parser.add_option('-r', dest='recursive', action='store_true', help='recursively copy')
-parser.add_option('--closest', action='store_true')
-args,opts=parser.parse_args()
 
-if not args.closest:
-    try:
-        source=opts[0]
-        destination=opts[1]
-    except:
-        parser.error('Source and Destination must be last two arguments')
-else:
-    print get_best_stashcache()
-    sys.exit()
-
-if not args.debug:
-    xrdargs=0
-else:
-    xrdargs=1
 
 TIMEOUT = 300
 DIFF = TIMEOUT * 10
 
 
-def doStashCpSingle(sourceFile, destination=destination):
+def doStashCpSingle(sourceFile, destination):
     xrdfs = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "stat", sourceFile], stdout=subprocess.PIPE).communicate()[0]
     fileSize=int(re.findall(r"Size:   \d+",xrdfs)[0].split(":   ")[1])
     cache=get_best_stashcache()
@@ -180,7 +161,7 @@ def doStashCpSingle(sourceFile, destination=destination):
                 print "Error curling to ES"
 
 
-def dostashcpdirectory(sourceDir=source, destination=destination):
+def dostashcpdirectory(sourceDir, destination):
     sourceItems = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "ls", sourceDir], stdout=subprocess.PIPE).communicate()[0].split()
     for file in sourceItems:
         print "file is: ",file
@@ -345,9 +326,35 @@ def get_best_stashcache():
     return minsite
 
 
+def main():
+    parser = optparse.OptionParser()
+    parser.add_option('--debug', dest='debug', action='store_true', help='debug')
+    parser.add_option('-r', dest='recursive', action='store_true', help='recursively copy')
+    parser.add_option('--closest', action='store_true')
+    args,opts=parser.parse_args()
+
+    if not args.closest:
+        try:
+            source=opts[0]
+            destination=opts[1]
+        except:
+            parser.error('Source and Destination must be last two arguments')
+    else:
+        print get_best_stashcache()
+        sys.exit()
+
+    if not args.debug:
+        xrdargs=0
+    else:
+        xrdargs=1
+        
+    if not args.recursive:
+        doStashCpSingle(sourceFile=source, destination=destination)
+    else:
+        dostashcpdirectory(source = source, destination = destination)
+
+
+if __name__ == "__main__":
+    main()
+
 ### EXECUTE ###
-if not args.recursive:
-    doStashCpSingle(sourceFile=source)
-else:
-    print "doing directory"
-    dostashcpdirectory()
