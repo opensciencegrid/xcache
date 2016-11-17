@@ -19,13 +19,13 @@ TIMEOUT = 300
 DIFF = TIMEOUT * 10
 
 
-def doStashCpSingle(sourceFile, destination):
+def doStashCpSingle(sourceFile, destination, debug=False):
     xrdfs = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "stat", sourceFile], stdout=subprocess.PIPE).communicate()[0]
     fileSize=int(re.findall(r"Size:   \d+",xrdfs)[0].split(":   ")[1])
     cache=get_best_stashcache()
     date=datetime.datetime.now()
     start1=int(time.mktime(date.timetuple()))*1000
-    xrd_exit=timed_transfer(timeout=TIMEOUT,filename=sourceFile,diff=DIFF,expSize=fileSize,xrdebug=xrdargs,cache=cache,destination=destination)
+    xrd_exit=timed_transfer(timeout=TIMEOUT,filename=sourceFile,diff=DIFF,expSize=fileSize,xrdebug=debug,cache=cache,destination=destination)
     date=datetime.datetime.now()
     end1=int(time.mktime(date.timetuple()))*1000
     filename=destination+'/'+sourceFile.split('/')[-1]
@@ -77,7 +77,7 @@ def doStashCpSingle(sourceFile, destination):
         print "1st try failed on %s, trying again" % cache
         date=datetime.datetime.now()
         start2=int(time.mktime(date.timetuple()))*1000
-        xrd_exit=timed_transfer(timeout=TIMEOUT,filename=source,diff=DIFF,expSize=fileSize,xrdebug=xrdargs,cache=cache,destination=destination)
+        xrd_exit=timed_transfer(timeout=TIMEOUT,filename=source,diff=DIFF,expSize=fileSize,xrdebug=debug,cache=cache,destination=destination)
         date=datetime.datetime.now()
         end2=int(time.mktime(date.timetuple()))*1000
         dlSz=os.stat(filename).st_size
@@ -118,7 +118,7 @@ def doStashCpSingle(sourceFile, destination):
             cache="root://stash.osgconnect.net"
             date=datetime.datetime.now()
             start3=int(time.mktime(date.timetuple()))*1000
-            xrd_exit=timed_transfer(timeout=TIMEOUT,filename=source,diff=DIFF,expSize=fileSize,xrdebug=xrdargs,cache=cache,destination=destination)
+            xrd_exit=timed_transfer(timeout=TIMEOUT,filename=source,diff=DIFF,expSize=fileSize,xrdebug=debug,cache=cache,destination=destination)
             date=datetime.datetime.now()
             end3=int(time.mktime(date.timetuple()))*1000
             dlSz=os.stat(filename).st_size
@@ -161,7 +161,7 @@ def doStashCpSingle(sourceFile, destination):
                 print "Error curling to ES"
 
 
-def dostashcpdirectory(sourceDir, destination):
+def dostashcpdirectory(sourceDir, destination, debug=False):
     sourceItems = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "ls", sourceDir], stdout=subprocess.PIPE).communicate()[0].split()
     for file in sourceItems:
         print "file is: ",file
@@ -171,10 +171,10 @@ def dostashcpdirectory(sourceDir, destination):
         print type(isdir)
         if isdir!='0':
             print 'Caching directory'
-            dostashcpdirectory(sourceDir=file)
+            dostashcpdirectory(sourceDir=file, destination, debug)
         else:
             print 'Caching file ', 
-            doStashCpSingle(sourceFile=file,destination=destination)
+            doStashCpSingle(sourceFile=file,destination=destination, debug)
 
 
 def es_send(payload):
@@ -190,7 +190,7 @@ def es_send(payload):
         print "Error posting to ES"
 
 
-def timed_transfer(filename,expSize,cache,destination,timeout=TIMEOUT,diff=DIFF,xrdebug=xrdargs):
+def timed_transfer(filename,expSize,cache,destination,timeout=TIMEOUT,diff=DIFF,debug=False):
     def watchdog(xrdcp,filename,expSize,diff,timeout):
         prevSize=0
         newSize=0
@@ -214,7 +214,7 @@ def timed_transfer(filename,expSize,cache,destination,timeout=TIMEOUT,diff=DIFF,
                 newSize=expSize
 
     filepath=cache+":1094//"+ filename
-    if xrdebug==1:
+    if xrdebug:
         command="xrdcp -d 2 --nopbar -f " + filepath + " " + destination
     else:
         command="xrdcp -s -f " + filepath + " " + destination
@@ -342,16 +342,11 @@ def main():
     else:
         print get_best_stashcache()
         sys.exit()
-
-    if not args.debug:
-        xrdargs=0
-    else:
-        xrdargs=1
         
     if not args.recursive:
-        doStashCpSingle(sourceFile=source, destination=destination)
+        doStashCpSingle(sourceFile=source, destination=destination, debug=args.debug)
     else:
-        dostashcpdirectory(source = source, destination = destination)
+        dostashcpdirectory(source = source, destination = destination, debug=args.debug)
 
 
 if __name__ == "__main__":
