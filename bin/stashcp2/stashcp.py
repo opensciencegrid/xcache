@@ -198,7 +198,6 @@ def dostashcpdirectory(sourceDir=source, destination=destination):
 
 def es_send(payload):
     data = payload
-    print data
     data=json.dumps(data)
     try:
         url = "http://uct2-collectd.mwt2.org:9951"
