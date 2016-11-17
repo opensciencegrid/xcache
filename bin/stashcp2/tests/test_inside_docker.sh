@@ -28,7 +28,9 @@ mount -t cvmfs config-osg.opensciencegrid.org /cvmfs/config-osg.opensciencegrid.
 mount -t cvmfs oasis.opensciencegrid.org /cvmfs/oasis.opensciencegrid.org
 
 # Load modules
+set +e
 . /cvmfs/oasis.opensciencegrid.org/osg/modules/lmod/current/init/bash 
+set -e
 module load xrootd
 
 # Perform tests
