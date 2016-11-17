@@ -343,7 +343,7 @@ def get_best_stashcache():
     if debug:
         print "#",minsite, mindist,"km"
 
-    return minsite[:-1]
+    return minsite
 
 
 ### EXECUTE ###
