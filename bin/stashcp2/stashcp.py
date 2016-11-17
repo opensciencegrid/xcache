@@ -25,7 +25,7 @@ def doStashCpSingle(sourceFile, destination, debug=False):
     cache=get_best_stashcache()
     date=datetime.datetime.now()
     start1=int(time.mktime(date.timetuple()))*1000
-    xrd_exit=timed_transfer(timeout=TIMEOUT,filename=sourceFile,diff=DIFF,expSize=fileSize,xrdebug=debug,cache=cache,destination=destination)
+    xrd_exit=timed_transfer(timeout=TIMEOUT,filename=sourceFile,diff=DIFF,expSize=fileSize,debug=debug,cache=cache,destination=destination)
     date=datetime.datetime.now()
     end1=int(time.mktime(date.timetuple()))*1000
     filename=destination+'/'+sourceFile.split('/')[-1]
@@ -77,7 +77,7 @@ def doStashCpSingle(sourceFile, destination, debug=False):
         print "1st try failed on %s, trying again" % cache
         date=datetime.datetime.now()
         start2=int(time.mktime(date.timetuple()))*1000
-        xrd_exit=timed_transfer(timeout=TIMEOUT,filename=source,diff=DIFF,expSize=fileSize,xrdebug=debug,cache=cache,destination=destination)
+        xrd_exit=timed_transfer(timeout=TIMEOUT,filename=source,diff=DIFF,expSize=fileSize,debug=debug,cache=cache,destination=destination)
         date=datetime.datetime.now()
         end2=int(time.mktime(date.timetuple()))*1000
         dlSz=os.stat(filename).st_size
@@ -118,7 +118,7 @@ def doStashCpSingle(sourceFile, destination, debug=False):
             cache="root://stash.osgconnect.net"
             date=datetime.datetime.now()
             start3=int(time.mktime(date.timetuple()))*1000
-            xrd_exit=timed_transfer(timeout=TIMEOUT,filename=source,diff=DIFF,expSize=fileSize,xrdebug=debug,cache=cache,destination=destination)
+            xrd_exit=timed_transfer(timeout=TIMEOUT,filename=source,diff=DIFF,expSize=fileSize,debug=debug,cache=cache,destination=destination)
             date=datetime.datetime.now()
             end3=int(time.mktime(date.timetuple()))*1000
             dlSz=os.stat(filename).st_size
@@ -214,7 +214,7 @@ def timed_transfer(filename,expSize,cache,destination,timeout=TIMEOUT,diff=DIFF,
                 newSize=expSize
 
     filepath=cache+":1094//"+ filename
-    if xrdebug:
+    if debug:
         command="xrdcp -d 2 --nopbar -f " + filepath + " " + destination
     else:
         command="xrdcp -s -f " + filepath + " " + destination
