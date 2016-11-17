@@ -8,11 +8,11 @@ el_version=$1
  # Run tests in Container
 if [ "$el_version" = "6" ]; then
 
-sudo docker run --rm=true -v `pwd`:/StashCache:rw centos:centos${OS_VERSION} /bin/bash -c "bash -xe /StashCache/bin/stashcp2/tests/test_inside_docker.sh ${OS_VERSION}"
+sudo docker run --cap-add SYS_ADMIN --rm=true -v `pwd`:/StashCache:rw centos:centos${OS_VERSION} /bin/bash -c "bash -xe /StashCache/bin/stashcp2/tests/test_inside_docker.sh ${OS_VERSION}"
 
 elif [ "$el_version" = "7" ]; then
 
-docker run --privileged -d -ti -e "container=docker"  -v /sys/fs/cgroup:/sys/fs/cgroup -v `pwd`:/StashCache:rw  centos:centos${OS_VERSION}   /usr/sbin/init
+docker run --privileged --cap-add SYS_ADMIN -d -ti -e "container=docker"  -v /sys/fs/cgroup:/sys/fs/cgroup -v `pwd`:/StashCache:rw  centos:centos${OS_VERSION}   /usr/sbin/init
 DOCKER_CONTAINER_ID=$(docker ps | grep centos | awk '{print $1}')
 docker logs $DOCKER_CONTAINER_ID
 docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "bash -xe /StashCache/bin/stashcp2/tests/test_inside_docker.sh ${OS_VERSION};
