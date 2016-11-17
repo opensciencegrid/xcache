@@ -34,7 +34,7 @@ set -e
 module load xrootd
 
 # Perform tests
-python /StashCache/bin/stashcp2/stashcpy.py /user/dweitzel/public/blast/queries/query1 ./
+python /StashCache/bin/stashcp2/stashcp.py /user/dweitzel/public/blast/queries/query1 ./
 
 result=`md5sum query1`
 
