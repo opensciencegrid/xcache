@@ -171,10 +171,10 @@ def dostashcpdirectory(sourceDir, destination, debug=False):
         print type(isdir)
         if isdir!='0':
             print 'Caching directory'
-            dostashcpdirectory(sourceDir=file, destination, debug)
+            dostashcpdirectory(file, destination, debug)
         else:
             print 'Caching file ', 
-            doStashCpSingle(sourceFile=file,destination=destination, debug)
+            doStashCpSingle(file,destination, debug)
 
 
 def es_send(payload):
