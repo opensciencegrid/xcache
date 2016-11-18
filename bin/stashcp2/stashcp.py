@@ -12,6 +12,7 @@ import threading
 import math
 import socket
 
+import logging
 
 
 
@@ -20,13 +21,20 @@ DIFF = TIMEOUT * 10
 
 
 def doStashCpSingle(sourceFile, destination, debug=False):
+
+    logging.debug("Checking size of file.")
     xrdfs = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "stat", sourceFile], stdout=subprocess.PIPE).communicate()[0]
     fileSize=int(re.findall(r"Size:   \d+",xrdfs)[0].split(":   ")[1])
+    logging.debug("Size of the file %s is %i" % (sourceFile, fileSize))
     cache=get_best_stashcache()
-    date=datetime.datetime.now()
+    logging.debug("Closest Cache is %s" % cache)
+
+    # Calculate the starting time
+    date = datetime.datetime.now()
     start1=int(time.mktime(date.timetuple()))*1000
     xrd_exit=timed_transfer(timeout=TIMEOUT,filename=sourceFile,diff=DIFF,expSize=fileSize,debug=debug,cache=cache,destination=destination)
-    date=datetime.datetime.now()
+    
+    date = datetime.datetime.now()
     end1=int(time.mktime(date.timetuple()))*1000
     filename=destination+'/'+sourceFile.split('/')[-1]
     dlSz=os.stat(filename).st_size
@@ -42,6 +50,7 @@ def doStashCpSingle(sourceFile, destination, debug=False):
     xrdexit2=-1
     xrdexit3=-1
     if xrd_exit=='0': #worked first try
+        logging.debug("Transferr success using " % cache)
         dltime=end1-start1
         status = 'Success'
         tries=1
@@ -72,9 +81,9 @@ def doStashCpSingle(sourceFile, destination, debug=False):
             time.sleep(5)
             p.terminate()
         except:
-            print "Error curling to ES"
+            logging.error("Error curling to ES")
     else: #copy again using same cache
-        print "1st try failed on %s, trying again" % cache
+        logging.warning("1st try failed on %s, trying again" % cache)
         date=datetime.datetime.now()
         start2=int(time.mktime(date.timetuple()))*1000
         xrd_exit=timed_transfer(timeout=TIMEOUT,filename=source,diff=DIFF,expSize=fileSize,debug=debug,cache=cache,destination=destination)
@@ -82,6 +91,7 @@ def doStashCpSingle(sourceFile, destination, debug=False):
         end2=int(time.mktime(date.timetuple()))*1000
         dlSz=os.stat(filename).st_size
         if xrd_exit=='0': #worked second try
+            logging.info("Transfer successful on second try")
             status = 'Success'
             tries=2
             dltime=end2-start2
@@ -112,9 +122,9 @@ def doStashCpSingle(sourceFile, destination, debug=False):
                 time.sleep(5)
                 p.terminate()
             except:
-                print "Error curling to ES"
+                logging.error("Error curling to ES")
         else: #pull from origin
-            print "2nd try failed on %s, pulling from origin" % cache
+            logging.warning("2nd try failed on %s, pulling from origin" % cache)
             cache="root://stash.osgconnect.net"
             date=datetime.datetime.now()
             start3=int(time.mktime(date.timetuple()))*1000
@@ -124,11 +134,11 @@ def doStashCpSingle(sourceFile, destination, debug=False):
             dlSz=os.stat(filename).st_size
             dltime=end3-start3
             if xrd_exit=='0':
-                print "Trunk Success"
+                logging.info("Trunk Success")
                 status = 'Trunk Sucess'
                 tries=3
             else:
-                print "stashcp failed"
+                logging.error("stashcp failed after 3 attempts")
                 status = 'Timeout'
                 tries = 3
             payload={}
@@ -158,22 +168,17 @@ def doStashCpSingle(sourceFile, destination, debug=False):
                 time.sleep(5)
                 p.terminate()
             except:
-                print "Error curling to ES"
+                logging.error("Error curling to ES")
 
 
 def dostashcpdirectory(sourceDir, destination, debug=False):
     sourceItems = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "ls", sourceDir], stdout=subprocess.PIPE).communicate()[0].split()
     for file in sourceItems:
-        print "file is: ",file
         command2 = 'xrdfs root://stash.osgconnect.net stat '+ file + ' | grep "IsDir" | wc -l'
-        print command2
         isdir=subprocess.Popen([command2],stdout=subprocess.PIPE,shell=True).communicate()[0].split()[0]
-        print type(isdir)
         if isdir!='0':
-            print 'Caching directory'
             dostashcpdirectory(file, destination, debug)
         else:
-            print 'Caching file ', 
             doStashCpSingle(file,destination, debug)
 
 
@@ -218,7 +223,7 @@ def timed_transfer(filename,expSize,cache,destination,timeout=TIMEOUT,diff=DIFF,
         command="xrdcp -d 2 --nopbar -f " + filepath + " " + destination
     else:
         command="xrdcp -s -f " + filepath + " " + destination
-    print command
+        
     filename="./"+filename.split("/")[-1]
     if os.path.isfile(filename):
         os.remove(filename)
@@ -328,7 +333,7 @@ def get_best_stashcache():
 
 def main():
     parser = optparse.OptionParser()
-    parser.add_option('--debug', dest='debug', action='store_true', help='debug')
+    parser.add_option('-d', '--debug', dest='debug', action='store_true', help='debug')
     parser.add_option('-r', dest='recursive', action='store_true', help='recursively copy')
     parser.add_option('--closest', action='store_true')
     args,opts=parser.parse_args()
@@ -342,7 +347,10 @@ def main():
     else:
         print get_best_stashcache()
         sys.exit()
-        
+    
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+    
     if not args.recursive:
         doStashCpSingle(sourceFile=source, destination=destination, debug=args.debug)
     else:
