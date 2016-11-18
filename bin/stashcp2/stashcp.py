@@ -20,14 +20,14 @@ TIMEOUT = 300
 DIFF = TIMEOUT * 10
 
 
-def doStashCpSingle(sourceFile, destination, debug=False):
+def doStashCpSingle(sourceFile, destination, cache, debug=False):
 
     logging.debug("Checking size of file.")
     xrdfs = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "stat", sourceFile], stdout=subprocess.PIPE).communicate()[0]
     fileSize=int(re.findall(r"Size:   \d+",xrdfs)[0].split(":   ")[1])
     logging.debug("Size of the file %s is %i" % (sourceFile, fileSize))
-    cache=get_best_stashcache()
-    logging.debug("Closest Cache is %s" % cache)
+    #cache=get_best_stashcache()
+    logging.debug("Using Cache %s" % cache)
 
     # Calculate the starting time
     date = datetime.datetime.now()
@@ -50,7 +50,7 @@ def doStashCpSingle(sourceFile, destination, debug=False):
     xrdexit2=-1
     xrdexit3=-1
     if xrd_exit=='0': #worked first try
-        logging.debug("Transferr success using %s" % cache)
+        logging.debug("Transfer success using %s" % cache)
         dltime=end1-start1
         status = 'Success'
         tries=1
@@ -171,15 +171,15 @@ def doStashCpSingle(sourceFile, destination, debug=False):
                 logging.error("Error curling to ES")
 
 
-def dostashcpdirectory(sourceDir, destination, debug=False):
+def dostashcpdirectory(sourceDir, destination, cache, debug=False):
     sourceItems = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "ls", sourceDir], stdout=subprocess.PIPE).communicate()[0].split()
     for file in sourceItems:
         command2 = 'xrdfs root://stash.osgconnect.net stat '+ file + ' | grep "IsDir" | wc -l'
         isdir=subprocess.Popen([command2],stdout=subprocess.PIPE,shell=True).communicate()[0].split()[0]
         if isdir!='0':
-            dostashcpdirectory(file, destination, debug)
+            dostashcpdirectory(file, destination, cache, debug)
         else:
-            doStashCpSingle(file,destination, debug)
+            doStashCpSingle(file,destination, cache, debug)
 
 
 def es_send(payload):
@@ -336,6 +336,7 @@ def main():
     parser.add_option('-d', '--debug', dest='debug', action='store_true', help='debug')
     parser.add_option('-r', dest='recursive', action='store_true', help='recursively copy')
     parser.add_option('--closest', action='store_true')
+    parser.add_option('-c', '--cache', dest='cache', help="Cache to use")
     args,opts=parser.parse_args()
 
     if not args.closest:
@@ -347,15 +348,24 @@ def main():
     else:
         print get_best_stashcache()
         sys.exit()
+        
+    # Check for manually entered cache to use
+    if args.cache:
+        cache = args.cache
+    else:
+        cache = get_bast_stashcache()
+        
     
     logger = logging.getLogger()
     if args.debug:
         logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.WARNING)
     
     if not args.recursive:
-        doStashCpSingle(sourceFile=source, destination=destination, debug=args.debug)
+        doStashCpSingle(sourceFile=source, destination=destination, cache=cache, debug=args.debug)
     else:
-        dostashcpdirectory(sourceDir = source, destination = destination, debug=args.debug)
+        dostashcpdirectory(sourceDir = source, destination = destination, cache=cache, debug=args.debug)
 
 
 if __name__ == "__main__":
