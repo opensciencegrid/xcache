@@ -348,6 +348,7 @@ def main():
         print get_best_stashcache()
         sys.exit()
     
+    logger = logging.getLogger()
     if args.debug:
         logger.setLevel(logging.DEBUG)
     
