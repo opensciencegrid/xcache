@@ -199,7 +199,7 @@ def timed_transfer(filename,expSize,cache,destination,timeout=TIMEOUT,diff=DIFF,
     
     # To set environment varibles if they don't already exist (set by user)
     def set_if_none(var, value):
-        if not os.environ[var]:
+        if var not in os.environ:
             os.environ[var] = value
     
     
