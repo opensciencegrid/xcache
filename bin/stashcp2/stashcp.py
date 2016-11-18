@@ -200,7 +200,7 @@ def timed_transfer(filename,expSize,cache,destination,timeout=TIMEOUT,diff=DIFF,
     # To set environment varibles if they don't already exist (set by user)
     def set_if_none(var, value):
         if var not in os.environ:
-            os.environ[var] = value
+            os.environ[var] = str(value)
     
     
     # All these values can be found on the xrdcp man page
