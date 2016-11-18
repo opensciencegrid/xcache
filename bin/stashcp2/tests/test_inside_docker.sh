@@ -1,6 +1,7 @@
 #!/bin/sh -xe
 
 OS_VERSION=$1
+XRD_CACHE=$2
 
 ls -l /home
 

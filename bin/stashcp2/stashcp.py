@@ -353,7 +353,7 @@ def main():
     if args.cache:
         cache = args.cache
     else:
-        cache = get_bast_stashcache()
+        cache = get_best_stashcache()
         
     
     logger = logging.getLogger()
