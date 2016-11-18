@@ -196,28 +196,21 @@ def es_send(payload):
 
 
 def timed_transfer(filename,expSize,cache,destination,timeout=TIMEOUT,diff=DIFF,debug=False):
-    def watchdog(xrdcp,filename,expSize,diff,timeout):
-        prevSize=0
-        newSize=0
-        filename="./"+filename.split("/")[-1]
-        while (newSize<expSize):
-            time.sleep(timeout)
-            if os.path.isfile(filename):
-                newSize=os.stat(filename).st_size
-                nextSize=prevSize+diff
-                if nextSize<expSize:
-                    wantSize=nextSize
-                else:
-                    wantSize=expSize
-                if newSize < wantSize:
-                    xrdcp.kill()
-                    newSize=expSize
-                else:
-                    prevSize=os.stat(filename).st_size
-            else:
-                xrdcp.kill()
-                newSize=expSize
-
+    
+    # To set environment varibles if they don't already exist (set by user)
+    def set_if_none(var, value):
+        if not os.environ[var]:
+            os.environ[var] = value
+    
+    
+    # All these values can be found on the xrdcp man page
+    set_if_none("XRD_REQUESTTIMEOUT", 30)   # How long to wait for a read request (s)
+    set_if_none("XRD_CPCHUNKSIZE", 8388608) # Size of each read request (8MB)
+    set_if_none("XRD_TIMEOUTRESOLUTION", 5) # How often to check the timeouts
+    set_if_none("XRD_CONNECTIONWINDOW", 30) # How long to wait for the initial TCP connection
+    set_if_none("XRD_CONNECTIONRETRY", 2)   # How many time should we retry the TCP connection
+    set_if_none("XRD_STREAMTIMEOUT", 30)    # How long to wait for TCP activity
+    
     filepath=cache+":1094//"+ filename
     if debug:
         command="xrdcp -d 2 --nopbar -f " + filepath + " " + destination
@@ -228,12 +221,10 @@ def timed_transfer(filename,expSize,cache,destination,timeout=TIMEOUT,diff=DIFF,
     if os.path.isfile(filename):
         os.remove(filename)
     xrdcp=subprocess.Popen([command ],shell=True,stdout=subprocess.PIPE)
-    time.sleep(1)
-    watchdog=multiprocessing.Process(target=watchdog,args=[xrdcp,filename,expSize,DIFF,TIMEOUT,])
-    watchdog.start()
+    
     streamdata=xrdcp.communicate()[0]
     xrd_exit=xrdcp.returncode
-    watchdog.terminate()
+
     return str(xrd_exit)
 
 
