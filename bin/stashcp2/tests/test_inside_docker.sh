@@ -43,6 +43,7 @@ if [ "$result" != "12bdb9a96cd5e8ca469b727a81593201" ]; then
 fi
 
 python /StashCache/bin/stashcp2/stashcp.py -r /user/dweitzel/public/blast/queries ./
+ls -lah queries
 
 
 
