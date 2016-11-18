@@ -50,7 +50,7 @@ def doStashCpSingle(sourceFile, destination, debug=False):
     xrdexit2=-1
     xrdexit3=-1
     if xrd_exit=='0': #worked first try
-        logging.debug("Transferr success using " % cache)
+        logging.debug("Transferr success using %s" % cache)
         dltime=end1-start1
         status = 'Success'
         tries=1
