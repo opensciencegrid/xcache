@@ -346,7 +346,7 @@ def main():
     if not args.recursive:
         doStashCpSingle(sourceFile=source, destination=destination, debug=args.debug)
     else:
-        dostashcpdirectory(source = source, destination = destination, debug=args.debug)
+        dostashcpdirectory(sourceDir = source, destination = destination, debug=args.debug)
 
 
 if __name__ == "__main__":
