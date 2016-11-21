@@ -34,6 +34,8 @@ set +e
 set -e
 module load xrootd
 
+cp /StashCache/caches.json /StashCache/bin/stashcp2/caches.json
+
 # Perform tests
 python /StashCache/bin/stashcp2/stashcp.py --cache=$XRD_CACHE -d /user/dweitzel/public/blast/queries/query1 ./
 
