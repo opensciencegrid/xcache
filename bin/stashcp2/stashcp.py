@@ -235,7 +235,7 @@ def get_best_stashcache():
     dir_path = os.path.dirname(os.path.realpath(__file__))
     cache_file = os.path.join(dir_path, 'caches.json')
     if not os.path.isfile(cache_file):
-        logging.error("Unable to find caches.json in %s": dir_path)
+        logging.error("Unable to find caches.json in %s" % dir_path)
         return None
     
     # Get all the caches from the json file
