@@ -262,7 +262,7 @@ def get_best_stashcache():
     
     # From the response, should respond with something like:
     # 3,1,2
-    ordered_list = response.read().split(",")
+    ordered_list = response.read().strip().split(",")
     logging.debug("Got response %s" % str(ordered_list))
     minsite = caches_list[int(ordered_list[0])-1]['name']
     
