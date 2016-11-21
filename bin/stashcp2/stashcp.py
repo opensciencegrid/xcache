@@ -287,7 +287,7 @@ def main():
         sys.exit()
         
     # Check for manually entered cache to use
-    if args.cache:
+    if args.cache and len(args.cache) > 0:
         cache = args.cache
     else:
         cache = get_best_stashcache()
