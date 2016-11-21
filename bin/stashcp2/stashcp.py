@@ -276,6 +276,12 @@ def main():
     parser.add_option('-c', '--cache', dest='cache', help="Cache to use")
     args,opts=parser.parse_args()
 
+    logger = logging.getLogger()
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.WARNING)
+
     if not args.closest:
         try:
             source=opts[0]
@@ -285,19 +291,12 @@ def main():
     else:
         print get_best_stashcache()
         sys.exit()
-        
+
     # Check for manually entered cache to use
     if args.cache and len(args.cache) > 0:
         cache = args.cache
     else:
         cache = get_best_stashcache()
-        
-    
-    logger = logging.getLogger()
-    if args.debug:
-        logger.setLevel(logging.DEBUG)
-    else:
-        logger.setLevel(logging.WARNING)
     
     if not args.recursive:
         doStashCpSingle(sourceFile=source, destination=destination, cache=cache, debug=args.debug)
