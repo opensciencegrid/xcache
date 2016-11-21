@@ -248,6 +248,8 @@ def get_best_stashcache():
     # Format the caches for the CVMFS query
     caches_string = ""
     for cache in caches_list:
+        if cache['status'] == 0:
+            continue
         parsed_url = urlparse(cache['name'])
         caches_string = "%s,%s" % (caches_string, parsed_url.hostname)
     # Remove the first comma
