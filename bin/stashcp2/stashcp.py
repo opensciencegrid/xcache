@@ -249,7 +249,7 @@ def get_best_stashcache():
     caches_string = ""
     for cache in caches_list:
         parsed_url = urlparse(cache['name'])
-        caches_string.append(",%s" % parsed_url.hostname)
+        caches_string = "%s,%s" % (caches_string, parsed_url.hostname)
     # Remove the first comma
     caches_string = caches_string[1:]
     
