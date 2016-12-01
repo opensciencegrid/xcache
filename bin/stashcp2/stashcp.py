@@ -49,7 +49,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     logging.debug("Checking if the CVMFS file exists: %s" % cvmfs_file)
     if os.path.exists(cvmfs_file):
         try:
-            shutil.copyfile(cvmfs_file, destination)
+            shutil.copy(cvmfs_file, destination)
             date = datetime.datetime.now()
             end1=int(time.mktime(date.timetuple()))*1000
             filename=destination+'/'+sourceFile.split('/')[-1]
