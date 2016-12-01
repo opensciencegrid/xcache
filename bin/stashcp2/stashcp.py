@@ -76,6 +76,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
                 p.terminate()
             except:
                 logging.error("Error curling to ES")
+            return 
             
         except IOError as e:
             logging.error("Unable to copy with CVMFS, even though file exists: %s" % str(e))
