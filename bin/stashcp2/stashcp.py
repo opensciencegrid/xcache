@@ -42,7 +42,10 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     start1=int(time.mktime(date.timetuple()))*1000
     
     # First, check if the file is available in CVMFS
-    cvmfs_file = os.path.join("/cvmfs/stash.osgstorage.org/", sourceFile)
+    if sourceFile[0] == '/':
+        cvmfs_file = os.path.join("/cvmfs/stash.osgstorage.org/", sourceFile[1:])
+    else:
+        cvmfs_file = os.path.join("/cvmfs/stash.osgstorage.org/", sourceFile)
     logging.debug("Checking if the CVMFS file exists: %s" % cvmfs_file)
     if os.path.exists(cvmfs_file):
         try:
