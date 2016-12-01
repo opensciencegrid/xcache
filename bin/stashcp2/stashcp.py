@@ -11,6 +11,7 @@ import urllib2
 import threading
 import math
 import socket
+import random
 
 import logging
 from urlparse import urlparse
@@ -255,10 +256,37 @@ def get_best_stashcache():
     # Remove the first comma
     caches_string = caches_string[1:]
     
-    # Query the GeoIP sites:
-    final_url = "http://hcc-cvmfs.unl.edu:8000/cvmfs/config-osg.opensciencegrid.org/api/v1.0/geo/@proxy@/%s" % caches_string
-    logging.debug("Querying for closest cache: %s" % final_url)
-    response = urllib2.urlopen("http://hcc-cvmfs.unl.edu:8000/cvmfs/config-osg.opensciencegrid.org/api/v1.0/geo/@proxy@/%s" % caches_string)
+    # Here is a list from the output of the command:
+    # attr -qg host_list /cvmfs/oasis.opensciencegrid.org
+    geo_ip_sites = "http://cvmfs-s1fnal.opensciencegrid.org:8000/cvmfs/oasis.opensciencegrid.org;http://cvmfs-s1bnl.opensciencegrid.org:8000/cvmfs/oasis.opensciencegrid.org;http://cvmfs-egi.gridpp.rl.ac.uk:8000/cvmfs/oasis.opensciencegrid.org;http://klei.nikhef.nl:8000/cvmfs/oasis.opensciencegrid.org;http://cvmfsrep.grid.sinica.edu.tw:8000/cvmfs/oasis.opensciencegrid.org".split(';')
+    
+    # Add HCC's, for good measure
+    geo_ip_sites.insert(0,"hcc-cvmfs.unl.edu:8000/cvmfs/config-osg.opensciencegrid.org")
+    
+    # Append text before caches string
+    append_text = "/api/v1.0/geo/@proxy@/"
+    
+    # Randomize the geo ip sites
+    random.shuffle(geo_ip_sites)
+    found = False
+    i = 0
+    while found == False and i < len(geo_ip_sites):
+        cur_site = geo_ip_sites[i]
+        logging.debug("Trying geoip site of: %s", cur_site)
+        final_url = "%s/%s/%s" % (cur_site, append_text, caches_string)
+        logging.debug("Querying for closest cache: %s" % final_url)
+        try:
+            response = urllib2.urlopen(final_url)
+            if response.getcode() == 200:
+                logging.debug("Got error code 200 from %s" % cur_site)
+                found = True
+                break
+        except urllib2.URLError as e:
+            logging.debug("URL error: %s": str(e))
+        i+=1
+        
+    if found == False:
+        logging.error("Unable to use Geoip to find closest site!")
     
     # From the response, should respond with something like:
     # 3,1,2
