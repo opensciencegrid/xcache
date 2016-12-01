@@ -269,7 +269,7 @@ def get_best_stashcache():
     geo_ip_sites.insert(0,"hcc-cvmfs.unl.edu:8000/cvmfs/config-osg.opensciencegrid.org")
     
     # Append text before caches string
-    append_text = "/api/v1.0/geo/@proxy@/"
+    append_text = "api/v1.0/geo/@proxy@"
     
     # Randomize the geo ip sites
     random.shuffle(geo_ip_sites)
