@@ -39,7 +39,15 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
         sitename=os.environ['OSG_SITE_NAME']
     except:
         sitename="siteNotFound"
-
+    
+    # Fill out the payload as much as possible
+    filename=destination+'/'+sourceFile.split('/')[-1]
+    payload={}
+    payload['xrdcp_version']=xrdcp_version
+    payload['filesize']=fileSize
+    payload['filename']=sourceFile
+    payload['sitename']=sitename
+    
     # Calculate the starting time
     date = datetime.datetime.now()
     start1=int(time.mktime(date.timetuple()))*1000
@@ -57,23 +65,17 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
             logging.debug("Succesfully copied file from CVMFS!")
             date = datetime.datetime.now()
             end1=int(time.mktime(date.timetuple()))*1000
-            filename=destination+'/'+sourceFile.split('/')[-1]
             dlSz=os.stat(filename).st_size
             dltime=end1-start1
             destSpace=1
             status = 'Success'
-            payload={}
             payload['timestamp']=end1
             payload['host']="CVMFS"
-            payload['filename']=sourceFile
-            payload['filesize']=fileSize
             payload['download_size']=dlSz
             payload['download_time']=dltime
-            payload['sitename']=sitename
             payload['destination_space']=destSpace
             payload['status']=status
             payload['tries']=1
-            payload['xrdcp_version']=xrdcp_version
             payload['start1']=start1
             payload['end1']=end1
             payload['cache']="CVMFS"
@@ -84,11 +86,16 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
                 p.terminate()
             except:
                 logging.error("Error curling to ES")
+                
             return 
             
         except IOError as e:
             logging.error("Unable to copy with CVMFS, even though file exists: %s" % str(e))
-        
+            
+    date = datetime.datetime.now()
+    end1=int(time.mktime(date.timetuple()))*1000
+    payload['end1']=end1
+    payload['start1']=start1
     
     date = datetime.datetime.now()
     start2=int(time.mktime(date.timetuple()))*1000
@@ -97,37 +104,27 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     
     date = datetime.datetime.now()
     end2=int(time.mktime(date.timetuple()))*1000
-    filename=destination+'/'+sourceFile.split('/')[-1]
     dlSz=os.stat(filename).st_size
     destSpace=1
+
+    payload['xrdexit1']=xrd_exit
+    payload['start2']=start2
+    payload['end2']=end2
     
-    start3=0
-    xrdexit3=-1
     if xrd_exit=='0': #worked first try
         logging.debug("Transfer success using %s" % cache)
         dltime=end2-start2
         status = 'Success'
         tries=2
-        payload={}
+
         payload['timestamp']=end2
         payload['host']=cache
-        payload['filename']=sourceFile
-        payload['filesize']=fileSize
         payload['download_size']=dlSz
         payload['download_time']=dltime
         payload['sitename']=sitename
         payload['destination_space']=destSpace
         payload['status']=status
-        payload['xrdexit1']=xrd_exit
-        payload['xrdexit2']=xrd_exit
-        payload['xrdexit3']=xrdexit3
         payload['tries']=tries
-        payload['xrdcp_version']=xrdcp_version
-        payload['start1']=start1
-        payload['end1']=end1
-        payload['start2']=start2
-        payload['end2']=end2
-        payload['start3']=start3
         payload['cache']=cache
         try:
             p = multiprocessing.Process(target=es_send, name="es_send", args=(payload,))
@@ -155,26 +152,16 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
             logging.error("stashcp failed after 3 attempts")
             status = 'Timeout'
             tries = 3
-        payload={}
-        payload['timestamp']=end1
+        payload['timestamp']=end3
         payload['host']=cache
-        payload['filename']=sourceFile
-        payload['filesize']=fileSize
         payload['download_size']=dlSz
         payload['download_time']=dltime
-        payload['sitename']=sitename
         payload['destination_space']=destSpace
         payload['status']=status
-        payload['xrdexit1']=xrd_exit
-        payload['xrdexit2']=xrdexit2
-        payload['xrdexit3']=xrdexit3
+        payload['xrdexit2']=xrd_exit
         payload['tries']=tries
-        payload['xrdcp_version']=xrdcp_version
-        payload['start1']=start1
-        payload['end1']=end1
-        payload['start2']=start2
-        payload['end2']=end2
         payload['start3']=start3
+        payload['end3']=end3
         payload['cache']=cache
         try:
             p = multiprocessing.Process(target=es_send, name="es_send", args=(payload,))
