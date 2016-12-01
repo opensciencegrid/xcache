@@ -282,7 +282,7 @@ def get_best_stashcache():
                 found = True
                 break
         except urllib2.URLError as e:
-            logging.debug("URL error: %s": str(e))
+            logging.debug("URL error: %s" % str(e))
         i+=1
         
     if found == False:
