@@ -27,6 +27,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
 
     logging.debug("Checking size of file.")
     xrdfs = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "stat", sourceFile], stdout=subprocess.PIPE).communicate()[0]
+    xrdcp_version=subprocess.Popen(['echo $(xrdcp -V 2>&1)'],stdout=subprocess.PIPE,shell=True).communicate()[0][:-1]
     fileSize=int(re.findall(r"Size:   \d+",xrdfs)[0].split(":   ")[1])
     logging.debug("Size of the file %s is %i" % (sourceFile, fileSize))
     #cache=get_best_stashcache()
@@ -93,7 +94,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     dlSz=os.stat(filename).st_size
     destSpace=1
     
-    xrdcp_version=subprocess.Popen(['echo $(xrdcp -V 2>&1)'],stdout=subprocess.PIPE,shell=True).communicate()[0][:-1]
+    
     start2=0
     start3=0
     end2=0
