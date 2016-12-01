@@ -12,6 +12,7 @@ import threading
 import math
 import socket
 import random
+import shutil
 
 import logging
 from urlparse import urlparse
@@ -30,10 +31,56 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     logging.debug("Size of the file %s is %i" % (sourceFile, fileSize))
     #cache=get_best_stashcache()
     logging.debug("Using Cache %s" % cache)
+    
+    try:
+        sitename=os.environ['OSG_SITE_NAME']
+    except:
+        sitename="siteNotFound"
 
     # Calculate the starting time
     date = datetime.datetime.now()
     start1=int(time.mktime(date.timetuple()))*1000
+    
+    # First, check if the file is available in CVMFS
+    cvmfs_file = os.path.join("/cvmfs/stash.osgstorage.org/", sourceFile)
+    logging.debug("Checking if the CVMFS file exists: %s" % cvmfs_file)
+    if os.path.exists(cvmfs_file):
+        try:
+            shutil.copyfile(cvmfs_file, destination)
+            date = datetime.datetime.now()
+            end1=int(time.mktime(date.timetuple()))*1000
+            filename=destination+'/'+sourceFile.split('/')[-1]
+            dlSz=os.stat(filename).st_size
+            dltime=end1-start1
+            destSpace=1
+            status = 'Success'
+            payload={}
+            payload['timestamp']=end1
+            payload['host']="CVMFS"
+            payload['filename']=sourceFile
+            payload['filesize']=fileSize
+            payload['download_size']=dlSz
+            payload['download_time']=dltime
+            payload['sitename']=sitename
+            payload['destination_space']=destSpace
+            payload['status']=status
+            payload['tries']=1
+            payload['xrdcp_version']=xrdcp_version
+            payload['start1']=start1
+            payload['end1']=end1
+            payload['cache']="CVMFS"
+            try:
+                p = multiprocessing.Process(target=es_send, name="es_send", args=(payload,))
+                p.start()
+                time.sleep(5)
+                p.terminate()
+            except:
+                logging.error("Error curling to ES")
+            
+        except IOError as e:
+            logging.error("Unable to copy with CVMFS, even though file exists: %s" % str(e))
+        
+    
     xrd_exit=timed_transfer(timeout=TIMEOUT,filename=sourceFile,diff=DIFF,expSize=fileSize,debug=debug,cache=cache,destination=destination)
     
     date = datetime.datetime.now()
@@ -41,10 +88,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     filename=destination+'/'+sourceFile.split('/')[-1]
     dlSz=os.stat(filename).st_size
     destSpace=1
-    try:
-        sitename=os.environ['OSG_SITE_NAME']
-    except:
-        sitename="siteNotFound"
+    
     xrdcp_version=subprocess.Popen(['echo $(xrdcp -V 2>&1)'],stdout=subprocess.PIPE,shell=True).communicate()[0][:-1]
     start2=0
     start3=0
@@ -84,93 +128,53 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
             p.terminate()
         except:
             logging.error("Error curling to ES")
-    else: #copy again using same cache
-        logging.warning("1st try failed on %s, trying again" % cache)
+
+    else: #pull from origin
+        logging.warning("2nd try failed on %s, pulling from origin" % cache)
+        cache="root://stash.osgconnect.net"
         date=datetime.datetime.now()
-        start2=int(time.mktime(date.timetuple()))*1000
+        start3=int(time.mktime(date.timetuple()))*1000
         xrd_exit=timed_transfer(timeout=TIMEOUT,filename=source,diff=DIFF,expSize=fileSize,debug=debug,cache=cache,destination=destination)
         date=datetime.datetime.now()
-        end2=int(time.mktime(date.timetuple()))*1000
+        end3=int(time.mktime(date.timetuple()))*1000
         dlSz=os.stat(filename).st_size
-        if xrd_exit=='0': #worked second try
-            logging.info("Transfer successful on second try")
-            status = 'Success'
-            tries=2
-            dltime=end2-start2
-            payload={}
-            payload['timestamp']=end1
-            payload['host']=cache
-            payload['filename']=sourceFile
-            payload['filesize']=fileSize
-            payload['download_size']=dlSz
-            payload['download_time']=dltime
-            payload['sitename']=sitename
-            payload['destination_space']=destSpace
-            payload['status']=status
-            payload['xrdexit1']=xrd_exit
-            payload['xrdexit2']=xrdexit2
-            payload['xrdexit3']=xrdexit3
-            payload['tries']=tries
-            payload['xrdcp_version']=xrdcp_version
-            payload['start1']=start1
-            payload['end1']=end1
-            payload['start2']=start2
-            payload['end2']=end2
-            payload['start3']=start3
-            payload['cache']=cache
-            try:
-                p = multiprocessing.Process(target=es_send, name="es_send", args=(payload,))
-                p.start()
-                time.sleep(5)
-                p.terminate()
-            except:
-                logging.error("Error curling to ES")
-        else: #pull from origin
-            logging.warning("2nd try failed on %s, pulling from origin" % cache)
-            cache="root://stash.osgconnect.net"
-            date=datetime.datetime.now()
-            start3=int(time.mktime(date.timetuple()))*1000
-            xrd_exit=timed_transfer(timeout=TIMEOUT,filename=source,diff=DIFF,expSize=fileSize,debug=debug,cache=cache,destination=destination)
-            date=datetime.datetime.now()
-            end3=int(time.mktime(date.timetuple()))*1000
-            dlSz=os.stat(filename).st_size
-            dltime=end3-start3
-            if xrd_exit=='0':
-                logging.info("Trunk Success")
-                status = 'Trunk Sucess'
-                tries=3
-            else:
-                logging.error("stashcp failed after 3 attempts")
-                status = 'Timeout'
-                tries = 3
-            payload={}
-            payload['timestamp']=end1
-            payload['host']=cache
-            payload['filename']=sourceFile
-            payload['filesize']=fileSize
-            payload['download_size']=dlSz
-            payload['download_time']=dltime
-            payload['sitename']=sitename
-            payload['destination_space']=destSpace
-            payload['status']=status
-            payload['xrdexit1']=xrd_exit
-            payload['xrdexit2']=xrdexit2
-            payload['xrdexit3']=xrdexit3
-            payload['tries']=tries
-            payload['xrdcp_version']=xrdcp_version
-            payload['start1']=start1
-            payload['end1']=end1
-            payload['start2']=start2
-            payload['end2']=end2
-            payload['start3']=start3
-            payload['cache']=cache
-            try:
-                p = multiprocessing.Process(target=es_send, name="es_send", args=(payload,))
-                p.start()
-                time.sleep(5)
-                p.terminate()
-            except:
-                logging.error("Error curling to ES")
+        dltime=end3-start3
+        if xrd_exit=='0':
+            logging.info("Trunk Success")
+            status = 'Trunk Sucess'
+            tries=3
+        else:
+            logging.error("stashcp failed after 3 attempts")
+            status = 'Timeout'
+            tries = 3
+        payload={}
+        payload['timestamp']=end1
+        payload['host']=cache
+        payload['filename']=sourceFile
+        payload['filesize']=fileSize
+        payload['download_size']=dlSz
+        payload['download_time']=dltime
+        payload['sitename']=sitename
+        payload['destination_space']=destSpace
+        payload['status']=status
+        payload['xrdexit1']=xrd_exit
+        payload['xrdexit2']=xrdexit2
+        payload['xrdexit3']=xrdexit3
+        payload['tries']=tries
+        payload['xrdcp_version']=xrdcp_version
+        payload['start1']=start1
+        payload['end1']=end1
+        payload['start2']=start2
+        payload['end2']=end2
+        payload['start3']=start3
+        payload['cache']=cache
+        try:
+            p = multiprocessing.Process(target=es_send, name="es_send", args=(payload,))
+            p.start()
+            time.sleep(5)
+            p.terminate()
+        except:
+            logging.error("Error curling to ES")
 
 
 def dostashcpdirectory(sourceDir, destination, cache, debug=False):
