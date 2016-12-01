@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import optparse
 import sys
 import subprocess
@@ -51,6 +53,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     if os.path.exists(cvmfs_file):
         try:
             shutil.copy(cvmfs_file, destination)
+            logging.debug("Succesfully copied file from CVMFS!")
             date = datetime.datetime.now()
             end1=int(time.mktime(date.timetuple()))*1000
             filename=destination+'/'+sourceFile.split('/')[-1]
@@ -76,7 +79,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
             try:
                 p = multiprocessing.Process(target=es_send, name="es_send", args=(payload,))
                 p.start()
-                time.sleep(5)
+                p.join(5)
                 p.terminate()
             except:
                 logging.error("Error curling to ES")
@@ -129,7 +132,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
         try:
             p = multiprocessing.Process(target=es_send, name="es_send", args=(payload,))
             p.start()
-            time.sleep(5)
+            p.join(5)
             p.terminate()
         except:
             logging.error("Error curling to ES")
@@ -176,7 +179,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
         try:
             p = multiprocessing.Process(target=es_send, name="es_send", args=(payload,))
             p.start()
-            time.sleep(5)
+            p.join(5)
             p.terminate()
         except:
             logging.error("Error curling to ES")
@@ -298,16 +301,20 @@ def get_best_stashcache():
         i+=1
         
     if found == False:
-        logging.error("Unable to use Geoip to find closest site!")
+        # Unable to find a geo_ip server to use, return random choice from caches!
+        minsite = random.choice(caches_list)
+        logging.error("Unable to use Geoip to find closest cache!  Returning random cache %s" % minsite)
+        return minsite
+    else:
     
-    # From the response, should respond with something like:
-    # 3,1,2
-    ordered_list = response.read().strip().split(",")
-    logging.debug("Got response %s" % str(ordered_list))
-    minsite = caches_list[int(ordered_list[0])-1]['name']
-    
-    logging.debug("Returning closest cache: %s" % minsite)
-    return minsite
+        # From the response, should respond with something like:
+        # 3,1,2
+        ordered_list = response.read().strip().split(",")
+        logging.debug("Got response %s" % str(ordered_list))
+        minsite = caches_list[int(ordered_list[0])-1]['name']
+        
+        logging.debug("Returning closest cache: %s" % minsite)
+        return minsite
 
 
 def main():
