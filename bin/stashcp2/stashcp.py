@@ -45,6 +45,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     start1=int(time.mktime(date.timetuple()))*1000
     
     # First, check if the file is available in CVMFS
+    # Really, we don't need to check for close caches before this, but oh well
     if sourceFile[0] == '/':
         cvmfs_file = os.path.join("/cvmfs/stash.osgstorage.org/", sourceFile[1:])
     else:
@@ -89,27 +90,26 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
             logging.error("Unable to copy with CVMFS, even though file exists: %s" % str(e))
         
     
+    date = datetime.datetime.now()
+    start2=int(time.mktime(date.timetuple()))*1000
+    
     xrd_exit=timed_transfer(timeout=TIMEOUT,filename=sourceFile,diff=DIFF,expSize=fileSize,debug=debug,cache=cache,destination=destination)
     
     date = datetime.datetime.now()
-    end1=int(time.mktime(date.timetuple()))*1000
+    end2=int(time.mktime(date.timetuple()))*1000
     filename=destination+'/'+sourceFile.split('/')[-1]
     dlSz=os.stat(filename).st_size
     destSpace=1
     
-    
-    start2=0
     start3=0
-    end2=0
-    xrdexit2=-1
     xrdexit3=-1
     if xrd_exit=='0': #worked first try
         logging.debug("Transfer success using %s" % cache)
-        dltime=end1-start1
+        dltime=end2-start2
         status = 'Success'
-        tries=1
+        tries=2
         payload={}
-        payload['timestamp']=end1
+        payload['timestamp']=end2
         payload['host']=cache
         payload['filename']=sourceFile
         payload['filesize']=fileSize
@@ -119,7 +119,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
         payload['destination_space']=destSpace
         payload['status']=status
         payload['xrdexit1']=xrd_exit
-        payload['xrdexit2']=xrdexit2
+        payload['xrdexit2']=xrd_exit
         payload['xrdexit3']=xrdexit3
         payload['tries']=tries
         payload['xrdcp_version']=xrdcp_version
@@ -138,7 +138,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
             logging.error("Error curling to ES")
 
     else: #pull from origin
-        logging.warning("2nd try failed on %s, pulling from origin" % cache)
+        logging.warning("XrdCP from cache failed on %s, pulling from origin" % cache)
         cache="root://stash.osgconnect.net"
         date=datetime.datetime.now()
         start3=int(time.mktime(date.timetuple()))*1000
