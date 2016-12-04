@@ -91,7 +91,10 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
             
         except IOError as e:
             logging.error("Unable to copy with CVMFS, even though file exists: %s" % str(e))
-            
+    
+    else:
+        logging.debug("CVMFS File does not exist")
+        
     date = datetime.datetime.now()
     end1=int(time.mktime(date.timetuple()))*1000
     payload['end1']=end1
@@ -140,7 +143,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
         cache="root://stash.osgconnect.net"
         date=datetime.datetime.now()
         start3=int(time.mktime(date.timetuple()))*1000
-        xrd_exit=timed_transfer(timeout=TIMEOUT,filename=source,diff=DIFF,expSize=fileSize,debug=debug,cache=cache,destination=destination)
+        xrd_exit=timed_transfer(timeout=TIMEOUT,filename=sourceFile,diff=DIFF,expSize=fileSize,debug=debug,cache=cache,destination=destination)
         date=datetime.datetime.now()
         end3=int(time.mktime(date.timetuple()))*1000
         if os.path.exists(filename):
