@@ -37,7 +37,7 @@ module load xrootd
 cp /StashCache/bin/caches.json /StashCache/bin/stashcp2/caches.json
 
 # Perform tests
-python /StashCache/bin/stashcp2/stashcp.py --cache=$XRD_CACHE -d /user/dweitzel/public/blast/queries/query1 ./
+/StashCache/bin/stashcp --cache=$XRD_CACHE -d /user/dweitzel/public/blast/queries/query1 ./
 
 result=`md5sum query1 | awk '{print $1;}'`
 
@@ -45,7 +45,7 @@ if [ "$result" != "12bdb9a96cd5e8ca469b727a81593201" ]; then
   exit 1
 fi
 
-python /StashCache/bin/stashcp2/stashcp.py --cache=$XRD_CACHE -d -r /user/dweitzel/public/blast/queries ./
+/StashCache/bin/stashcp --cache=$XRD_CACHE -d -r /user/dweitzel/public/blast/queries ./
 ls -lah
 
 
