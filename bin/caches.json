@@ -1,6 +1,6 @@
 [ 
-    {"name":"root://student02.ci-connect.net/", "status":0, "longitude":-87.603, "latitude":41.78}, 
-    {"name":"root://stash.osgconnect.net/", "status":1, "longitude":-87.603, "latitude":41.78},
+    {"name":"root://student02.ci-connect.net", "status":0, "longitude":-87.603, "latitude":41.78}, 
+    {"name":"root://stash.osgconnect.net", "status":1, "longitude":-87.603, "latitude":41.78},
     {"name":"root://cm3.bu.edu", "status":0, "longitude":-72.6167, "latitude":42.2042},
     {"name":"root://xrd-cache-1.t2.ucsd.edu", "status":1, "longitude":-117.2359, "latitude":32.8807},
     {"name":"root://mwt2-stashcache.campuscluster.illinois.edu", "status":1, "longitude":-88.23, "latitude":40.107487},

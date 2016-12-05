@@ -1,451 +1,349 @@
-#!/bin/bash 
+#!/usr/bin/env python
 
-usage="$(basename $0) [-d] [-r] [-h] <source> <destination>
-	-d: show debugging information
-	-r: recursively copy
-	-h: show this help text
-	
-	--closest: return closest cache location
-	Exit status 4 indicates that at least one file did not successfully copy over.
-	Exit status 1 indicates that the WantsStashCache classad was not present in job environment."
+import optparse
+import sys
+import subprocess
+import datetime
+import time
+import re
+import os
+import json
+import multiprocessing
+import urllib2
+import threading
+import math
+import socket
+import random
+import shutil
 
-## function to find closest cache
-function getClose {
-	## for now, call Ilija's code, and hope that it is available nearby
-	setStashCache=`which setStashCache.sh 2>/dev/null`
-	res=$?
-	if [ $res -ne '0' ]; then
-		>&2 echo "Cannot find setStashCache.sh, setting to defaults - PROBLEM"
-		echo "root://stash.osgconnect.net"
-		exit 1
-	else 	
-		stashTools=$(which setStashCache.sh | rev | cut -d'/' -f2- | rev)
-		export StashToolsDir=$stashTools
-		source $setStashCache > /dev/null 2>&1 
-		echo $STASHPREFIX
-	fi
-}
-
-## function to update global arrays containing stashcp behavior information
-function updateInfo {
-	## arguments are: starts, names, sizes, times - in that order
-	starts=("${starts[@]}" $1)
-	names=("${names[@]}" $2)
-	sizes=("${sizes[@]}" $3)
-	times=("${times[@]}" $4)
-}
+import logging
+from urlparse import urlparse
 
 
 
-function findCondorChirp {
+TIMEOUT = 300
+DIFF = TIMEOUT * 10
 
-	## find chirp and add to path
-	if [ $isJob -eq 1 ]; then
-	        # First, try to use the glidein's condor_chirp.
-		# It's probably the most up to date, and we control it (more or less)
-		pushd ../../
-		pd=$(find . | grep "condor_chirp")
-		if ! [ -z $pd ]; then
-			p1=$(echo $pd | cut -c 2-)
-			p2=$(echo $p1 | rev | cut -d'/' -f2- | rev)
-			cwd=$(pwd)
-			PATH=$cwd/$p2:$PATH
-                        popd
-			return
-		fi
-		popd
 
-	        # Check if condor_chirp is in the path
-		which condor_chirp > /dev/null 2>&1
-		res=$?
-		if [ $res -eq 0 ]; then
-			return
-		fi
+def doStashCpSingle(sourceFile, destination, cache, debug=False):
 
-		# Finally, check if condor_chirp is available in a well known directory
-		if [ -s /usr/libexec/condor/condor_chirp ]; then
-			PATH=$PATH:/usr/libexec/condor
-		fi
-	fi
-	
+    logging.debug("Checking size of file.")
+    xrdfs = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "stat", sourceFile], stdout=subprocess.PIPE).communicate()[0]
+    xrdcp_version=subprocess.Popen(['echo $(xrdcp -V 2>&1)'],stdout=subprocess.PIPE,shell=True).communicate()[0][:-1]
+    fileSize=int(re.findall(r"Size:   \d+",xrdfs)[0].split(":   ")[1])
+    logging.debug("Size of the file %s is %i" % (sourceFile, fileSize))
+    #cache=get_best_stashcache()
+    logging.debug("Using Cache %s" % cache)
+    
+    try:
+        sitename=os.environ['OSG_SITE_NAME']
+    except:
+        sitename="siteNotFound"
+    
+    # Fill out the payload as much as possible
+    filename=destination+'/'+sourceFile.split('/')[-1]
+    payload={}
+    payload['xrdcp_version']=xrdcp_version
+    payload['filesize']=fileSize
+    payload['filename']=sourceFile
+    payload['sitename']=sitename
+    
+    # Calculate the starting time
+    date = datetime.datetime.now()
+    start1=int(time.mktime(date.timetuple()))*1000
+    
+    # First, check if the file is available in CVMFS
+    # Really, we don't need to check for close caches before this, but oh well
+    if sourceFile[0] == '/':
+        cvmfs_file = os.path.join("/cvmfs/stash.osgstorage.org/", sourceFile[1:])
+    else:
+        cvmfs_file = os.path.join("/cvmfs/stash.osgstorage.org/", sourceFile)
+    logging.debug("Checking if the CVMFS file exists: %s" % cvmfs_file)
+    if os.path.exists(cvmfs_file):
+        try:
+            shutil.copy(cvmfs_file, destination)
+            logging.debug("Succesfully copied file from CVMFS!")
+            date = datetime.datetime.now()
+            end1=int(time.mktime(date.timetuple()))*1000
+            dlSz=os.stat(filename).st_size
+            dltime=end1-start1
+            destSpace=1
+            status = 'Success'
+            payload['timestamp']=end1
+            payload['host']="CVMFS"
+            payload['download_size']=dlSz
+            payload['download_time']=dltime
+            payload['destination_space']=destSpace
+            payload['status']=status
+            payload['tries']=1
+            payload['start1']=start1
+            payload['end1']=end1
+            payload['cache']="CVMFS"
+            try:
+                p = multiprocessing.Process(target=es_send, name="es_send", args=(payload,))
+                p.start()
+                p.join(5)
+                p.terminate()
+            except:
+                logging.error("Error curling to ES")
+                
+            return 
+            
+        except IOError as e:
+            logging.error("Unable to copy with CVMFS, even though file exists: %s" % str(e))
+    
+    else:
+        logging.debug("CVMFS File does not exist")
+        
+    date = datetime.datetime.now()
+    end1=int(time.mktime(date.timetuple()))*1000
+    payload['end1']=end1
+    payload['start1']=start1
+    
+    date = datetime.datetime.now()
+    start2=int(time.mktime(date.timetuple()))*1000
+    
+    xrd_exit=timed_transfer(timeout=TIMEOUT,filename=sourceFile,diff=DIFF,expSize=fileSize,debug=debug,cache=cache,destination=destination)
+    
+    date = datetime.datetime.now()
+    end2=int(time.mktime(date.timetuple()))*1000
+    if os.path.exists(filename):
+        dlSz=os.stat(filename).st_size
+    destSpace=1
 
-}
+    payload['xrdexit1']=xrd_exit
+    payload['start2']=start2
+    payload['end2']=end2
+    
+    if xrd_exit=='0': #worked first try
+        logging.debug("Transfer success using %s" % cache)
+        dltime=end2-start2
+        status = 'Success'
+        tries=2
 
-## address single-file case
-function doStashCpSingle {
-	downloadFile=$1
-	dest=$2
-	## Get localPath = source path without prefix to be removed (logic for determining this in main loop)
-	#localPath=$dest
-	localPath=${downloadFile#$prefixRm}
-	mySz=$(xrdfs root://stash.osgconnect.net stat $downloadFile | grep "Size: " | cut -d':' -f2)
-	mySz=$(echo -n "${mySz//[[:space:]]/}")
-	## if someone has 'Size: ' in their file path, they have bigger problems than this not working.
-	mb=$((mySz/1000000))
-	tm=$((300+mb)) ## 5 minutes + 1MBps
-	xrdcpVersion="$(xrdcp -V 2>&1)"
-	st2=0
-	dl2=0
-	st3=0
-	cache=$sourcePrefix
-	xrdexit2=-1
-	xrdexit3=-1
+        payload['timestamp']=end2
+        payload['host']=cache
+        payload['download_size']=dlSz
+        payload['download_time']=dltime
+        payload['sitename']=sitename
+        payload['destination_space']=destSpace
+        payload['status']=status
+        payload['tries']=tries
+        payload['cache']=cache
+        try:
+            p = multiprocessing.Process(target=es_send, name="es_send", args=(payload,))
+            p.start()
+            p.join(5)
+            p.terminate()
+        except:
+            logging.error("Error curling to ES")
 
-	## First attempt
-	## Check destination directory for space in bytes
-	dirSpace=$(df -k $baseDir | tail -1 | awk '{print $3}')
-	dirSpace=$(echo $((dirSpace *1000)))
-	
-	st1=$(date +%s%3N)
-	downloading_timeout.sh -t $seconds -d $diff -f $baseDir/$localPath -s $mySz xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath
-	res=$?
-	xrdexit1=$res
-	dSz=$(du -b -s $baseDir/$localPath | cut -f -1)
-	dl1=$(date +%s%3N)
-	if [ $res -eq 0 ]; then
-		## pull from local cache succeeded
-		if [ $dSz -eq $mySz ]; then
-			jobStatus="Success"
-			tries=1
-		else
-			jobStatus="No timeout but filesize does not match downloaded size"
-		fi
-		dltm=$((dl1-st1))
-		if [ $3 ]; then 	## update info only if I want to
-			updateInfo $st1 $downloadFile $mySz $dltm
-		fi
-		## send info out to ES
-		hn=$sourcePrefix
-		timestamp=$(date +%s)
-		timestamp=$(echo $((timestamp*1000)))
-		xrdcpVersion="$(xrdcp -V 2>&1)"
-		payload="{ \"timestamp\" : ${timestamp}, \"host\" : \"${hn}\",\"filename\" : \"${downloadFile}\", \"filesize\" : ${mySz}, \"download_size\" : ${dSz}, \"download_time\" : ${dltm},  \"sitename\" : \"${OSG_SITE_NAME}\", \"destination_space\" : ${dirSpace}, \"status\" : \"${jobStatus}\", \"xrdexit1\" : ${xrdexit1}, \"xrdexit2\" : ${xrdexit2}, \"xrdexit3\" : ${xrdexit3}, \"tries\" : ${tries}, \"xrdcp_version\" : \"${xrdcpVersion}\", \"start1\" : ${st1}, \"end1\" : ${dl1}, \"start2\" : ${st2}, \"end2\" : ${dl2}, \"start3\" : ${st3}, \"cache\" : \"${cache}\"}"
-		echo $payload > data.json
-		timeout 10 curl -XPOST uct2-int.mwt2.org:9951 -d @data.json > /dev/null 2>&1 
-		rm data.json 2>&1
-	else
-		## pull from local cache failed; try again
-		## Second attempt
-		st2=$(date +%s%3N)
-		downloading_timeout.sh -t $seconds -d $diff -f $baseDir/$localPath -s $mySz xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath		
-		res=$?
-		xrdexit2=$res
-		dSz=$(du -b -s $baseDir/$localPath | cut -f -1)
-		dl2=$(date +%s%3N)
-		if [ $res -eq 0 ]; then 
-			## second attempt to pull from local cache succeeded
-			if [ $dSz -eq $mySz ]; then
-				jobStatus="Success"
-				tries=2
-			else
-				jobStatus="No timeout but filesize does not match downloaded size"
-			fi
-			dltm=$((dl2-st2))
-			if [ $2 ]; then 	## update info only if I want to
-				updateInfo $st2 $downloadFile $mySz $dltm
-			fi
-			## send info out to ES
-			hn=$sourcePrefix
-			timestamp=$(date +%s)
-			timestamp=$(echo $((timestamp*1000)))
-			payload="{ \"timestamp\" : ${timestamp}, \"host\" : \"${hn}\",\"filename\" : \"${downloadFile}\", \"filesize\" : ${mySz}, \"download_size\" : ${dSz}, \"download_time\" : ${dltm},  \"sitename\" : \"${OSG_SITE_NAME}\", \"destination_space\" : ${dirSpace}, \"status\" : \"${jobStatus}\", \"xrdexit1\" : ${xrdexit1}, \"xrdexit2\" : ${xrdexit2}, \"xrdexit3\" : ${xrdexit3}, \"tries\" : ${tries}, \"xrdcp_version\" : \"${xrdcpVersion}\", \"start1\" : ${st1}, \"end1\" : ${dl1}, \"start2\" : ${st2}, \"end2\" : ${dl2}, \"start3\" : ${st3}, \"cache\" : \"${cache}\"}"
-			echo $payload > data.json
-			timeout 10 curl -XPOST uct2-int.mwt2.org:9951 -d @data.json > /dev/null 2>&1
-			rm data.json 2>&1
-		else 	
-			## second attempt to pull from local cache failed, pulling from trunk
-		    	if [ $debug -eq 2 ]; then	
-				## print out debug info
-				echo "Pull of $downloadFile from $sourcePrefix failed."
-				echo "Command: xrdcp $xrdargs -f $sourcePrefix://$downloadFile $baseDir/$localPath 2>&1"
-				echo "Pulling from trunk"
-			fi
-			
-			## Third attempt
-			hn="root://stash.osgconnect.net"
-			st3=$(date +%s%3N)
-			downloading_timeout.sh -t $seconds -d $diff -f $baseDir/$localPath -s $mySz xrdcp $xrdargs -f $hn://$downloadFile $baseDir/$localPath
-			res=$?
-			xrdexit3=$res
-			dSz=$(du -b -s $baseDir/$localPath | cut -f -1)
-			dl3=$(date +%s%3N)
-			dltm=$((dl3-st3))
-			if [ $res -eq 0 ]; then
-				## pull from trunk succeeded
-				if [ $dSz -eq $mySz ]; then
-					jobStatus="Trunk Success"
-					tries=3
-				else
-					jobStatus="Downloaded from trunk - No timeout but filesize does not match downloaded size"
-				fi
-				#dltm=$((dl3-st3))
-				if [ $2 ]; then
-					updateInfo $st3 $downloadFile $mySz $dltm
-				fi
-				failoverfiles=("${failoverfiles[@]}" $downloadFile)
-				failovertimes=("${failovertimes[@]}" $st2) # time that the failed pull started
-			else
-				tries=3
-				jobStatus="Timeout"
-				failfiles=("${failfiles[@]}" $downloadFile)
-				failtimes=("${failtimes[@]}" $st2)	## this is the last time something failed
-				failcodes=("${failcodes[@]}" $res)
-				echo "Stashcp of $downloadFile failed."
-				echo "Command: xrdcp $xrdargs -f root://stash.osgconnect.net://$downloadFile $baseDir/$localPath 2>&1"
-				failed=$((failed+1))
-			fi
-			
-			timestamp=$(date +%s)
-			timestamp=$(echo $((timestamp*1000)))
-			payload="{ \"timestamp\" : ${timestamp}, \"host\" : \"${hn}\",\"filename\" : \"${downloadFile}\", \"filesize\" : ${mySz}, \"download_size\" : ${dSz}, \"download_time\" : ${dltm},  \"sitename\" : \"${OSG_SITE_NAME}\", \"destination_space\" : ${dirSpace}, \"status\" : \"${jobStatus}\", \"xrdexit1\" : ${xrdexit1}, \"xrdexit2\" : ${xrdexit2}, \"xrdexit3\" : ${xrdexit3}, \"tries\" : ${tries}, \"xrdcp_version\" : \"${xrdcpVersion}\", \"start1\" : ${st1}, \"end1\" : ${dl1}, \"start2\" : ${st2}, \"end2\" : ${dl2}, \"start3\" : ${st3}, \"cache\" : \"${cache}\"}"
-			echo $payload > data.json
-			timeout 10 curl -XPOST uct2-int.mwt2.org:9951 -d @data.json > /dev/null 2>&1
-			rm data.json 2>&1
-		fi
-	fi
-}
+    else: #pull from origin
+        logging.warning("XrdCP from cache failed on %s, pulling from origin" % cache)
+        cache="root://stash.osgconnect.net"
+        date=datetime.datetime.now()
+        start3=int(time.mktime(date.timetuple()))*1000
+        xrd_exit=timed_transfer(timeout=TIMEOUT,filename=sourceFile,diff=DIFF,expSize=fileSize,debug=debug,cache=cache,destination=destination)
+        date=datetime.datetime.now()
+        end3=int(time.mktime(date.timetuple()))*1000
+        if os.path.exists(filename):
+            dlSz=os.stat(filename).st_size
+        dltime=end3-start3
+        if xrd_exit=='0':
+            logging.info("Trunk Success")
+            status = 'Trunk Sucess'
+            tries=3
+        else:
+            logging.error("stashcp failed after 3 attempts")
+            status = 'Timeout'
+            tries = 3
+        payload['timestamp']=end3
+        payload['host']=cache
+        payload['download_size']=dlSz
+        payload['download_time']=dltime
+        payload['destination_space']=destSpace
+        payload['status']=status
+        payload['xrdexit2']=xrd_exit
+        payload['tries']=tries
+        payload['start3']=start3
+        payload['end3']=end3
+        payload['cache']=cache
+        try:
+            p = multiprocessing.Process(target=es_send, name="es_send", args=(payload,))
+            p.start()
+            p.join(5)
+            p.terminate()
+        except:
+            logging.error("Error curling to ES")
 
-## address directory case
-function doStashCpDirectory {
-	sourceDir=$1
-	sourceItems=$(xrdfs root://stash.osgconnect.net ls $sourceDir)
-	sz=$(xrdfs root://stash.osgconnect.net stat $sourceDir | grep "Size: " | cut -d':' -f2)
-	sz=$(echo -n "${sz//[[:space:]]/}")
-	st=$(date +%s%3N)
-	for item in $sourceItems; do
-		isdir=$(xrdfs root://stash.osgconnect.net stat $item | grep "IsDir" | wc -l)
-		## Logic for copying files vs. directories
-		if [ $isdir != 0 ] && [ $recursive == 1 ]; then
-			## creating local directory for subfolder
-			localPath=${item#$prefixRm}
-			mkdir -p $baseDir/$localPath
-			doStashCpDirectory $item
-		elif [ $isdir == 0 ]; then
-			doStashCpSingle $item
-		fi
-	done
-	dl=$(date +%s%3N)
-	dltm=$((dl-st))
-	if [ $2 ]; then
-		updateInfo $st $chirpedSource $sz $dltm 
-	fi
-}
 
-### LOGIC TO RUN STASHCP ###
+def dostashcpdirectory(sourceDir, destination, cache, debug=False):
+    sourceItems = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "ls", sourceDir], stdout=subprocess.PIPE).communicate()[0].split()
+    for file in sourceItems:
+        command2 = 'xrdfs root://stash.osgconnect.net stat '+ file + ' | grep "IsDir" | wc -l'
+        isdir=subprocess.Popen([command2],stdout=subprocess.PIPE,shell=True).communicate()[0].split()[0]
+        if isdir!='0':
+            dostashcpdirectory(file, destination, cache, debug)
+        else:
+            doStashCpSingle(file,destination, cache, debug)
 
-isJob=0
-## check if the relevant classad is there
-if [ ! -z ${_CONDOR_JOB_AD+x} ]; then
-	## in a job environment, and this check is relevant
-	isJob=1
-	classad=$(grep WantsStashCache $_CONDOR_JOB_AD)
-	if [ -n "$classad" ]; then 
-		## check if classad is correct
-		ans=$(echo "$classad" | cut -d' ' -f3)
-		if [ "$ans" == "WantsPosixStashCache" ]; then
-			ans=$(grep ^WantsPosixStashCache $_CONDOR_JOB_AD | cut -d' ' -f3)
-		fi
-		if [ ! "$ans" == "true" ] && [ ! "$ans" == "1" ]; then
-			echo "Error: WantsStashCache classad not set to true" >&2
-			exit 1
-		fi
-	else
-		echo "Error: WantsStashCache classad not present" >&2
-		exit 1
-	fi
-fi
 
-module load xrootd/4.2.1
-DIR=`dirname $(readlink -f $0)`
-export PATH=$PATH:$DIR
+def es_send(payload):
+    data = payload
+    data=json.dumps(data)
+    try:
+        url = "http://uct2-collectd.mwt2.org:9951"
+        req = urllib2.Request(url, data=data, headers={'Content-Type': 'application/json'})
+        f = urllib2.urlopen(req)
+        response = f.read()
+        f.close()
+    except:
+        print "Error posting to ES"
 
-## initialize variables
-debug=0
-file=""
-loc="."
-source=""
-recursive=0
-seconds=300
-diff=$((seconds * 10)) ## 10Bps
 
-## Process arguments
-## http://stackoverflow.com/a/5230306
-## http://stackoverflow.com/a/7948533
-if [ "$#" -eq 0 ]; then
-	echo "$usage"
-	exit
-fi
-if ! options=$(getopt -o :drhs:l: -l closest -- "$@"); then
-	exit 1
-fi
-eval set -- "$options"
-while [ $# -gt 0 ]; do
-    case $1 in 
-	-h)
-		echo "$usage"
-		exit
-		;;
-	-d)
-		debug=2
-		;;
-	-r)
-	    recursive=1
-	    ;;
-	--closest)
-		getClose
-		exit
-		;;
-	(--)
-		shift
-		break
-		;;
-	(-*)
-	    echo "$0: error - unrecognized option $1" 1>&2
-	    echo "$usage" >&2
-	    exit 1
-	    ;;
-	(*)
-		break
-		;;
-    esac
-	shift
-done
+def timed_transfer(filename,expSize,cache,destination,timeout=TIMEOUT,diff=DIFF,debug=False):
+    
+    # To set environment varibles if they don't already exist (set by user)
+    def set_if_none(var, value):
+        if var not in os.environ:
+            os.environ[var] = str(value)
+    
+    
+    # All these values can be found on the xrdcp man page
+    set_if_none("XRD_REQUESTTIMEOUT", 30)   # How long to wait for a read request (s)
+    set_if_none("XRD_CPCHUNKSIZE", 8388608) # Size of each read request (8MB)
+    set_if_none("XRD_TIMEOUTRESOLUTION", 5) # How often to check the timeouts
+    set_if_none("XRD_CONNECTIONWINDOW", 30) # How long to wait for the initial TCP connection
+    set_if_none("XRD_CONNECTIONRETRY", 2)   # How many time should we retry the TCP connection
+    set_if_none("XRD_STREAMTIMEOUT", 30)    # How long to wait for TCP activity
+    
+    filepath=cache+":1094//"+ filename
+    if debug:
+        command="xrdcp -d 2 --nopbar -f " + filepath + " " + destination
+    else:
+        command="xrdcp -s -f " + filepath + " " + destination
+        
+    filename="./"+filename.split("/")[-1]
+    if os.path.isfile(filename):
+        os.remove(filename)
+    xrdcp=subprocess.Popen([command ],shell=True,stdout=subprocess.PIPE)
+    
+    streamdata=xrdcp.communicate()[0]
+    xrd_exit=xrdcp.returncode
 
-# All further arguments are sources and 1 destination (like cp)
-# All n-1 elements are sources
-if [ $# -lt 2 ]; then
-    echo "Not enough arguments, require source and destination" >&2
-    exit 1
-fi
-sources=("${@:1:$#-1}")
-# Last argument is the destination
-dest=("${@:$#}") 
-#source=$1
-#loc=$2
+    return str(xrd_exit)
 
-findCondorChirp
 
-## set sourcePrefix to proper format
-if [[ $OSG_SITE_NAME == CIT* ]]; then
-    STASHPREFIX="root://xrd-cache-1.t2.ucsd.edu"
-    sourcePrefix=$STASHPREFIX
-elif [ ${#STASHPREFIX} -lt 3 ]; then
-	## look for closest site
-	getClose > /dev/null 2>&1
-	if [ ${#STASHPREFIX} -lt 3 ]; then
-		sourcePrefix="root://stash.osgconnect.net"
-		echo "Empty prefix"
-	else
-		sourcePrefix=$STASHPREFIX
-	fi
-fi
-lcs=$(echo "${STASHPREFIX: -1}")
-if [ $lcs == "/" ]; then
-	sourcePrefix=$(echo $STASHPREFIX | rev | cut -c 2- | rev)
-else
-	sourcePrefix=$STASHPREFIX
-fi
+def get_best_stashcache():
+    
+    # First, check for caches.json file in this file's directory:
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    cache_file = os.path.join(dir_path, 'caches.json')
+    if not os.path.isfile(cache_file):
+        logging.error("Unable to find caches.json in %s" % dir_path)
+        return None
+    
+    # Get all the caches from the json file
+    f = open(cache_file, 'r')
+    caches_list = json.loads(f.read())
+    f.close()
+    
+    # Get the possible GeoIP sites
+    
+    # Format the caches for the CVMFS query
+    caches_string = ""
+    usable_caches = []
+    for cache in caches_list:
+        if cache['status'] == 0:
+            continue
+        usable_caches.append(cache)
+        parsed_url = urlparse(cache['name'])
+        caches_string = "%s,%s" % (caches_string, parsed_url.hostname)
+    caches_list = usable_caches
+    # Remove the first comma
+    caches_string = caches_string[1:]
+    
+    # Here is a list from the output of the command:
+    # attr -qg host_list /cvmfs/oasis.opensciencegrid.org
+    geo_ip_sites = "http://cvmfs-s1fnal.opensciencegrid.org:8000/cvmfs/oasis.opensciencegrid.org;http://cvmfs-s1bnl.opensciencegrid.org:8000/cvmfs/oasis.opensciencegrid.org;http://cvmfs-egi.gridpp.rl.ac.uk:8000/cvmfs/oasis.opensciencegrid.org;http://klei.nikhef.nl:8000/cvmfs/oasis.opensciencegrid.org;http://cvmfsrep.grid.sinica.edu.tw:8000/cvmfs/oasis.opensciencegrid.org".split(';')
+    
+    # Add HCC's, for good measure
+    geo_ip_sites.insert(0,"hcc-cvmfs.unl.edu:8000/cvmfs/config-osg.opensciencegrid.org")
+    
+    # Append text before caches string
+    append_text = "api/v1.0/geo/@proxy@"
+    
+    # Randomize the geo ip sites
+    random.shuffle(geo_ip_sites)
+    found = False
+    i = 0
+    while found == False and i < len(geo_ip_sites):
+        cur_site = geo_ip_sites[i]
+        logging.debug("Trying geoip site of: %s", cur_site)
+        final_url = "%s/%s/%s" % (cur_site, append_text, caches_string)
+        logging.debug("Querying for closest cache: %s" % final_url)
+        try:
+            response = urllib2.urlopen(final_url)
+            if response.getcode() == 200:
+                logging.debug("Got error code 200 from %s" % cur_site)
+                found = True
+                break
+        except urllib2.URLError as e:
+            logging.debug("URL error: %s" % str(e))
+        i+=1
+        
+    if found == False:
+        # Unable to find a geo_ip server to use, return random choice from caches!
+        minsite = random.choice(caches_list)
+        logging.error("Unable to use Geoip to find closest cache!  Returning random cache %s" % minsite)
+        return minsite
+    else:
+    
+        # From the response, should respond with something like:
+        # 3,1,2
+        ordered_list = response.read().strip().split(",")
+        logging.debug("Got response %s" % str(ordered_list))
+        minsite = caches_list[int(ordered_list[0])-1]['name']
+        
+        logging.debug("Returning closest cache: %s" % minsite)
+        return minsite
 
-## deal with sites without variable set
-if [ ! -n "$OSG_SITE_NAME" ]; then
-	OSG_SITE_NAME="UNKNOWN"
-fi
 
-## set xrdargs
-if [ $debug -eq 2 ]; then
-	xrdargs="-d 2 --nopbar"
-else
-	xrdargs="-s"
-fi
+def main():
+    parser = optparse.OptionParser()
+    parser.add_option('-d', '--debug', dest='debug', action='store_true', help='debug')
+    parser.add_option('-r', dest='recursive', action='store_true', help='recursively copy')
+    parser.add_option('--closest', action='store_true')
+    parser.add_option('-c', '--cache', dest='cache', help="Cache to use")
+    args,opts=parser.parse_args()
 
-## check if location exists
-if [ ! -e $dest ]; then
-	echo "Error: Desired location $dest does not exist." >&2
-	exit 1
-fi
+    logger = logging.getLogger()
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.WARNING)
 
-## initialize info to be chirped
-failed=0
-starts=()
-names=()
-sizes=()
-times=()
-failoverfiles=()
-failovertimes=()
-failfiles=()
-failtimes=()
-failcodes=()
+    if not args.closest:
+        try:
+            source=opts[0]
+            destination=opts[1]
+        except:
+            parser.error('Source and Destination must be last two arguments')
+    else:
+        print get_best_stashcache()
+        sys.exit()
 
-baseDir=$dest
-prefixRm=""
+    # Check for manually entered cache to use
+    if args.cache and len(args.cache) > 0:
+        cache = args.cache
+    else:
+        cache = get_best_stashcache()
+    
+    if not args.recursive:
+        doStashCpSingle(sourceFile=source, destination=destination, cache=cache, debug=args.debug)
+    else:
+        dostashcpdirectory(sourceDir = source, destination = destination, cache=cache, debug=args.debug)
 
-## get list of files
-#source=$(echo $source | tr ',' ' ' | tr ';' ' ')
-files=($sources)
 
-### MAIN LOOP ###
-for file in ${files[@]}; do
-	## determine whether the input source is a directory or not
-	fisdir=$(xrdfs root://stash.osgconnect.net stat $file | grep "IsDir" | wc -l)
-	if [ $fisdir -eq 0 ]; then
-		## Single file
-		export prefixRm=`dirname $file`
-		baseDir=$dest
-		doStashCpSingle $file $dest update
-	else
-		## directory 
-		lc=$(echo "${file: -1}")
-		if [ "x$lc" == "x/" ]; then
-			## directory *contents* copied to $loc
-			export prefixRm="$(echo $file | rev | cut -d/ -f1- | rev)"
-			chirpedSource=$file/+
-			doStashCpDirectory $file update
-		else
-			## directory copied to $loc
-			dir=$(echo $file | rev | cut -d/ -f1 | rev)
-			export prefixRm="$(echo $file | rev | cut -d/ -f1- | rev)/"
-			baseDir=$dest/$dir
-			mkdir $baseDir
-			chirpedSource=$file+
-			doStashCpDirectory $file update
-		fi
-	fi
-done
-
-## Setting classads as appropriate
-## Once they remove the 1024-character limit on chirped classads, remove string subsetting
-if [ $isJob -eq 1 ]; then
-	condor_chirp set_job_attr_delayed Chirp_StashCp_Dest \"$OSG_SITE_NAME\"
-	condor_chirp set_job_attr_delayed Chirp_StashCp_Used \"true\"
-	condor_chirp set_job_attr_delayed Chirp_StashCp_Prefix \"$sourcePrefix\"
-	## http://stackoverflow.com/a/2317171
-	startString=$(printf ",%s" "${starts[@]}")
-	condor_chirp set_job_attr_delayed Chirp_StashCp_DLStart \"${startString:1}\"
-	nameString=$(printf ",%s" "${names[@]}")
-	condor_chirp set_job_attr_delayed Chirp_StashCp_FileName \"${nameString:1:1020}\"
-	sizeString=$(printf ",%s" "${sizes[@]}")
-	condor_chirp set_job_attr_delayed Chirp_StashCp_FileSize ${sizeString:1}
-	timeString=$(printf ",%s" "${times[@]}")
-	condor_chirp set_job_attr_delayed Chirp_StashCp_DlTimeMs ${timeString:1}
-	if [ $failoverfiles ]; then
-		fofString=$(printf ",%s" "${failoverfiles[@]}")
-		condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverFiles \"${fofString:1:1020}\"
-		fotString=$(printf ",%s" "${failovertimes[@]}")
-		condor_chirp set_job_attr_delayed Chirp_StashCp_FailoverTimes ${fotString:1}
-	fi
-	if [ $failfiles ]; then
-		ffString=$(printf ",%s" "${failfiles[@]}")
-		condor_chirp set_job_attr_delayed Chirp_StashCp_FailFiles \"${ffString:1:1020}\"
-		ftString=$(printf ",%s" "${failtimes[@]}")
-		condor_chirp set_job_attr_delayed Chirp_StashCp_FailTimes ${ftString:1}
-		fcString=$(printf ",%s" "${failcodes[@]}")
-		condor_chirp set_job_attr_delayed Chirp_StashCp_FailCodes \"${fcString:1:1020}\"
-	fi
-fi
-
-## If any one file transfer fails, then stashcp returns failure
-if [ $failed -ne 0 ]; then
-	exit 4
-else
-	exit 0
-fi
+if __name__ == "__main__":
+    main()
