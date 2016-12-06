@@ -15,7 +15,7 @@ rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-${OS_VERSION}
 yum -y install yum-plugin-priorities
 rpm -Uvh https://repo.grid.iu.edu/osg/3.3/osg-3.3-el${OS_VERSION}-release-latest.rpm
 
-yum -y install osg-oasis
+yum -y install osg-oasis pylint
 
 echo "user_allow_other" >> /etc/fuse.conf
 
@@ -34,7 +34,7 @@ set +e
 set -e
 module load xrootd
 
-cp /StashCache/bin/caches.json /StashCache/bin/stashcp2/caches.json
+pylint /StashCache/bin/stashcp
 
 # Perform tests
 /StashCache/bin/stashcp --cache=$XRD_CACHE -d /user/dweitzel/public/blast/queries/query1 ./
