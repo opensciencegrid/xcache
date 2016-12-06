@@ -1,6 +1,6 @@
 # StashCache
 
-[![Build Status](https://travis-ci.org/djw8605/StashCache-1.svg?branch=master)](https://travis-ci.org/djw8605/StashCache-1)
+[![Build Status](https://travis-ci.org/opensciencegrid/StashCache.svg?branch=master)](https://travis-ci.org/opensciencegrid/StashCache)
 
 This repo holds json file with addresses, statuses and geographical coordinates of all of the StashCache caches.
 Status is given as a number: 1 - Active, 0 - Not Active.
