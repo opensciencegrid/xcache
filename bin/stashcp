@@ -49,8 +49,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     payload['sitename']=sitename
     
     # Calculate the starting time
-    date = datetime.datetime.now()
-    start1=int(time.mktime(date.timetuple()))*1000
+    start1 = int(time.time()*1000)
     
     # First, check if the file is available in CVMFS
     # Really, we don't need to check for close caches before this, but oh well
@@ -63,8 +62,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
         try:
             shutil.copy(cvmfs_file, destination)
             logging.debug("Succesfully copied file from CVMFS!")
-            date = datetime.datetime.now()
-            end1=int(time.mktime(date.timetuple()))*1000
+            end1 = int(time.time()*1000)
             dlSz=os.stat(filename).st_size
             dltime=end1-start1
             destSpace=1
@@ -89,18 +87,15 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     else:
         logging.debug("CVMFS File does not exist")
         
-    date = datetime.datetime.now()
-    end1=int(time.mktime(date.timetuple()))*1000
+    end1=int(time.time()*1000)
     payload['end1']=end1
     payload['start1']=start1
     
-    date = datetime.datetime.now()
-    start2=int(time.mktime(date.timetuple()))*1000
+    start2 = int(time.time()*1000)
     
     xrd_exit=timed_transfer(timeout=TIMEOUT,filename=sourceFile,diff=DIFF,expSize=fileSize,debug=debug,cache=cache,destination=destination)
     
-    date = datetime.datetime.now()
-    end2=int(time.mktime(date.timetuple()))*1000
+    end2=int(time.time()*1000)
     if os.path.exists(filename):
         dlSz=os.stat(filename).st_size
     destSpace=1
@@ -115,8 +110,6 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
         status = 'Success'
         tries=2
 
-        payload['timestamp']=end2
-        payload['host']=cache
         payload['download_size']=dlSz
         payload['download_time']=dltime
         payload['sitename']=sitename
@@ -129,11 +122,9 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     else: #pull from origin
         logging.warning("XrdCP from cache failed on %s, pulling from origin" % cache)
         cache="root://stash.osgconnect.net"
-        date=datetime.datetime.now()
-        start3=int(time.mktime(date.timetuple()))*1000
+        start3 = int(time.time()*1000)
         xrd_exit=timed_transfer(timeout=TIMEOUT,filename=sourceFile,diff=DIFF,expSize=fileSize,debug=debug,cache=cache,destination=destination)
-        date=datetime.datetime.now()
-        end3=int(time.mktime(date.timetuple()))*1000
+        end3=int(time.time()*1000)
         if os.path.exists(filename):
             dlSz=os.stat(filename).st_size
         dltime=end3-start3
@@ -145,8 +136,6 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
             logging.error("stashcp failed after 3 attempts")
             status = 'Timeout'
             tries = 3
-        payload['timestamp']=end3
-        payload['host']=cache
         payload['download_size']=dlSz
         payload['download_time']=dltime
         payload['destination_space']=destSpace
@@ -171,6 +160,10 @@ def dostashcpdirectory(sourceDir, destination, cache, debug=False):
 
 
 def es_send(payload):
+    
+    # Calculate the curernt timestamp
+    payload['timestamp'] = int(time.time()*1000)
+    payload['host'] = payload['cache']
     
     def _es_send(payload):
         data = payload
