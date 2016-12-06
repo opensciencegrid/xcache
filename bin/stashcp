@@ -10,9 +10,6 @@ import os
 import json
 import multiprocessing
 import urllib2
-import threading
-import math
-import socket
 import random
 import shutil
 
@@ -31,9 +28,9 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     xrdfs = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "stat", sourceFile], stdout=subprocess.PIPE).communicate()[0]
     xrdcp_version=subprocess.Popen(['echo $(xrdcp -V 2>&1)'],stdout=subprocess.PIPE,shell=True).communicate()[0][:-1]
     fileSize=int(re.findall(r"Size:   \d+",xrdfs)[0].split(":   ")[1])
-    logging.debug("Size of the file %s is %i" % (sourceFile, fileSize))
+    logging.debug("Size of the file %s is %i", sourceFile, str(fileSize))
     #cache=get_best_stashcache()
-    logging.debug("Using Cache %s" % cache)
+    logging.debug("Using Cache %s", cache)
     
     try:
         sitename=os.environ['OSG_SITE_NAME']
@@ -58,7 +55,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
         cvmfs_file = os.path.join("/cvmfs/stash.osgstorage.org/", sourceFile[1:])
     else:
         cvmfs_file = os.path.join("/cvmfs/stash.osgstorage.org/", sourceFile)
-    logging.debug("Checking if the CVMFS file exists: %s" % cvmfs_file)
+    logging.debug("Checking if the CVMFS file exists: %s", cvmfs_file)
     if os.path.exists(cvmfs_file):
         try:
             shutil.copy(cvmfs_file, destination)
@@ -90,7 +87,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
             return 
             
         except IOError as e:
-            logging.error("Unable to copy with CVMFS, even though file exists: %s" % str(e))
+            logging.error("Unable to copy with CVMFS, even though file exists: %s", str(e))
     
     else:
         logging.debug("CVMFS File does not exist")
@@ -116,7 +113,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     payload['end2']=end2
     
     if xrd_exit=='0': #worked first try
-        logging.debug("Transfer success using %s" % cache)
+        logging.debug("Transfer success using %s", cache)
         dltime=end2-start2
         status = 'Success'
         tries=2
@@ -139,7 +136,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
             logging.error("Error curling to ES")
 
     else: #pull from origin
-        logging.warning("XrdCP from cache failed on %s, pulling from origin" % cache)
+        logging.warning("XrdCP from cache failed on %s, pulling from origin", cache)
         cache="root://stash.osgconnect.net"
         date=datetime.datetime.now()
         start3=int(time.mktime(date.timetuple()))*1000
@@ -240,7 +237,7 @@ def get_best_stashcache():
     dir_path = os.path.dirname(os.path.realpath(__file__))
     cache_file = os.path.join(dir_path, 'caches.json')
     if not os.path.isfile(cache_file):
-        logging.error("Unable to find caches.json in %s" % dir_path)
+        logging.error("Unable to find caches.json in %s", dir_path)
         return None
     
     # Get all the caches from the json file
@@ -281,31 +278,31 @@ def get_best_stashcache():
         cur_site = geo_ip_sites[i]
         logging.debug("Trying geoip site of: %s", cur_site)
         final_url = "%s/%s/%s" % (cur_site, append_text, caches_string)
-        logging.debug("Querying for closest cache: %s" % final_url)
+        logging.debug("Querying for closest cache: %s", final_url)
         try:
             response = urllib2.urlopen(final_url)
             if response.getcode() == 200:
-                logging.debug("Got error code 200 from %s" % cur_site)
+                logging.debug("Got error code 200 from %s", cur_site)
                 found = True
                 break
         except urllib2.URLError as e:
-            logging.debug("URL error: %s" % str(e))
+            logging.debug("URL error: %s", str(e))
         i+=1
         
     if found == False:
         # Unable to find a geo_ip server to use, return random choice from caches!
         minsite = random.choice(caches_list)
-        logging.error("Unable to use Geoip to find closest cache!  Returning random cache %s" % minsite)
+        logging.error("Unable to use Geoip to find closest cache!  Returning random cache %s", minsite)
         return minsite
     else:
     
         # From the response, should respond with something like:
         # 3,1,2
         ordered_list = response.read().strip().split(",")
-        logging.debug("Got response %s" % str(ordered_list))
+        logging.debug("Got response %s", str(ordered_list))
         minsite = caches_list[int(ordered_list[0])-1]['name']
         
-        logging.debug("Returning closest cache: %s" % minsite)
+        logging.debug("Returning closest cache: %s", minsite)
         return minsite
 
 
