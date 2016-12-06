@@ -170,7 +170,7 @@ def es_send(payload):
             f = urllib2.urlopen(req)
             f.read()
             f.close()
-        except URLError as e:
+        except urllib2.URLError as e:
             logging.error("Error posting to ES: %s", str(e))
     
     p = multiprocessing.Process(target=_es_send, name="_es_send", args=(payload,))
