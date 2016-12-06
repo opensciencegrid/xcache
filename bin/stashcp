@@ -3,7 +3,6 @@
 import optparse
 import sys
 import subprocess
-import datetime
 import time
 import re
 import os
@@ -32,9 +31,9 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     #cache=get_best_stashcache()
     logging.debug("Using Cache %s", cache)
     
-    try:
+    if 'OSG_SITE_NAME' in os.environ:
         sitename=os.environ['OSG_SITE_NAME']
-    except:
+    else:
         sitename="siteNotFound"
     
     # Fill out the payload as much as possible
@@ -147,13 +146,13 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
 
 def dostashcpdirectory(sourceDir, destination, cache, debug=False):
     sourceItems = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "ls", sourceDir], stdout=subprocess.PIPE).communicate()[0].split()
-    for file in sourceItems:
-        command2 = 'xrdfs root://stash.osgconnect.net stat '+ file + ' | grep "IsDir" | wc -l'
+    for remote_file in sourceItems:
+        command2 = 'xrdfs root://stash.osgconnect.net stat '+ remote_file + ' | grep "IsDir" | wc -l'
         isdir=subprocess.Popen([command2],stdout=subprocess.PIPE,shell=True).communicate()[0].split()[0]
         if isdir!='0':
-            dostashcpdirectory(file, destination, cache, debug)
+            dostashcpdirectory(remote_file, destination, cache, debug)
         else:
-            doStashCpSingle(file,destination, cache, debug)
+            doStashCpSingle(remote_file,destination, cache, debug)
 
 
 def es_send(payload):
@@ -169,10 +168,10 @@ def es_send(payload):
             url = "http://uct2-collectd.mwt2.org:9951"
             req = urllib2.Request(url, data=data, headers={'Content-Type': 'application/json'})
             f = urllib2.urlopen(req)
-            response = f.read()
+            f.read()
             f.close()
-        except:
-            logging.error("Error posting to ES")
+        except URLError as e:
+            logging.error("Error posting to ES: %s", str(e))
     
     p = multiprocessing.Process(target=_es_send, name="_es_send", args=(payload,))
     p.start()
@@ -206,7 +205,7 @@ def timed_transfer(filename, cache, destination, debug=False):
         os.remove(filename)
     xrdcp=subprocess.Popen([command ],shell=True,stdout=subprocess.PIPE)
     
-    streamdata=xrdcp.communicate()[0]
+    xrdcp.communicate()
     xrd_exit=xrdcp.returncode
 
     return str(xrd_exit)
