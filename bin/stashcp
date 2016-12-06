@@ -79,13 +79,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
             payload['start1']=start1
             payload['end1']=end1
             payload['cache']="CVMFS"
-            try:
-                p = multiprocessing.Process(target=es_send, name="es_send", args=(payload,))
-                p.start()
-                p.join(5)
-                p.terminate()
-            except:
-                logging.error("Error curling to ES")
+            es_send(payload)
                 
             return 
             
@@ -130,13 +124,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
         payload['status']=status
         payload['tries']=tries
         payload['cache']=cache
-        try:
-            p = multiprocessing.Process(target=es_send, name="es_send", args=(payload,))
-            p.start()
-            p.join(5)
-            p.terminate()
-        except:
-            logging.error("Error curling to ES")
+        es_send(payload)
 
     else: #pull from origin
         logging.warning("XrdCP from cache failed on %s, pulling from origin" % cache)
@@ -168,13 +156,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
         payload['start3']=start3
         payload['end3']=end3
         payload['cache']=cache
-        try:
-            p = multiprocessing.Process(target=es_send, name="es_send", args=(payload,))
-            p.start()
-            p.join(5)
-            p.terminate()
-        except:
-            logging.error("Error curling to ES")
+        es_send(payload)
 
 
 def dostashcpdirectory(sourceDir, destination, cache, debug=False):
@@ -189,16 +171,25 @@ def dostashcpdirectory(sourceDir, destination, cache, debug=False):
 
 
 def es_send(payload):
-    data = payload
-    data=json.dumps(data)
-    try:
-        url = "http://uct2-collectd.mwt2.org:9951"
-        req = urllib2.Request(url, data=data, headers={'Content-Type': 'application/json'})
-        f = urllib2.urlopen(req)
-        response = f.read()
-        f.close()
-    except:
-        print "Error posting to ES"
+    
+    def _es_send(payload):
+        data = payload
+        data=json.dumps(data)
+        try:
+            url = "http://uct2-collectd.mwt2.org:9951"
+            req = urllib2.Request(url, data=data, headers={'Content-Type': 'application/json'})
+            f = urllib2.urlopen(req)
+            response = f.read()
+            f.close()
+        except:
+            logging.error("Error posting to ES")
+    
+    p = multiprocessing.Process(target=_es_send, name="_es_send", args=(payload,))
+    p.start()
+    p.join(5)
+    p.terminate()
+    
+    
 
 
 def timed_transfer(filename,expSize,cache,destination,timeout=TIMEOUT,diff=DIFF,debug=False):
