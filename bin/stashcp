@@ -194,19 +194,14 @@ def es_send(payload):
 
 def timed_transfer(filename,expSize,cache,destination,timeout=TIMEOUT,diff=DIFF,debug=False):
     
-    # To set environment varibles if they don't already exist (set by user)
-    def set_if_none(var, value):
-        if var not in os.environ:
-            os.environ[var] = str(value)
-    
     
     # All these values can be found on the xrdcp man page
-    set_if_none("XRD_REQUESTTIMEOUT", 30)   # How long to wait for a read request (s)
-    set_if_none("XRD_CPCHUNKSIZE", 8388608) # Size of each read request (8MB)
-    set_if_none("XRD_TIMEOUTRESOLUTION", 5) # How often to check the timeouts
-    set_if_none("XRD_CONNECTIONWINDOW", 30) # How long to wait for the initial TCP connection
-    set_if_none("XRD_CONNECTIONRETRY", 2)   # How many time should we retry the TCP connection
-    set_if_none("XRD_STREAMTIMEOUT", 30)    # How long to wait for TCP activity
+    os.environ.setdefault("XRD_REQUESTTIMEOUT", "30")   # How long to wait for a read request (s)
+    os.environ.setdefault("XRD_CPCHUNKSIZE", "8388608") # Size of each read request (8MB)
+    os.environ.setdefault("XRD_TIMEOUTRESOLUTION", "5") # How often to check the timeouts
+    os.environ.setdefault("XRD_CONNECTIONWINDOW", "30") # How long to wait for the initial TCP connection
+    os.environ.setdefault("XRD_CONNECTIONRETRY", "2")   # How many time should we retry the TCP connection
+    os.environ.setdefault("XRD_STREAMTIMEOUT", "30")    # How long to wait for TCP activity
     
     filepath=cache+":1094//"+ filename
     if debug:
