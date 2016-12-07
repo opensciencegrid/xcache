@@ -261,7 +261,7 @@ def get_best_stashcache():
         logging.debug("Querying for closest cache: %s", final_url)
         try:
             # Make the request
-            req = urllib2.Request(final_url, headers)
+            req = urllib2.Request(final_url, headers=headers)
             response = urllib2.urlopen(req)
             if response.getcode() == 200:
                 logging.debug("Got error code 200 from %s", cur_site)
