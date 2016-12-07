@@ -31,10 +31,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     #cache=get_best_stashcache()
     logging.debug("Using Cache %s", cache)
     
-    if 'OSG_SITE_NAME' in os.environ:
-        sitename = os.environ['OSG_SITE_NAME']
-    else:
-        sitename = "siteNotFound"
+    sitename = os.environ.setdefault("OSG_SITE_NAME", "siteNotFound")
     
     # Fill out the payload as much as possible
     filename = destination + '/' + sourceFile.split('/')[-1]
@@ -77,7 +74,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
                 
             return 
             
-        except IOError as e:
+        except IOError, e:
             logging.error("Unable to copy with CVMFS, even though file exists: %s", str(e))
     
     else:
@@ -170,7 +167,7 @@ def es_send(payload):
             f = urllib2.urlopen(req)
             f.read()
             f.close()
-        except urllib2.URLError as e:
+        except urllib2.URLError, e:
             logging.error("Error posting to ES: %s", str(e))
     
     p = multiprocessing.Process(target=_es_send, name="_es_send", args=(payload,))
@@ -265,7 +262,7 @@ def get_best_stashcache():
                 logging.debug("Got error code 200 from %s", cur_site)
                 found = True
                 break
-        except urllib2.URLError as e:
+        except urllib2.URLError, e:
             logging.debug("URL error: %s", str(e))
         i+=1
         
