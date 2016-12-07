@@ -247,6 +247,9 @@ def get_best_stashcache():
     # Append text before caches string
     append_text = "api/v1.0/geo/stashcp"
     
+    # Headers for the HTTP request
+    headers = {'Cache-control': 'max-age=0', 'User-Agent': 'stashcp/4.1'}
+    
     # Randomize the geo ip sites
     random.shuffle(geo_ip_sites)
     found = False
@@ -258,8 +261,7 @@ def get_best_stashcache():
         logging.debug("Querying for closest cache: %s", final_url)
         try:
             # Make the request
-            req = urllib2.Request(final_url)
-            req.add_header("Cache-control", "max-age=0")
+            req = urllib2.Request(final_url, headers)
             response = urllib2.urlopen(req)
             if response.getcode() == 200:
                 logging.debug("Got error code 200 from %s", cur_site)
