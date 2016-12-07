@@ -27,7 +27,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     xrdfs = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "stat", sourceFile], stdout=subprocess.PIPE).communicate()[0]
     xrdcp_version = subprocess.Popen(['echo $(xrdcp -V 2>&1)'], stdout=subprocess.PIPE, shell=True).communicate()[0][:-1]
     fileSize = int(re.findall(r"Size:   \d+", xrdfs)[0].split(":   ")[1])
-    logging.debug("Size of the file %s is %i", sourceFile, str(fileSize))
+    logging.debug("Size of the file %s is %i", sourceFile, fileSize)
     #cache=get_best_stashcache()
     logging.debug("Using Cache %s", cache)
     
@@ -248,7 +248,7 @@ def get_best_stashcache():
     geo_ip_sites.insert(0,"hcc-cvmfs.unl.edu:8000/cvmfs/config-osg.opensciencegrid.org")
     
     # Append text before caches string
-    append_text = "api/v1.0/geo/@proxy@"
+    append_text = "api/v1.0/geo/stashcp"
     
     # Randomize the geo ip sites
     random.shuffle(geo_ip_sites)
@@ -260,7 +260,10 @@ def get_best_stashcache():
         final_url = "%s/%s/%s" % (cur_site, append_text, caches_string)
         logging.debug("Querying for closest cache: %s", final_url)
         try:
-            response = urllib2.urlopen(final_url)
+            # Make the request
+            req = urllib2.Request(final_url)
+            req.add_header("Cache-control", "max-age=0")
+            response = urllib2.urlopen(req)
             if response.getcode() == 200:
                 logging.debug("Got error code 200 from %s", cur_site)
                 found = True
