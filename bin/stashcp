@@ -339,6 +339,10 @@ def main():
     else:
         cache = get_best_stashcache()
     
+    if not source.startswith('/'):
+        logging.warning("DEPRECIATED: The source path does not begin with a '/', but it is required.  This functionality will be removed in an upcoming release")
+        source = "/" + source
+    
     if not args.recursive:
         doStashCpSingle(sourceFile=source, destination=destination, cache=cache, debug=args.debug)
     else:
