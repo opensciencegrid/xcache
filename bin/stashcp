@@ -242,7 +242,7 @@ def get_best_stashcache():
     geo_ip_sites = "http://cvmfs-s1fnal.opensciencegrid.org:8000/cvmfs/oasis.opensciencegrid.org;http://cvmfs-s1bnl.opensciencegrid.org:8000/cvmfs/oasis.opensciencegrid.org;http://cvmfs-egi.gridpp.rl.ac.uk:8000/cvmfs/oasis.opensciencegrid.org;http://klei.nikhef.nl:8000/cvmfs/oasis.opensciencegrid.org;http://cvmfsrep.grid.sinica.edu.tw:8000/cvmfs/oasis.opensciencegrid.org".split(';')
     
     # Add HCC's, for good measure
-    geo_ip_sites.insert(0,"hcc-cvmfs.unl.edu:8000/cvmfs/config-osg.opensciencegrid.org")
+    geo_ip_sites.insert(0,"http://hcc-cvmfs.unl.edu:8000/cvmfs/config-osg.opensciencegrid.org")
     
     # Append text before caches string
     append_text = "api/v1.0/geo/@proxy@"
