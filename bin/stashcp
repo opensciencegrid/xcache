@@ -89,8 +89,8 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     xrd_exit=timed_transfer(filename=sourceFile, debug=debug, cache=cache, destination=destination)
     
     end2=int(time.time()*1000)
-    if os.path.exists(filename):
-        dlSz=os.stat(filename).st_size
+    if os.path.exists(destination):
+        dlSz=os.stat(destination).st_size
     destSpace=1
 
     payload['xrdexit1']=xrd_exit
@@ -118,8 +118,8 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
         start3 = int(time.time()*1000)
         xrd_exit=timed_transfer(filename=sourceFile, debug=debug, cache=cache, destination=destination)
         end3=int(time.time()*1000)
-        if os.path.exists(filename):
-            dlSz=os.stat(filename).st_size
+        if os.path.exists(destination):
+            dlSz=os.stat(destination).st_size
         dltime=end3-start3
         if xrd_exit=='0':
             logging.info("Trunk Success")
