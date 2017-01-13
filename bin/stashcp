@@ -56,7 +56,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
             shutil.copy(cvmfs_file, destination)
             logging.debug("Succesfully copied file from CVMFS!")
             end1 = int(time.time()*1000)
-            dlSz=os.stat(filename).st_size
+            dlSz=os.stat(destination).st_size
             dltime=end1-start1
             destSpace=1
             status = 'Success'
