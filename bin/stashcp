@@ -293,6 +293,8 @@ def main():
     args,opts=parser.parse_args()
 
     logger = logging.getLogger()
+    logger.basicConfig(format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+    
     if args.debug:
         logger.setLevel(logging.DEBUG)
     else:
