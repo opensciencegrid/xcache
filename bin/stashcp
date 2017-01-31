@@ -292,8 +292,9 @@ def main():
     parser.add_option('-c', '--cache', dest='cache', help="Cache to use")
     args,opts=parser.parse_args()
 
+    logging.basicConfig(format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
     logger = logging.getLogger()
-    logger.basicConfig(format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+
     
     if args.debug:
         logger.setLevel(logging.DEBUG)
