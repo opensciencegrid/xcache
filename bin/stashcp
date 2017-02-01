@@ -292,7 +292,8 @@ def main():
     parser.add_option('-c', '--cache', dest='cache', help="Cache to use")
     args,opts=parser.parse_args()
 
-    logging.basicConfig(format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+    logger.basicConfig(format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                       datefmt="%Y-%m-%dT%H:%M:%S%z")
     logger = logging.getLogger()
 
     
