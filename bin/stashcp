@@ -148,7 +148,7 @@ def parse_job_ad():
     try:
         with open(os.environ['_CONDOR_JOB_AD']) as job_file:
             for line in job_file.readLines():
-                match = re.match('Owner|ProjectName', line, re.IGNORECASE)
+                match = re.search('^\s*(Owner|ProjectName)\s=\s"(.*)"', line,  re.IGNORECASE)
                 if match:
                     temp_list[match.group()] = line
     except IOError, e:
