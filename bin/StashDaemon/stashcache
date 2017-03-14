@@ -70,15 +70,11 @@ class HeartBeatThread(threading.Thread):
                                               % self.url)
                     # ads need to be updated every 15 min while heartbeats should be done every 30 min
                     for _ in range(2):
-                        try:
-                            for collector in local_coll, central_coll:
-                                pool = collector.query(htcondor.AdTypes.Collector)[0]['Machine']
-                                htcondor.log(htcondor.LogLevel.Always, 'Advertising StashCache ads to %s' % pool)
-                                for args in [([local_master], 'UPDATE_MASTER_AD'),
-                                             ([cache_ad], 'UPDATE_STARTD_AD')]:
-                                    collector.advertise(*args)
-                        except ValueError:
-                            raise ValueError
+                        for collector in local_coll, central_coll:
+                            pool = collector.query(htcondor.AdTypes.Collector)[0]['Machine']
+                            htcondor.log(htcondor.LogLevel.Always, 'Advertising StashCache ads to %s' % pool)
+                            for args in [([local_master], 'UPDATE_MASTER_AD'), ([cache_ad], 'UPDATE_STARTD_AD')]:
+                                collector.advertise(*args)
                         time.sleep(900)
                 else:
                     raise XrootdException('No heartbeat from XRootD server')
