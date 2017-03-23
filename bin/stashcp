@@ -72,7 +72,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
             payload['cache']="CVMFS"
             es_send(payload)
                 
-            return 
+            return 0
             
         except IOError, e:
             logging.error("Unable to copy with CVMFS, even though file exists: %s", str(e))
@@ -139,6 +139,11 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
         payload['end3']=end3
         payload['cache']=cache
         es_send(payload)
+        if xrd_exit == '0':
+            return 0
+        else:
+            return 1
+    return 0
 
 
 def dostashcpdirectory(sourceDir, destination, cache, debug=False):
@@ -147,9 +152,12 @@ def dostashcpdirectory(sourceDir, destination, cache, debug=False):
         command2 = 'xrdfs root://stash.osgconnect.net stat '+ remote_file + ' | grep "IsDir" | wc -l'
         isdir=subprocess.Popen([command2],stdout=subprocess.PIPE,shell=True).communicate()[0].split()[0]
         if isdir!='0':
-            dostashcpdirectory(remote_file, destination, cache, debug)
+            result = dostashcpdirectory(remote_file, destination, cache, debug)
         else:
-            doStashCpSingle(remote_file,destination, cache, debug)
+            result = doStashCpSingle(remote_file,destination, cache, debug)
+        # Stop transfers if something fails
+        if result != 0:
+            return result
 
 
 def es_send(payload):
@@ -323,10 +331,13 @@ def main():
         logging.warning("DEPRECIATED: The source path does not begin with a '/', but it is required.  This functionality will be removed in an upcoming release")
         source = "/" + source
     
+    
     if not args.recursive:
-        doStashCpSingle(sourceFile=source, destination=destination, cache=cache, debug=args.debug)
+        result = doStashCpSingle(sourceFile=source, destination=destination, cache=cache, debug=args.debug)
     else:
-        dostashcpdirectory(sourceDir = source, destination = destination, cache=cache, debug=args.debug)
+        result = dostashcpdirectory(sourceDir = source, destination = destination, cache=cache, debug=args.debug)
+    # Exit with failure
+    sys.exit(result)
 
 
 if __name__ == "__main__":
