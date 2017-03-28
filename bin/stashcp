@@ -31,7 +31,6 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     #cache=get_best_stashcache()
     logging.debug("Using Cache %s", cache)
     
-    sitename = os.environ.setdefault("OSG_SITE_NAME", "siteNotFound")
     
     # Fill out the payload as much as possible
     filename = destination + '/' + sourceFile.split('/')[-1]
