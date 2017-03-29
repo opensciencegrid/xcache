@@ -24,9 +24,16 @@ DIFF = TIMEOUT * 10
 def doStashCpSingle(sourceFile, destination, cache, debug=False):
 
     logging.debug("Checking size of file.")
-    xrdfs = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "stat", sourceFile], stdout=subprocess.PIPE).communicate()[0]
+    (xrdfs_stdout, xrdfs_stderr) = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "stat", sourceFile], stdout=subprocess.PIPE).communicate()
     xrdcp_version = subprocess.Popen(['echo $(xrdcp -V 2>&1)'], stdout=subprocess.PIPE, shell=True).communicate()[0][:-1]
-    fileSize = int(re.findall(r"Size:   \d+", xrdfs)[0].split(":   ")[1])
+    try:
+        fileSize = int(re.findall(r"Size:   \d+", xrdfs_stdout)[0].split(":   ")[1])
+    except Exception as e:
+        sys.stderr.write("Unable to find size of file\n")
+        print str(xrdfs_stdout)
+        sys.stderr.write(str(xrdfs_stderr))
+        sys.stderr.write("\n")
+        return 1
     logging.debug("Size of the file %s is %s", sourceFile, str(fileSize))
     #cache=get_best_stashcache()
     logging.debug("Using Cache %s", cache)
@@ -71,7 +78,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
             payload['cache']="CVMFS"
             es_send(payload)
                 
-            return 
+            return 0
             
         except IOError, e:
             logging.error("Unable to copy with CVMFS, even though file exists: %s", str(e))
@@ -140,6 +147,11 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
         payload['end3']=end3
         payload['cache']=cache
         es_send(payload)
+        if xrd_exit == '0':
+            return 0
+        else:
+            return 1
+    return 0
 
 
 def parse_job_ad():
@@ -170,9 +182,12 @@ def dostashcpdirectory(sourceDir, destination, cache, debug=False):
         command2 = 'xrdfs root://stash.osgconnect.net stat '+ remote_file + ' | grep "IsDir" | wc -l'
         isdir=subprocess.Popen([command2],stdout=subprocess.PIPE,shell=True).communicate()[0].split()[0]
         if isdir!='0':
-            dostashcpdirectory(remote_file, destination, cache, debug)
+            result = dostashcpdirectory(remote_file, destination, cache, debug)
         else:
-            doStashCpSingle(remote_file,destination, cache, debug)
+            result = doStashCpSingle(remote_file,destination, cache, debug)
+        # Stop transfers if something fails
+        if result != 0:
+            return result
 
 
 def es_send(payload):
@@ -346,10 +361,13 @@ def main():
         logging.warning("DEPRECIATED: The source path does not begin with a '/', but it is required.  This functionality will be removed in an upcoming release")
         source = "/" + source
     
+    
     if not args.recursive:
-        doStashCpSingle(sourceFile=source, destination=destination, cache=cache, debug=args.debug)
+        result = doStashCpSingle(sourceFile=source, destination=destination, cache=cache, debug=args.debug)
     else:
-        dostashcpdirectory(sourceDir = source, destination = destination, cache=cache, debug=args.debug)
+        result = dostashcpdirectory(sourceDir = source, destination = destination, cache=cache, debug=args.debug)
+    # Exit with failure
+    sys.exit(result)
 
 
 if __name__ == "__main__":
