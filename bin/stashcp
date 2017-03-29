@@ -32,7 +32,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
         sys.stderr.write("Unable to find size of file\n")
         print str(xrdfs_stdout)
         sys.stderr.write(str(xrdfs_stderr))
-        print str(e)
+        sys.stderr.write("\n")
         return 1
     logging.debug("Size of the file %s is %s", sourceFile, str(fileSize))
     #cache=get_best_stashcache()
