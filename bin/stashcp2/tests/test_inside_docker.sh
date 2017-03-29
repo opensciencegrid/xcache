@@ -37,6 +37,9 @@ module load xrootd
 # For now, disable pylint failures
 pylint /StashCache/bin/stashcp || /bin/true
 
+# Copy in the .job.ad file:
+cp /StashCache/bin/stashcp2/job.ad ./.job.ad
+
 # Try copying with no forward slash
 /StashCache/bin/stashcp --cache=$XRD_CACHE user/dweitzel/public/blast/queries/query1 ./
 

@@ -143,12 +143,17 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
 
 
 def parse_job_ad():
+    """
+    Parse the .job.ad file for the Owner (username) and ProjectName of the callee.
+    """
     temp_list = {}
     try:
         if '_CONDOR_JOB_AD' in os.environ:
             filename = os.environ['_CONDOR_JOB_AD']
+        elif os.path.exists(".job.ad"):
+            filename = ".job.ad"
         else:
-            filename = "job.ad"
+            return {}
         with open(filename) as job_file:
             for line in job_file.readLines():
                 match = re.search('^\s*(Owner|ProjectName)\s=\s"(.*)"', line,  re.IGNORECASE)
