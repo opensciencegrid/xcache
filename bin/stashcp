@@ -42,11 +42,13 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     
     # Fill out the payload as much as possible
     filename = destination + '/' + sourceFile.split('/')[-1]
+    
     payload = {}
     payload['xrdcp_version'] = xrdcp_version
     payload['filesize'] = fileSize
     payload['filename'] = sourceFile
     payload['sitename'] = sitename
+    payload.update(parse_job_ad())
     
     # Calculate the starting time
     start1 = int(time.time()*1000)
@@ -104,7 +106,6 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     payload['start2']=start2
     payload['end2']=end2
     
-    payload.update(parse_job_ad())
 
     if xrd_exit=='0': #worked first try
         logging.debug("Transfer success using %s", cache)
@@ -168,7 +169,7 @@ def parse_job_ad():
         else:
             return {}
         with open(filename) as job_file:
-            for line in job_file.readLines():
+            for line in job_file.readlines():
                 match = re.search('^\s*(Owner|ProjectName)\s=\s"(.*)"', line,  re.IGNORECASE)
                 if match:
                     temp_list[match.group()] = line
