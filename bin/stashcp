@@ -96,6 +96,8 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     payload['start2']=start2
     payload['end2']=end2
     
+    payload.update(parse_job_ad())
+
     if xrd_exit=='0': #worked first try
         logging.debug("Transfer success using %s", cache)
         dltime=end2-start2
@@ -139,6 +141,23 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
         payload['cache']=cache
         es_send(payload)
 
+
+def parse_job_ad():
+    temp_list = {}
+    try:
+        if '_CONDOR_JOB_AD' in os.environ:
+            filename = os.environ['_CONDOR_JOB_AD']
+        else:
+            filename = "job.ad"
+        with open(filename) as job_file:
+            for line in job_file.readLines():
+                match = re.search('^\s*(Owner|ProjectName)\s=\s"(.*)"', line,  re.IGNORECASE)
+                if match:
+                    temp_list[match.group()] = line
+    except IOError, e:
+        logging.error("Unable to open the .job.ad file")
+
+    return temp_list
 
 def dostashcpdirectory(sourceDir, destination, cache, debug=False):
     sourceItems = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "ls", sourceDir], stdout=subprocess.PIPE).communicate()[0].split()
