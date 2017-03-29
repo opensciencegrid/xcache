@@ -38,7 +38,7 @@ module load xrootd
 pylint /StashCache/bin/stashcp || /bin/true
 
 # Copy in the .job.ad file:
-cp /StashCache/bin/stashcp2/job.ad ./.job.ad
+cp /StashCache/bin/stashcp2/tests/job.ad ./.job.ad
 
 # Test against a file that is known to not exist
 set +e
