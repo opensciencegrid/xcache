@@ -37,6 +37,18 @@ module load xrootd
 # For now, disable pylint failures
 pylint /StashCache/bin/stashcp || /bin/true
 
+# Copy in the .job.ad file:
+cp /StashCache/bin/stashcp2/job.ad ./.job.ad
+
+# Test against a file that is known to not exist
+set +e
+/StashCache/bin/stashcp --cache=$XRD_CACHE /blah/does/not/exist
+if [ $? -eq 0 ]; then
+  echo "Failed to exit with non-zero exit status when it should have"
+  exit 1
+fi
+set -e
+
 # Try copying with no forward slash
 /StashCache/bin/stashcp --cache=$XRD_CACHE user/dweitzel/public/blast/queries/query1 ./
 
