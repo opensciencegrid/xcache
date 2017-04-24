@@ -15,7 +15,7 @@ import shutil
 import logging
 from urlparse import urlparse
 
-
+main_redirector = "root://redirector.osgstorage.org"
 
 TIMEOUT = 300
 DIFF = TIMEOUT * 10
@@ -23,18 +23,7 @@ DIFF = TIMEOUT * 10
 
 def doStashCpSingle(sourceFile, destination, cache, debug=False):
 
-    logging.debug("Checking size of file.")
-    (xrdfs_stdout, xrdfs_stderr) = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "stat", sourceFile], stdout=subprocess.PIPE).communicate()
-    xrdcp_version = subprocess.Popen(['echo $(xrdcp -V 2>&1)'], stdout=subprocess.PIPE, shell=True).communicate()[0][:-1]
-    try:
-        fileSize = int(re.findall(r"Size:   \d+", xrdfs_stdout)[0].split(":   ")[1])
-    except Exception as e:
-        sys.stderr.write("Unable to find size of file\n")
-        print str(xrdfs_stdout)
-        sys.stderr.write(str(xrdfs_stderr))
-        sys.stderr.write("\n")
-        return 1
-    logging.debug("Size of the file %s is %s", sourceFile, str(fileSize))
+    
     #cache=get_best_stashcache()
     logging.debug("Using Cache %s", cache)
     
@@ -44,8 +33,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     filename = destination + '/' + sourceFile.split('/')[-1]
     
     payload = {}
-    payload['xrdcp_version'] = xrdcp_version
-    payload['filesize'] = fileSize
+    
     payload['filename'] = sourceFile
     payload['sitename'] = sitename
     payload.update(parse_job_ad())
@@ -66,12 +54,14 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
             logging.debug("Succesfully copied file from CVMFS!")
             end1 = int(time.time()*1000)
             dlSz=os.stat(destination).st_size
+            filesize = os.stat(cvmfs_file).st_size
             dltime=end1-start1
             destSpace=1
             status = 'Success'
             payload['timestamp']=end1
             payload['host']="CVMFS"
             payload['download_size']=dlSz
+            payload['filesize'] = filesize
             payload['download_time']=dltime
             payload['destination_space']=destSpace
             payload['status']=status
@@ -89,6 +79,23 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     else:
         logging.debug("CVMFS File does not exist")
         
+    # Now check the size of the file with xrootd
+    logging.debug("Checking size of file.")
+    (xrdfs_stdout, xrdfs_stderr) = subprocess.Popen(["xrdfs", main_redirector, "stat", sourceFile], stdout=subprocess.PIPE).communicate()
+    xrdcp_version = subprocess.Popen(['echo $(xrdcp -V 2>&1)'], stdout=subprocess.PIPE, shell=True).communicate()[0][:-1]
+    try:
+        fileSize = int(re.findall(r"Size:   \d+", xrdfs_stdout)[0].split(":   ")[1])
+    except Exception as e:
+        sys.stderr.write("Unable to find size of file\n")
+        print str(xrdfs_stdout)
+        sys.stderr.write(str(xrdfs_stderr))
+        sys.stderr.write("\n")
+        return 1
+    logging.debug("Size of the file %s is %s", sourceFile, str(fileSize))
+    
+    payload['xrdcp_version'] = xrdcp_version
+    payload['filesize'] = fileSize
+    
     end1=int(time.time()*1000)
     payload['end1']=end1
     payload['start1']=start1
@@ -179,9 +186,9 @@ def parse_job_ad():
     return temp_list
 
 def dostashcpdirectory(sourceDir, destination, cache, debug=False):
-    sourceItems = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "ls", sourceDir], stdout=subprocess.PIPE).communicate()[0].split()
+    sourceItems = subprocess.Popen(["xrdfs", main_redirector, "ls", sourceDir], stdout=subprocess.PIPE).communicate()[0].split()
     for remote_file in sourceItems:
-        command2 = 'xrdfs root://stash.osgconnect.net stat '+ remote_file + ' | grep "IsDir" | wc -l'
+        command2 = 'xrdfs ' + main_redirector + ' stat '+ remote_file + ' | grep "IsDir" | wc -l'
         isdir=subprocess.Popen([command2],stdout=subprocess.PIPE,shell=True).communicate()[0].split()[0]
         if isdir!='0':
             result = dostashcpdirectory(remote_file, destination, cache, debug)
