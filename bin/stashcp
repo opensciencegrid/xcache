@@ -179,7 +179,7 @@ def parse_job_ad():
             for line in job_file.readlines():
                 match = re.search('^\s*(Owner|ProjectName)\s=\s"(.*)"', line,  re.IGNORECASE)
                 if match:
-                    temp_list[match.group()] = line
+                    temp_list[match.group(1)] = match.group(2)
     except IOError, e:
         logging.error("Unable to open the .job.ad file")
 
