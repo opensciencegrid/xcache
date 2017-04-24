@@ -131,8 +131,8 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
         es_send(payload)
 
     else: #pull from origin
-        logging.warning("XrdCP from cache failed on %s, pulling from origin", cache)
-        cache="root://stash.osgconnect.net"
+        logging.warning("XrdCP from cache failed on %s, pulling from main redirector", cache)
+        cache=main_redirector
         start3 = int(time.time()*1000)
         xrd_exit=timed_transfer(filename=sourceFile, debug=debug, cache=cache, destination=destination)
         end3=int(time.time()*1000)
