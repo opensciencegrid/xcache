@@ -42,7 +42,7 @@ cp /StashCache/bin/stashcp2/tests/job.ad ./.job.ad
 
 # Test against a file that is known to not exist
 set +e
-/StashCache/bin/stashcp --cache=$XRD_CACHE /blah/does/not/exist
+/StashCache/bin/stashcp --cache=$XRD_CACHE /blah/does/not/exist ./
 if [ $? -eq 0 ]; then
   echo "Failed to exit with non-zero exit status when it should have"
   exit 1
@@ -78,6 +78,16 @@ fi
 
 /StashCache/bin/stashcp --cache=$XRD_CACHE -d -r /user/dweitzel/public/blast/queries ./
 ls -lah
+
+rm -rf queries
+
+/StashCache/bin/stashcp --cache=$XRD_CACHE -d /xenon/rucio/x1t_SR001_170419_1605_mv/73/90/XENON1T-0-000008000-000008999-000001000.zip ./
+
+result=`md5sum XENON1T-0-000008000-000008999-000001000.zip | awk '{print $1;}'`
+if [ "$result" != "dd00dd6a6b1e0de4a3b8ecf1a34b24b3" ]; then
+  exit 1
+fi
+
 
 
 
