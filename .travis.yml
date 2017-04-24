@@ -3,13 +3,11 @@ env:
   matrix:
   - OS_TYPE=centos OS_VERSION=6
   - OS_TYPE=centos OS_VERSION=7
-  - OS_TYPE=centos OS_VERSION=6 XRD_CACHE="root://stash.osgconnect.net"
   - OS_TYPE=centos OS_VERSION=6 XRD_CACHE="root://xrd-cache-1.t2.ucsd.edu"
   - OS_TYPE=centos OS_VERSION=6 XRD_CACHE="root://mwt2-stashcache.campuscluster.illinois.edu"
   - OS_TYPE=centos OS_VERSION=6 XRD_CACHE="root://hcc-stash.unl.edu"
   - OS_TYPE=centos OS_VERSION=6 XRD_CACHE="root://osgxroot.usatlas.bnl.gov"
   - OS_TYPE=centos OS_VERSION=6 XRD_CACHE="root://its-condor-xrootd1.syr.edu"
-  - OS_TYPE=centos OS_VERSION=7 XRD_CACHE="root://stash.osgconnect.net"
   - OS_TYPE=centos OS_VERSION=7 XRD_CACHE="root://xrd-cache-1.t2.ucsd.edu"
   - OS_TYPE=centos OS_VERSION=7 XRD_CACHE="root://mwt2-stashcache.campuscluster.illinois.edu"
   - OS_TYPE=centos OS_VERSION=7 XRD_CACHE="root://hcc-stash.unl.edu"
