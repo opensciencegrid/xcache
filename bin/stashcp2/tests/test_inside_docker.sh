@@ -81,7 +81,7 @@ ls -lah
 
 rm -rf queries
 
-/StashCache/bin/stashcp --cache=$XRD_CACHE -d /xenon/rucio/x1t_SR001_170419_1605_mv/73/90/XENON1T-0-000008000-000008999-000001000.zip
+/StashCache/bin/stashcp --cache=$XRD_CACHE -d /xenon/rucio/x1t_SR001_170419_1605_mv/73/90/XENON1T-0-000008000-000008999-000001000.zip ./
 
 result=`md5sum XENON1T-0-000008000-000008999-000001000.zip | awk '{print $1;}'`
 if [ "$result" != "dd00dd6a6b1e0de4a3b8ecf1a34b24b3" ]; then
