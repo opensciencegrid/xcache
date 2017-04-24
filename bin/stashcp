@@ -16,6 +16,7 @@ import logging
 from urlparse import urlparse
 
 main_redirector = "root://redirector.osgstorage.org"
+stash_origin = "root://stash.osgconnect.net"
 
 TIMEOUT = 300
 DIFF = TIMEOUT * 10
@@ -186,9 +187,9 @@ def parse_job_ad():
     return temp_list
 
 def dostashcpdirectory(sourceDir, destination, cache, debug=False):
-    sourceItems = subprocess.Popen(["xrdfs", main_redirector, "ls", sourceDir], stdout=subprocess.PIPE).communicate()[0].split()
+    sourceItems = subprocess.Popen(["xrdfs", stash_origin, "ls", sourceDir], stdout=subprocess.PIPE).communicate()[0].split()
     for remote_file in sourceItems:
-        command2 = 'xrdfs ' + main_redirector + ' stat '+ remote_file + ' | grep "IsDir" | wc -l'
+        command2 = 'xrdfs ' + stash_origin + ' stat '+ remote_file + ' | grep "IsDir" | wc -l'
         isdir=subprocess.Popen([command2],stdout=subprocess.PIPE,shell=True).communicate()[0].split()[0]
         if isdir!='0':
             result = dostashcpdirectory(remote_file, destination, cache, debug)
