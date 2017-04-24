@@ -42,7 +42,7 @@ cp /StashCache/bin/stashcp2/tests/job.ad ./.job.ad
 
 # Test against a file that is known to not exist
 set +e
-/StashCache/bin/stashcp --cache=$XRD_CACHE /blah/does/not/exist
+/StashCache/bin/stashcp --cache=$XRD_CACHE /blah/does/not/exist ./
 if [ $? -eq 0 ]; then
   echo "Failed to exit with non-zero exit status when it should have"
   exit 1
