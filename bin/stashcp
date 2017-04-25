@@ -24,7 +24,6 @@ DIFF = TIMEOUT * 10
 
 def doStashCpSingle(sourceFile, destination, cache, debug=False):
 
-    
     #cache=get_best_stashcache()
     logging.debug("Using Cache %s", cache)
     
@@ -293,7 +292,10 @@ def get_best_stashcache():
     geo_ip_sites.insert(0,"http://hcc-cvmfs.unl.edu:8000/cvmfs/config-osg.opensciencegrid.org")
     
     # Append text before caches string
-    append_text = "api/v1.0/geo/@proxy@"
+    append_text = "api/v1.0/geo/stashcp"
+    
+    # Headers for the HTTP request
+    headers = {'Cache-control': 'max-age=0', 'User-Agent': 'stashcp/4.3.1'}
     
     # Randomize the geo ip sites
     random.shuffle(geo_ip_sites)
@@ -305,7 +307,9 @@ def get_best_stashcache():
         final_url = "%s/%s/%s" % (cur_site, append_text, caches_string)
         logging.debug("Querying for closest cache: %s", final_url)
         try:
-            response = urllib2.urlopen(final_url)
+            # Make the request
+            req = urllib2.Request(final_url, headers=headers)
+            response = urllib2.urlopen(req)
             if response.getcode() == 200:
                 logging.debug("Got error code 200 from %s", cur_site)
                 found = True
