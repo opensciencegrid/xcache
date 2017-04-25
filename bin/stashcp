@@ -15,7 +15,8 @@ import shutil
 import logging
 from urlparse import urlparse
 
-
+main_redirector = "root://redirector.osgstorage.org"
+stash_origin = "root://stash.osgconnect.net"
 
 TIMEOUT = 300
 DIFF = TIMEOUT * 10
@@ -23,11 +24,6 @@ DIFF = TIMEOUT * 10
 
 def doStashCpSingle(sourceFile, destination, cache, debug=False):
 
-    logging.debug("Checking size of file.")
-    xrdfs = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "stat", sourceFile], stdout=subprocess.PIPE).communicate()[0]
-    xrdcp_version = subprocess.Popen(['echo $(xrdcp -V 2>&1)'], stdout=subprocess.PIPE, shell=True).communicate()[0][:-1]
-    fileSize = int(re.findall(r"Size:   \d+", xrdfs)[0].split(":   ")[1])
-    logging.debug("Size of the file %s is %i", sourceFile, fileSize)
     #cache=get_best_stashcache()
     logging.debug("Using Cache %s", cache)
     
@@ -35,11 +31,12 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     
     # Fill out the payload as much as possible
     filename = destination + '/' + sourceFile.split('/')[-1]
+    
     payload = {}
-    payload['xrdcp_version'] = xrdcp_version
-    payload['filesize'] = fileSize
+    
     payload['filename'] = sourceFile
     payload['sitename'] = sitename
+    payload.update(parse_job_ad())
     
     # Calculate the starting time
     start1 = int(time.time()*1000)
@@ -56,13 +53,15 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
             shutil.copy(cvmfs_file, destination)
             logging.debug("Succesfully copied file from CVMFS!")
             end1 = int(time.time()*1000)
-            dlSz=os.stat(filename).st_size
+            dlSz=os.stat(destination).st_size
+            filesize = os.stat(cvmfs_file).st_size
             dltime=end1-start1
             destSpace=1
             status = 'Success'
             payload['timestamp']=end1
             payload['host']="CVMFS"
             payload['download_size']=dlSz
+            payload['filesize'] = filesize
             payload['download_time']=dltime
             payload['destination_space']=destSpace
             payload['status']=status
@@ -72,7 +71,7 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
             payload['cache']="CVMFS"
             es_send(payload)
                 
-            return 
+            return 0
             
         except IOError, e:
             logging.error("Unable to copy with CVMFS, even though file exists: %s", str(e))
@@ -80,6 +79,23 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     else:
         logging.debug("CVMFS File does not exist")
         
+    # Now check the size of the file with xrootd
+    logging.debug("Checking size of file.")
+    (xrdfs_stdout, xrdfs_stderr) = subprocess.Popen(["xrdfs", main_redirector, "stat", sourceFile], stdout=subprocess.PIPE).communicate()
+    xrdcp_version = subprocess.Popen(['echo $(xrdcp -V 2>&1)'], stdout=subprocess.PIPE, shell=True).communicate()[0][:-1]
+    try:
+        fileSize = int(re.findall(r"Size:   \d+", xrdfs_stdout)[0].split(":   ")[1])
+    except Exception as e:
+        sys.stderr.write("Unable to find size of file\n")
+        print str(xrdfs_stdout)
+        sys.stderr.write(str(xrdfs_stderr))
+        sys.stderr.write("\n")
+        return 1
+    logging.debug("Size of the file %s is %s", sourceFile, str(fileSize))
+    
+    payload['xrdcp_version'] = xrdcp_version
+    payload['filesize'] = fileSize
+    
     end1=int(time.time()*1000)
     payload['end1']=end1
     payload['start1']=start1
@@ -89,14 +105,15 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
     xrd_exit=timed_transfer(filename=sourceFile, debug=debug, cache=cache, destination=destination)
     
     end2=int(time.time()*1000)
-    if os.path.exists(filename):
-        dlSz=os.stat(filename).st_size
+    if os.path.exists(destination):
+        dlSz=os.stat(destination).st_size
     destSpace=1
 
     payload['xrdexit1']=xrd_exit
     payload['start2']=start2
     payload['end2']=end2
     
+
     if xrd_exit=='0': #worked first try
         logging.debug("Transfer success using %s", cache)
         dltime=end2-start2
@@ -113,13 +130,13 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
         es_send(payload)
 
     else: #pull from origin
-        logging.warning("XrdCP from cache failed on %s, pulling from origin", cache)
-        cache="root://stash.osgconnect.net"
+        logging.warning("XrdCP from cache failed on %s, pulling from main redirector", cache)
+        cache=main_redirector
         start3 = int(time.time()*1000)
         xrd_exit=timed_transfer(filename=sourceFile, debug=debug, cache=cache, destination=destination)
         end3=int(time.time()*1000)
-        if os.path.exists(filename):
-            dlSz=os.stat(filename).st_size
+        if os.path.exists(destination):
+            dlSz=os.stat(destination).st_size
         dltime=end3-start3
         if xrd_exit=='0':
             logging.info("Trunk Success")
@@ -139,17 +156,47 @@ def doStashCpSingle(sourceFile, destination, cache, debug=False):
         payload['end3']=end3
         payload['cache']=cache
         es_send(payload)
+        if xrd_exit == '0':
+            return 0
+        else:
+            return 1
+    return 0
 
+
+def parse_job_ad():
+    """
+    Parse the .job.ad file for the Owner (username) and ProjectName of the callee.
+    """
+    temp_list = {}
+    try:
+        if '_CONDOR_JOB_AD' in os.environ:
+            filename = os.environ['_CONDOR_JOB_AD']
+        elif os.path.exists(".job.ad"):
+            filename = ".job.ad"
+        else:
+            return {}
+        with open(filename) as job_file:
+            for line in job_file.readlines():
+                match = re.search('^\s*(Owner|ProjectName)\s=\s"(.*)"', line,  re.IGNORECASE)
+                if match:
+                    temp_list[match.group(1)] = match.group(2)
+    except IOError, e:
+        logging.error("Unable to open the .job.ad file")
+
+    return temp_list
 
 def dostashcpdirectory(sourceDir, destination, cache, debug=False):
-    sourceItems = subprocess.Popen(["xrdfs", "root://stash.osgconnect.net", "ls", sourceDir], stdout=subprocess.PIPE).communicate()[0].split()
+    sourceItems = subprocess.Popen(["xrdfs", stash_origin, "ls", sourceDir], stdout=subprocess.PIPE).communicate()[0].split()
     for remote_file in sourceItems:
-        command2 = 'xrdfs root://stash.osgconnect.net stat '+ remote_file + ' | grep "IsDir" | wc -l'
+        command2 = 'xrdfs ' + stash_origin + ' stat '+ remote_file + ' | grep "IsDir" | wc -l'
         isdir=subprocess.Popen([command2],stdout=subprocess.PIPE,shell=True).communicate()[0].split()[0]
         if isdir!='0':
-            dostashcpdirectory(remote_file, destination, cache, debug)
+            result = dostashcpdirectory(remote_file, destination, cache, debug)
         else:
-            doStashCpSingle(remote_file,destination, cache, debug)
+            result = doStashCpSingle(remote_file,destination, cache, debug)
+        # Stop transfers if something fails
+        if result != 0:
+            return result
 
 
 def es_send(payload):
@@ -168,7 +215,7 @@ def es_send(payload):
             f.read()
             f.close()
         except urllib2.URLError, e:
-            logging.error("Error posting to ES: %s", str(e))
+            logging.warning("Error posting to ES: %s", str(e))
     
     p = multiprocessing.Process(target=_es_send, name="_es_send", args=(payload,))
     p.start()
@@ -242,7 +289,7 @@ def get_best_stashcache():
     geo_ip_sites = "http://cvmfs-s1fnal.opensciencegrid.org:8000/cvmfs/oasis.opensciencegrid.org;http://cvmfs-s1bnl.opensciencegrid.org:8000/cvmfs/oasis.opensciencegrid.org;http://cvmfs-egi.gridpp.rl.ac.uk:8000/cvmfs/oasis.opensciencegrid.org;http://klei.nikhef.nl:8000/cvmfs/oasis.opensciencegrid.org;http://cvmfsrep.grid.sinica.edu.tw:8000/cvmfs/oasis.opensciencegrid.org".split(';')
     
     # Add HCC's, for good measure
-    geo_ip_sites.insert(0,"hcc-cvmfs.unl.edu:8000/cvmfs/config-osg.opensciencegrid.org")
+    geo_ip_sites.insert(0,"http://hcc-cvmfs.unl.edu:8000/cvmfs/config-osg.opensciencegrid.org")
     
     # Append text before caches string
     append_text = "api/v1.0/geo/stashcp"
@@ -297,7 +344,11 @@ def main():
     parser.add_option('-c', '--cache', dest='cache', help="Cache to use")
     args,opts=parser.parse_args()
 
+    logging.basicConfig(format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                       datefmt="%Y-%m-%dT%H:%M:%S%z")
     logger = logging.getLogger()
+
+    
     if args.debug:
         logger.setLevel(logging.DEBUG)
     else:
@@ -320,10 +371,17 @@ def main():
     else:
         cache = get_best_stashcache()
     
+    if not source.startswith('/'):
+        logging.warning("DEPRECIATED: The source path does not begin with a '/', but it is required.  This functionality will be removed in an upcoming release")
+        source = "/" + source
+    
+    
     if not args.recursive:
-        doStashCpSingle(sourceFile=source, destination=destination, cache=cache, debug=args.debug)
+        result = doStashCpSingle(sourceFile=source, destination=destination, cache=cache, debug=args.debug)
     else:
-        dostashcpdirectory(sourceDir = source, destination = destination, cache=cache, debug=args.debug)
+        result = dostashcpdirectory(sourceDir = source, destination = destination, cache=cache, debug=args.debug)
+    # Exit with failure
+    sys.exit(result)
 
 
 if __name__ == "__main__":

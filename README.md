@@ -1,6 +1,8 @@
 # StashCache
 
 [![Build Status](https://travis-ci.org/opensciencegrid/StashCache.svg?branch=master)](https://travis-ci.org/opensciencegrid/StashCache)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.377033.svg)](https://doi.org/10.5281/zenodo.377033)
+
 
 This repo holds json file with addresses, statuses and geographical coordinates of all of the StashCache caches.
 Status is given as a number: 1 - Active, 0 - Not Active.
