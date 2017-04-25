@@ -295,7 +295,7 @@ def get_best_stashcache():
     append_text = "api/v1.0/geo/stashcp"
     
     # Headers for the HTTP request
-    headers = {'Cache-control': 'max-age=0', 'User-Agent': 'stashcp/4.1'}
+    headers = {'Cache-control': 'max-age=0', 'User-Agent': 'stashcp/4.3.1'}
     
     # Randomize the geo ip sites
     random.shuffle(geo_ip_sites)
