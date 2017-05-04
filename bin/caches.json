@@ -1,8 +1,0 @@
-[ 
-    {"name":"root://xrd-cache-1.t2.ucsd.edu", "status":1, "longitude":-117.2359, "latitude":32.8807},
-    {"name":"root://mwt2-stashcache.campuscluster.illinois.edu", "status":1, "longitude":-88.23, "latitude":40.107487},
-    {"name":"root://hcc-stash.unl.edu", "status":1, "longitude":-96.702991, "latitude":40.812957},
-    {"name":"root://osgxroot.usatlas.bnl.gov", "status":1, "longitude":-72.9333, "latitude":40.8167},
-    {"name":"root://its-condor-xrootd1.syr.edu", "status":1, "longitude":-72.9333, "latitude":40.8167},
-    {"name":"root://stashcache.grid.uchicago.edu", "status":1, "longitude":-72.9333, "latitude":40.8167}
-]
