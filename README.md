@@ -1,29 +1,28 @@
-# StashCache
+# StashCache-Daemon meta package
 
-[![Build Status](https://travis-ci.org/opensciencegrid/StashCache.svg?branch=master)](https://travis-ci.org/opensciencegrid/StashCache)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.377033.svg)](https://doi.org/10.5281/zenodo.377033)
+## Dependencies
 
+* condor-python
+* xrootd-python
 
-This repo holds json file with addresses, statuses and geographical coordinates of all of the StashCache caches.
-Status is given as a number: 1 - Active, 0 - Not Active.
+## StashCache Description
 
-## Using Stashcp
+This script is used as an intermediary between a condor_master and a StashCache
+cache server. Its two main functions are to accept signals from the
+`condor_master` and to advertise the cache stats back to the master. It is not
+intended to be run standalone but rather by the condor_master. It calls
+`xrootd_cache_stats.py` to query the XRootD cache.
 
-XrootD client is required to be installed in order to use stashcp.  You can use it with:
+## Invoking xrootd_cache_stats.py
+This is a script for collecting information about the files in a Stash cache and formatting them as an HTCondor classad.
 
-    ./bin/stashcp <source> <destination>
-    
-See the help message for full usage of the command.
+If run as:
 
-## Operation of stashcp
+`xrootd_cache_stats.py <base xrootd URL> <top level cache directory> [max cache fraction]`
 
-Stashcp uses geo located nearby caches in order to copy from the OSG Connect's stash storage service
-to a job's workspace on a cluster.
+It will print the classad to stdout, for example:
 
-Stashcp uses an ordered list of methods to access the file:
+`xrootd_cache_stats.py root://fermicloud126.fnal.gov /stash 0.9`
 
-1. Copy the file from CVMFS, under the directory /cvmfs/stash.osgstorage.org/...
-2. Copy the file with `xrdcp` from the nearest cache.
-3. Copy the file with `xrdcp` from the source, stash.osgconnect.net.
-
-While using `xrdcp`, it uses XrootD's internal timers to act as a strict watchdog.
+The max cache fraction is needed to correctly calculate the remaining cache size.
+It should match the value in the xrootd config file.
