@@ -1,9 +1,0 @@
-PLEASE, do not use any of these!!!
-
-It's just a note for myself when comparing and building new structure for StashCache-Daemon in: 
-
-old-svn:
-https://vdt.cs.wisc.edu/svn/software/stashcache-daemon/
-
-old-git:
-https://github.com/opensciencegrid/StashCache/bin/StashDaemon
