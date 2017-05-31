@@ -6,20 +6,23 @@
 # ------------------------------------------------------------------------------
 
 PACKAGE := stashcache
-VERSION := 0.6
+VERSION := 0.7
 
 
 # ------------------------------------------------------------------------------
 # Other configuration: May need to change for a release
 # ------------------------------------------------------------------------------
 
-SBIN_FILES := stashcache
+SBIN_FILES := src/stashcache
 INSTALL_SBIN_DIR := usr/sbin
-CONDOR_CONFIG := 01-stashcache.conf
+CONDOR_CONFIG := configs/01-stashcache.conf
+CACHE_CONFIG := configs/xrootd-stashcache-cache-server.cfg.in
+ORIGIN_CONFIG := configs/xrootd-stashcache-cache-origin.cfg.in
 INSTALL_CONDOR_DIR := etc/condor/config.d
-PYTHON_LIB := xrootd_cache_stats.py
+PYTHON_LIB := src/xrootd_cache_stats.py
+MAKEFILE := src/Makefile
 
-DIST_FILES := $(SBIN_FILES) $(CONDOR_CONFIG) $(PYTHON_LIB) Makefile
+DIST_FILES := $(SBIN_FILES) $(CONDOR_CONFIG) $(PYTHON_LIB) $(MAKEFILE)
 
 
 # ------------------------------------------------------------------------------
