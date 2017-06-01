@@ -7,8 +7,6 @@ Group:     Grid
 URL:       https://opensciencegrid.github.io/StashCache/
 BuildArch: noarch
 Source0:   %{name}-%{version}.tar.gz
-Source1:   xrootd-stashcache-origin-server.cfg.in
-Source2:   xrootd-stashcache-cache-server.cfg.in
 
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
@@ -17,8 +15,8 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 %{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(1))")}
 %endif
 
-%define originhost_prod redirector.opensciencegrid.org
-%define originhost_itb redirector-itb.opensciencegrid.org
+%define redirector_prod redirector.opensciencegrid.org
+%define redirector_itb redirector-itb.opensciencegrid.org
 
 %description
 %{summary}
@@ -67,12 +65,13 @@ Requires: %{name}-daemon
 %install
 mkdir -p %{buildroot}%{_sysconfdir}/xrootd
 make install DESTDIR=%{buildroot}
-for src in "configs/%{SOURCE1}" "configs/%{SOURCE2}"; do
+for src in "./configs/xrootd-stashcache-origin-server.cfg.in" \ 
+           "./configs/xrootd-stashcache-cache-server.cfg.in"; do
     dst=$(basename "$src" .cfg.in)
     sed -i -e "s#@LIBDIR@#%{_libdir}#" "$src"
-    sed -e "s#@ORIGINHOST@#%{originhost_prod}#" \
+    sed -e "s#@ORIGINHOST@#%{redirector_prod}#" \
         "$src" > "%{buildroot}%{_sysconfdir}/xrootd/${dst}.cfg"
-    sed -e "s#@ORIGINHOST@#%{originhost_itb}#" \
+    sed -e "s#@ORIGINHOST@#%{redirector_itb}#" \
         "$src" > "%{buildroot}%{_sysconfdir}/xrootd/${dst}-itb.cfg"
 done
 

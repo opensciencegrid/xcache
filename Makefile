@@ -16,13 +16,10 @@ VERSION := 0.7
 SBIN_FILES := src/stashcache
 INSTALL_SBIN_DIR := usr/sbin
 CONDOR_CONFIG := configs/01-stashcache.conf
-CACHE_CONFIG := configs/xrootd-stashcache-cache-server.cfg.in
-ORIGIN_CONFIG := configs/xrootd-stashcache-cache-origin.cfg.in
 INSTALL_CONDOR_DIR := etc/condor/config.d
 PYTHON_LIB := src/xrootd_cache_stats.py
-MAKEFILE := src/Makefile
 
-DIST_FILES := $(SBIN_FILES) $(CONDOR_CONFIG) $(PYTHON_LIB) $(MAKEFILE)
+DIST_FILES := $(SBIN_FILES) $(CONDOR_CONFIG) $(PYTHON_LIB) Makefile
 
 
 # ------------------------------------------------------------------------------
