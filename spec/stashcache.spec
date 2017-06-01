@@ -69,9 +69,9 @@ for src in "./configs/xrootd-stashcache-origin-server.cfg.in" \
            "./configs/xrootd-stashcache-cache-server.cfg.in"; do
     dst=$(basename "$src" .cfg.in)
     sed -i -e "s#@LIBDIR@#%{_libdir}#" "$src"
-    sed -e "s#@ORIGINHOST@#%{redirector_prod}#" \
+    sed -e "s#@REDIRECTOR@#%{redirector_prod}#" \
         "$src" > "%{buildroot}%{_sysconfdir}/xrootd/${dst}.cfg"
-    sed -e "s#@ORIGINHOST@#%{redirector_itb}#" \
+    sed -e "s#@REDIRECTOR@#%{redirector_itb}#" \
         "$src" > "%{buildroot}%{_sysconfdir}/xrootd/${dst}-itb.cfg"
 done
 
