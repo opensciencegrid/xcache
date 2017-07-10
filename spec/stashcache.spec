@@ -29,11 +29,7 @@ Requires: xrootd-server >= 1:4.6.1
 Requires: xrootd-python >= 1:4.6.1
 Requires: condor-python >= 8.4.11
 Requires: grid-certificates >= 7
-%if 0%{?rhel} < 6
-Requires: fetch-crl3
-%else
 Requires: fetch-crl
-%endif
 
 %description daemon
 %{summary}
@@ -53,7 +49,7 @@ Group: Grid
 Summary: Metapackage for a cache server
 
 Requires: xrootd-server >= 1:4.6.1
-Requires: xrootd-lcmaps >= 1:1.3.3
+Requires: xrootd-lcmaps >= 1.3.3
 Requires: %{name}-daemon
 
 %description cache-server
@@ -61,6 +57,10 @@ Requires: %{name}-daemon
 
 %prep
 %setup -q
+%if 0%{?el6}
+echo "*** This version does not build on EL 6 ***"
+exit 1
+%endif
 
 %install
 mkdir -p %{buildroot}%{_sysconfdir}/xrootd
