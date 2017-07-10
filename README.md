@@ -7,7 +7,7 @@
 
 ## StashCache Description
 
-This script is used as an intermediary between a condor_master and a StashCache
+The script `/usr/sbin/stashcache` is used as an intermediary between a condor_master and a StashCache
 cache server. Its two main functions are to accept signals from the
 `condor_master` and to advertise the cache stats back to the master. It is not
 intended to be run standalone but rather by the condor_master. It calls

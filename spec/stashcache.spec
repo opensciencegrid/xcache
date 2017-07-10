@@ -1,7 +1,7 @@
 Name:      stashcache
 Summary:   StashCache metapackages
 Version:   0.7
-Release:   1%{?dist}
+Release:   3%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.github.io/StashCache/
@@ -15,8 +15,8 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 %{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(1))")}
 %endif
 
-%define redirector_prod redirector.opensciencegrid.org
-%define redirector_itb redirector-itb.opensciencegrid.org
+%define redirector_prod redirector.osgstorage.org
+%define redirector_itb redirector-itb.osgstorage.org
 
 %description
 %{summary}
@@ -65,14 +65,15 @@ Requires: %{name}-daemon
 %install
 mkdir -p %{buildroot}%{_sysconfdir}/xrootd
 make install DESTDIR=%{buildroot}
-for src in "./configs/xrootd-stashcache-origin-server.cfg.in" \ 
-           "./configs/xrootd-stashcache-cache-server.cfg.in"; do
+for src in "./configs/xrootd-stashcache-origin-server.cfg.in" "./configs/xrootd-stashcache-cache-server.cfg.in"; do
     dst=$(basename "$src" .cfg.in)
     sed -i -e "s#@LIBDIR@#%{_libdir}#" "$src"
     sed -e "s#@REDIRECTOR@#%{redirector_prod}#" \
         "$src" > "%{buildroot}%{_sysconfdir}/xrootd/${dst}.cfg"
+    chown xrootd:xrootd %{buildroot}%{_sysconfdir}/xrootd/${dst}.cfg
     sed -e "s#@REDIRECTOR@#%{redirector_itb}#" \
         "$src" > "%{buildroot}%{_sysconfdir}/xrootd/${dst}-itb.cfg"
+    chown xrootd:xrootd %{buildroot}%{_sysconfdir}/xrootd/${dst}-itb.cfg
 done
 
 %clean
@@ -93,6 +94,13 @@ rm -rf %{_buildroot}
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server-itb.cfg
 
 %changelog
+* Tue July 10 2017 Marian Zvada <marian.zvada@cern.ch> 0.7-3
+- ownership of xrootd config files set to xrootd uid
+
+* Thu Jun 1 2017 Marian Zvada <marian.zvada@cern.ch> 0.7-2
+- added stanza so that we don't build StashCache for EL6
+- no epoch of xrootd-lcmaps-1.3.3 for cache-server requirement
+
 * Wed May 31 2017 Marian Zvada <marian.zvada@cern.ch> 0.7-1
 - SOFTWARE-2295: restructure under opensciencegrid/StashCache-Daemon.git 
 
