@@ -70,10 +70,8 @@ for src in "./configs/xrootd-stashcache-origin-server.cfg.in" "./configs/xrootd-
     sed -i -e "s#@LIBDIR@#%{_libdir}#" "$src"
     sed -e "s#@REDIRECTOR@#%{redirector_prod}#" \
         "$src" > "%{buildroot}%{_sysconfdir}/xrootd/${dst}.cfg"
-    chown xrootd:xrootd %{buildroot}%{_sysconfdir}/xrootd/${dst}.cfg
     sed -e "s#@REDIRECTOR@#%{redirector_itb}#" \
         "$src" > "%{buildroot}%{_sysconfdir}/xrootd/${dst}-itb.cfg"
-    chown xrootd:xrootd %{buildroot}%{_sysconfdir}/xrootd/${dst}-itb.cfg
 done
 
 %clean
@@ -86,16 +84,20 @@ rm -rf %{_buildroot}
 %{python_sitelib}/xrootd_cache_stats.py*
 
 %files origin-server
+%defattr(-,xrootd,xrootd)
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-origin-server.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-origin-server-itb.cfg
 
 %files cache-server
+%defattr(-,xrootd,xrootd)
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server-itb.cfg
 
 %changelog
-* Tue July 10 2017 Marian Zvada <marian.zvada@cern.ch> 0.7-3
+* Tue July 11 2017 Marian Zvada <marian.zvada@cern.ch> 0.7-3
 - ownership of xrootd config files set to xrootd uid
+- change homepage in origin server xrootd config file
+- set proper redirector hostname in xrootd config files
 
 * Thu Jun 1 2017 Marian Zvada <marian.zvada@cern.ch> 0.7-2
 - added stanza so that we don't build StashCache for EL6
