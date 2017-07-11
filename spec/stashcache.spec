@@ -84,18 +84,15 @@ rm -rf %{_buildroot}
 %{python_sitelib}/xrootd_cache_stats.py*
 
 %files origin-server
-%defattr(-,xrootd,xrootd)
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-origin-server.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-origin-server-itb.cfg
 
 %files cache-server
-%defattr(-,xrootd,xrootd)
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server-itb.cfg
 
 %changelog
 * Tue July 11 2017 Marian Zvada <marian.zvada@cern.ch> 0.7-3
-- ownership of xrootd config files set to xrootd uid
 - change homepage in origin server xrootd config file
 - set proper redirector hostname in xrootd config files
 
