@@ -1,6 +1,6 @@
 Name:      stashcache
 Summary:   StashCache metapackages
-Version:   0.7
+Version:   0.8
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -15,8 +15,8 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 %{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(1))")}
 %endif
 
-%define redirector_prod redirector.opensciencegrid.org
-%define redirector_itb redirector-itb.opensciencegrid.org
+%define redirector_prod redirector.osgstorage.org
+%define redirector_itb redirector-itb.osgstorage.org
 
 %description
 %{summary}
@@ -29,11 +29,7 @@ Requires: xrootd-server >= 1:4.6.1
 Requires: xrootd-python >= 1:4.6.1
 Requires: condor-python >= 8.4.11
 Requires: grid-certificates >= 7
-%if 0%{?rhel} < 6
-Requires: fetch-crl3
-%else
 Requires: fetch-crl
-%endif
 
 %description daemon
 %{summary}
@@ -53,7 +49,7 @@ Group: Grid
 Summary: Metapackage for a cache server
 
 Requires: xrootd-server >= 1:4.6.1
-Requires: xrootd-lcmaps >= 1:1.3.3
+Requires: xrootd-lcmaps >= 1.3.3
 Requires: %{name}-daemon
 
 %description cache-server
@@ -61,12 +57,15 @@ Requires: %{name}-daemon
 
 %prep
 %setup -q
+%if 0%{?el6}
+echo "*** This version does not build on EL 6 ***"
+exit 1
+%endif
 
 %install
 mkdir -p %{buildroot}%{_sysconfdir}/xrootd
 make install DESTDIR=%{buildroot}
-for src in "./configs/xrootd-stashcache-origin-server.cfg.in" \ 
-           "./configs/xrootd-stashcache-cache-server.cfg.in"; do
+for src in "./configs/xrootd-stashcache-origin-server.cfg.in" "./configs/xrootd-stashcache-cache-server.cfg.in"; do
     dst=$(basename "$src" .cfg.in)
     sed -i -e "s#@LIBDIR@#%{_libdir}#" "$src"
     sed -e "s#@REDIRECTOR@#%{redirector_prod}#" \
@@ -93,6 +92,15 @@ rm -rf %{_buildroot}
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server-itb.cfg
 
 %changelog
+* Thu Aug 24 2017 Marian Zvada <marian.zvada@cern.ch> 0.8-1
+- change homepage in origin server xrootd config file
+- set proper redirector hostname in xrootd config files
+- updated Makefile, replace properly VERSION in src/stashcache for make install target
+
+* Thu Jun 1 2017 Marian Zvada <marian.zvada@cern.ch> 0.7-2
+- added stanza so that we don't build StashCache for EL6
+- no epoch of xrootd-lcmaps-1.3.3 for cache-server requirement
+
 * Wed May 31 2017 Marian Zvada <marian.zvada@cern.ch> 0.7-1
 - SOFTWARE-2295: restructure under opensciencegrid/StashCache-Daemon.git 
 

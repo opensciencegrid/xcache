@@ -1,4 +1,4 @@
-# https://twiki.grid.iu.edu/bin/view/Documentation/Release3/InstallStashCache
+# https://opensciencegrid.github.io/StashCache/
 
 xrd.allow host *
 sec.protocol  host
