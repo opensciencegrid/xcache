@@ -1,7 +1,7 @@
 Name:      stashcache
 Summary:   StashCache metapackages
-Version:   0.7
-Release:   3%{?dist}
+Version:   0.8
+Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.github.io/StashCache/
@@ -92,9 +92,10 @@ rm -rf %{_buildroot}
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server-itb.cfg
 
 %changelog
-* Tue July 11 2017 Marian Zvada <marian.zvada@cern.ch> 0.7-3
+* Thu Aug 24 2017 Marian Zvada <marian.zvada@cern.ch> 0.8-1
 - change homepage in origin server xrootd config file
 - set proper redirector hostname in xrootd config files
+- updated Makefile, replace properly VERSION in src/stashcache for make install target
 
 * Thu Jun 1 2017 Marian Zvada <marian.zvada@cern.ch> 0.7-2
 - added stanza so that we don't build StashCache for EL6
