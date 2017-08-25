@@ -55,7 +55,7 @@ endif
 install:
 	mkdir -p $(DESTDIR)/$(INSTALL_SBIN_DIR)
 	install -p -m 0755 $(SBIN_FILES) $(DESTDIR)/$(INSTALL_SBIN_DIR)
-        sed -i -e 's/##VERSION##/$(VERSION)/g' $(DESTDIR)/$(INSTALL_SBIN_DIR)/stashcache
+	sed -i -e 's/##VERSION##/$(VERSION)/g' $(DESTDIR)/$(INSTALL_SBIN_DIR)/stashcache
 	mkdir -p $(DESTDIR)/$(INSTALL_CONDOR_DIR)
 	install -p -m 0644 $(CONDOR_CONFIG) $(DESTDIR)/$(INSTALL_CONDOR_DIR)
 	mkdir -p $(DESTDIR)/$(INSTALL_PYTHON_DIR)
