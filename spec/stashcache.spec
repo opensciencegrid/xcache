@@ -9,18 +9,18 @@ BuildArch: noarch
 Source0:   %{name}-%{version}.tar.gz
 
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+BuildRequires: systemd
+%{?systemd_requires}
 
 %if ! (0%{?fedora} > 12 || 0%{?rhel} > 5)
 %{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 %{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(1))")}
 %endif
 
-%define redirector_prod redirector.osgstorage.org
-%define redirector_itb redirector-itb.osgstorage.org
-
 %description
 %{summary}
 
+########################################
 %package daemon
 Group: Grid
 Summary: Scripts and configuration for StashCache management
@@ -28,32 +28,63 @@ Summary: Scripts and configuration for StashCache management
 Requires: xrootd-server >= 1:4.6.1
 Requires: xrootd-python >= 1:4.6.1
 Requires: condor-python >= 8.4.11
-Requires: grid-certificates >= 7
-Requires: fetch-crl
 
 %description daemon
 %{summary}
 
+########################################
 %package origin-server
 Group: Grid
 Summary: Metapackage for the origin server
 
-Requires: xrootd-server >= 1:4.6.1
 Requires: %{name}-daemon
 
 %description origin-server
 %{summary}
 
+%post origin-server
+%systemd_post xrootd@stashcache-origin-server.service cmsd@stashcache-origin-server.service
+%preun origin-server
+%systemd_preun xrootd@stashcache-origin-server.service cmsd@stashcache-origin-server.service
+%postun origin-server
+%systemd_postun_with_restart xrootd@stashcache-origin-server.service cmsd@stashcache-origin-server.service
+
+########################################
 %package cache-server
 Group: Grid
 Summary: Metapackage for a cache server
 
-Requires: xrootd-server >= 1:4.6.1
-Requires: xrootd-lcmaps >= 1.3.3
 Requires: %{name}-daemon
 
 %description cache-server
+
+%post cache-server
+%systemd_post xrootd@stashcache-cache-server.service
+%preun cache-server
+%systemd_preun xrootd@stashcache-cache-server.service
+%postun cache-server
+%systemd_postun_with_restart xrootd@stashcache-cache-server.service
+
+########################################
+%package cache-server-auth
+Group: Grid
+Summary: Metapackage for an authenticated cache server
+
+Requires: %{name}-cache-server
+Requires: xrootd-lcmaps >= 1.3.3
+Requires: grid-certificates >= 7
+Requires: fetch-crl
+Requires: globus-proxy-utils
+
+%description cache-server-auth
 %{summary}
+
+%post cache-server-auth
+%systemd_post xrootd@stashcache-cache-server-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
+%preun cache-server-auth
+%systemd_preun xrootd@stashcache-cache-server-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
+%postun cache-server-auth
+%systemd_postun_with_restart xrootd@stashcache-cache-server-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
 
 %prep
 %setup -q
@@ -65,14 +96,9 @@ exit 1
 %install
 mkdir -p %{buildroot}%{_sysconfdir}/xrootd
 make install DESTDIR=%{buildroot}
-for src in "./configs/xrootd-stashcache-origin-server.cfg.in" "./configs/xrootd-stashcache-cache-server.cfg.in"; do
-    dst=$(basename "$src" .cfg.in)
-    sed -i -e "s#@LIBDIR@#%{_libdir}#" "$src"
-    sed -e "s#@REDIRECTOR@#%{redirector_prod}#" \
-        "$src" > "%{buildroot}%{_sysconfdir}/xrootd/${dst}.cfg"
-    sed -e "s#@REDIRECTOR@#%{redirector_itb}#" \
-        "$src" > "%{buildroot}%{_sysconfdir}/xrootd/${dst}-itb.cfg"
-done
+
+# Create xrootd certificate directory
+mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 
 %clean
 rm -rf %{_buildroot}
@@ -84,12 +110,19 @@ rm -rf %{_buildroot}
 %{python_sitelib}/xrootd_cache_stats.py*
 
 %files origin-server
-%config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-origin-server.cfg
-%config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-origin-server-itb.cfg
+%attr(-, xrootd, xrootd) %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-origin-server.cfg
 
 %files cache-server
-%config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server.cfg
-%config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server-itb.cfg
+%attr(-, xrootd, xrootd) %config(noreplace) %{_sysconfdir}/xrootd/stashcache-robots.txt
+%attr(-, xrootd, xrootd) %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server.cfg
+%attr(-, xrootd, xrootd) %config(noreplace) %{_sysconfdir}/xrootd/Authfile-noauth
+
+%files cache-server-auth
+%attr(-, xrootd, xrootd) %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server-auth.cfg
+%attr(-, xrootd, xrootd) %config(noreplace) %{_sysconfdir}/xrootd/Authfile-auth
+%{_unitdir}/xrootd-renew-proxy.service
+%{_unitdir}/xrootd-renew-proxy.timer
+%attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
 
 %changelog
 * Thu Aug 24 2017 Marian Zvada <marian.zvada@cern.ch> 0.8-1
