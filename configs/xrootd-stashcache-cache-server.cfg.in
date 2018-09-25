@@ -20,7 +20,7 @@ oss.localroot $(cachedir)
 
 # Config for v2 (xrootd >v4.5.0)
 pfc.blocksize 512k
-pfc.ram       32g
+pfc.ram       8g
 pfc.prefetch  10
 pfc.diskusage 0.98 0.99
 
