@@ -38,7 +38,7 @@ sec.protocol /usr/lib64 gsi \
 ofs.authorize 1
 acc.audit deny grant
 
-# The authenticated instance runs on port 1094 (Xrootd) and 8443 (HTTPS).
+# The authenticated instance runs on port 1094 (Xrootd) and 8443 (Xrootd and HTTPS).
 # It uses a separate auth file from the unauthenticated instance.
 if named stashcache-cache-server-auth
    xrd.port 8443
