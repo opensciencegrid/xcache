@@ -18,9 +18,8 @@ pss.setopt DebugLevel 1
 
 oss.localroot $(cachedir)
 
-# Config for v2 (xrootd >v4.5.0)
 pfc.blocksize 512k
-pfc.ram       32g
+pfc.ram       8g
 pfc.prefetch  10
 pfc.diskusage 0.98 0.99
 
@@ -39,11 +38,9 @@ sec.protocol /usr/lib64 gsi \
 ofs.authorize 1
 acc.audit deny grant
 
-# Run the authenticated instance on port 8443 (Xrootd and HTTPS)
-# Notice authenticated and unauthenticated instances use separate auth
-# files.
+# The authenticated instance runs on port 1094 (Xrootd) and 8443 (Xrootd and HTTPS).
+# It uses a separate auth file from the unauthenticated instance.
 if named stashcache-cache-server-auth
-   #pss.origin  red-gridftp4.unl.edu:1094
    xrd.port 8443
    acc.authdb /etc/xrootd/Authfile-auth
    sec.protbind * gsi
@@ -51,10 +48,10 @@ if named stashcache-cache-server-auth
    pss.origin xrootd-local.unl.edu:1094
 else
 
-# Unauthenticated instance runs on port 1094 (Xrootd) and 8000 (HTTP/HTTPS)
+# The unauthenticated instance runs on port 1094 (Xrootd) and 8000 (HTTP).
+# It uses a separate auth file from the authenticated instance.
    acc.authdb /etc/xrootd/Authfile-noauth
-#sec.protbind * none
-   sec.protbind  * none
+   sec.protbind * none
    xrd.protocol http:8000 libXrdHttp.so
 fi
 
