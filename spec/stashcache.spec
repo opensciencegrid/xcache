@@ -28,6 +28,8 @@ Summary: Scripts and configuration for StashCache management
 Requires: xrootd-server >= 1:4.6.1
 Requires: xrootd-python >= 1:4.6.1
 Requires: condor-python >= 8.4.11
+Requires: grid-certificates >= 7
+Requires: fetch-crl
 
 %description daemon
 %{summary}
@@ -72,8 +74,6 @@ Summary: Metapackage for an authenticated cache server
 
 Requires: %{name}-cache-server
 Requires: xrootd-lcmaps >= 1.3.3
-Requires: grid-certificates >= 7
-Requires: fetch-crl
 Requires: globus-proxy-utils
 
 %description cache-server-auth
