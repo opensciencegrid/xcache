@@ -110,16 +110,16 @@ rm -rf %{_buildroot}
 %{python_sitelib}/xrootd_cache_stats.py*
 
 %files origin-server
-%attr(-, xrootd, xrootd) %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-origin-server.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-origin-server.cfg
 
 %files cache-server
-%attr(-, xrootd, xrootd) %config(noreplace) %{_sysconfdir}/xrootd/stashcache-robots.txt
-%attr(-, xrootd, xrootd) %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server.cfg
-%attr(-, xrootd, xrootd) %config(noreplace) %{_sysconfdir}/xrootd/Authfile-noauth
+%config(noreplace) %{_sysconfdir}/xrootd/stashcache-robots.txt
+%config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/Authfile-noauth
 
 %files cache-server-auth
-%attr(-, xrootd, xrootd) %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server-auth.cfg
-%attr(-, xrootd, xrootd) %config(noreplace) %{_sysconfdir}/xrootd/Authfile-auth
+%config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server-auth.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/Authfile-auth
 %{_unitdir}/xrootd-renew-proxy.service
 %{_unitdir}/xrootd-renew-proxy.timer
 %attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
