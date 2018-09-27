@@ -8,6 +8,9 @@ URL:       https://opensciencegrid.github.io/StashCache/
 BuildArch: noarch
 Source0:   %{name}-%{version}.tar.gz
 
+BuildRequires: systemd
+%{?systemd_requires}
+
 %description
 %{summary}
 
