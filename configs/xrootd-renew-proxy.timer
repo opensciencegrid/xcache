@@ -1,0 +1,9 @@
+[Unit]
+Description=Renew proxy every day at midnight
+
+[Timer]
+OnCalendar=*-*-* 00:00:00
+Unit=xrootd-renew-proxy.service
+
+[Install]
+WantedBy=multi-user.target
