@@ -8,15 +8,6 @@ URL:       https://opensciencegrid.github.io/StashCache/
 BuildArch: noarch
 Source0:   %{name}-%{version}.tar.gz
 
-BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
-BuildRequires: systemd
-%{?systemd_requires}
-
-%if ! (0%{?fedora} > 12 || 0%{?rhel} > 5)
-%{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
-%{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(1))")}
-%endif
-
 %description
 %{summary}
 
@@ -100,11 +91,7 @@ make install DESTDIR=%{buildroot}
 # Create xrootd certificate directory
 mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 
-%clean
-rm -rf %{_buildroot}
-
 %files daemon
-%defattr(-,root,root)
 %{_sbindir}/stashcache
 %{_sysconfdir}/condor/config.d/01-stashcache.conf
 %{python_sitelib}/xrootd_cache_stats.py*
