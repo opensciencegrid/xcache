@@ -1,0 +1,11 @@
+[Unit]
+Description=Renew xrootd proxy
+
+[Service]
+User=xrootd
+Group=xrootd
+Type = oneshot
+ExecStart = /bin/grid-proxy-init -cert /etc/grid-security/xrd/xrdcert.pem -key /etc/grid-security/xrd/xrdkey.pem -out /tmp/x509up_xrootd -valid 48:00
+
+[Install]
+WantedBy=multi-user.target
