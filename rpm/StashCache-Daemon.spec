@@ -1,6 +1,6 @@
 Name:      stashcache
 Summary:   StashCache metapackages
-Version:   0.8
+Version:   0.9
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -82,12 +82,12 @@ Requires: globus-proxy-utils
 
 %prep
 %setup -q
+
+%install
 %if 0%{?el6}
 echo "*** This version does not build on EL 6 ***"
 exit 1
 %endif
-
-%install
 mkdir -p %{buildroot}%{_sysconfdir}/xrootd
 make install DESTDIR=%{buildroot}
 
@@ -115,6 +115,19 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
 
 %changelog
+* Fri Sep 28 2018 Mátyás Selmeci <matyas@cs.wisc.edu> 0.9-1
+- https://github.com/opensciencegrid/StashCache-Daemon/pull/8
+  - Reduce the dependencies for the unauthenticated xrootd
+  - Create the config and systemd unit files during the make install process
+  - Tidy the stashcache configuration
+    - Reduce the default disk usage of the cache to 90/95% to avoid
+      accidentally filling filesystems too full
+    - Move the certificate configuration inside the auth instance of xrootd
+    - Set pfc.ram 7g to allow a bit of room for the OS on 8GB system
+      (documented minimum RAM)
+    - Added pss.origin redirector-itb as a commented line, rather than adding
+      a separate itb config file
+
 * Thu Aug 24 2017 Marian Zvada <marian.zvada@cern.ch> 0.8-1
 - change homepage in origin server xrootd config file
 - set proper redirector hostname in xrootd config files
