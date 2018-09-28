@@ -6,7 +6,7 @@ License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.github.io/StashCache/
 BuildArch: noarch
-Source0:   %{name}-%{version}.tar.gz
+Source0:   StashCache-Daemon-%{version}.tar.gz
 
 BuildRequires: systemd
 %{?systemd_requires}
