@@ -82,12 +82,12 @@ Requires: globus-proxy-utils
 
 %prep
 %setup -q
+
+%install
 %if 0%{?el6}
 echo "*** This version does not build on EL 6 ***"
 exit 1
 %endif
-
-%install
 mkdir -p %{buildroot}%{_sysconfdir}/xrootd
 make install DESTDIR=%{buildroot}
 
