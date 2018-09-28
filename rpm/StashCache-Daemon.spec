@@ -81,7 +81,7 @@ Requires: globus-proxy-utils
 %systemd_postun_with_restart xrootd@stashcache-cache-server-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
 
 %prep
-%setup -q
+%setup -n StashCache-Daemon-%{version} -q
 
 %install
 %if 0%{?el6}
