@@ -9,12 +9,16 @@ Collect XRootD stats and report to HTCondor collector
 import argparse
 import logging
 import os
+import random
 import sys
 import socket
 import time
 
 import htcondor
 import xrootd_cache_stats
+
+# Ad expires from collector after 15 minutes
+REFRESH_INTERVAL = 600 + random.randrange(180) # seconds
 
 def heart_beat(hostname, cache_path='/stash', one_shot=False):
     '''Send heartbeats and cache ads to the condor_master'''
@@ -27,6 +31,7 @@ def heart_beat(hostname, cache_path='/stash', one_shot=False):
 
     xrootd_url = 'root://' + hostname
     while True:
+        start_time = time.time()
         logging.debug('Collecting cache stats from %s', cache_path)
         cache_ad = xrootd_cache_stats.collect_cache_stats(xrootd_url, cache_path)
         cache_ad['STASHCACHE_DaemonVersion'] = '##VERSION##'
@@ -44,9 +49,11 @@ def heart_beat(hostname, cache_path='/stash', one_shot=False):
         if one_shot:
             break
         else:
-            # ads need to be updated every 15 min
-            logging.debug('Sleeping until next ad refresh')
-            time.sleep(900)
+            end_time = time.time()
+            logging.debug('Cache stat collection took %s seconds', end_time - start_time)
+            sleep_time = max(0, REFRESH_INTERVAL - (end_time - start_time))
+            logging.debug('Sleeping %d seconds before ad refresh', sleep_time)
+            time.sleep(sleep_time)
 
 def main():
     '''Main function'''
