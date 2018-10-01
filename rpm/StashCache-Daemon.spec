@@ -28,6 +28,13 @@ Requires: fetch-crl
 %description daemon
 %{summary}
 
+%post daemon
+%systemd_post stashcache.service stashcache.timer
+%preun daemon
+%systemd_preun stashcache.service stashcache.timer
+%postun daemon
+%systemd_postun_with_restart stashcache.service stashcache.timer
+
 ########################################
 %package origin-server
 Group: Grid
@@ -96,8 +103,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 
 %files daemon
 %{_sbindir}/stashcache
-%{_sysconfdir}/condor/config.d/01-stashcache.conf
 %{python_sitelib}/xrootd_cache_stats.py*
+%{_unitdir}/stashcache.service
+%{_unitdir}/stashcache.timer
 
 %files origin-server
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-origin-server.cfg
