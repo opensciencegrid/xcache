@@ -3,7 +3,7 @@ Description=Report StashCache usage stats every 15 minutes
 
 [Timer]
 OnUnitInactiveSec=15m
-Unit=stashcache.service
+Unit=stashcache-reporter.service
 
 [Install]
 WantedBy=multi-user.target
