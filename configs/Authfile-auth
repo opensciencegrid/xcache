@@ -1,8 +1,8 @@
 # Authfile for authenticated StashCache access
 ##############################################
 
-# Users in VO /osg/ligo are granted read/lookup for path /user/ligo
-# Users in VO /osg/ligo are granted read/lookup for path /
+# Users in VOMS group /osg/ligo are granted read/lookup for path /user/ligo
+# Users in VOMS group /osg/ligo are granted read/lookup for path /
 g /osg/ligo /user/ligo rl \
             /          rl
 
