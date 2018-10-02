@@ -1,0 +1,11 @@
+[Unit]
+Description=Report StashCache usage stats
+
+[Service]
+User=root
+Group=root
+Type=oneshot
+ExecStart=/usr/sbin/stashcache --one-shot
+
+[Install]
+WantedBy=multi-user.target

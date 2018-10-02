@@ -1,0 +1,10 @@
+[Unit]
+Description=Report StashCache usage stats periodically
+
+[Timer]
+OnUnitInactiveSec=10m
+RandomizedDelaySec=3m
+Unit=stashcache-reporter.service
+
+[Install]
+WantedBy=multi-user.target
