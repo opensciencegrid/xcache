@@ -1,1 +1,7 @@
-u * /user/ligo -rl / rl
+# Authfile for unauthenticated StashCache access
+################################################
+
+# All users are denied  read/lookup for path /user/ligo
+# All users are granted read/lookup for path /
+u * /user/ligo -rl \
+    /           rl
