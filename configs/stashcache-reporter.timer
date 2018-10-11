@@ -2,9 +2,10 @@
 Description=Report StashCache usage stats periodically
 
 [Timer]
-OnUnitInactiveSec=10m
+OnBootSec=5m
+OnUnitActiveSec=10m
 RandomizedDelaySec=3m
 Unit=stashcache-reporter.service
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=timers.target

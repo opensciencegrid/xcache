@@ -5,6 +5,7 @@ that can be handed to condor
 """
 
 import os
+import math
 import time
 import errno
 import struct
@@ -111,7 +112,7 @@ def scan_vo_dir(vodir):
 
             for h in access_info["by_hour"]:
                 accesses["naccesses_hr_" + h] += access_info["by_hour"][h]
-                accesses["bytes_hr_" + h] += access_info["by_hour"][h]*file_size
+                accesses["bytes_hr_" + h] += access_info["bytes_hr"][h]
 
     result = classad.ClassAd({
                             "used_bytes" : totalsize,
@@ -128,20 +129,20 @@ def scan_vo_dir(vodir):
 # Parsing the cinfo files
 
 # The header (not a c struct; consecutive separate values with no padding)
-# version + buffer size + download status array size (bits) + download status array
-#   int   +  long long  +              int                  +       variable
-_header_fmt = '=iqi'
+# version + buffer size + file size (blocks)
+# int     + long long   + long long
+_header_fmt = '=iqq'
 _header_fmt_size = struct.calcsize(_header_fmt)
 
 # then the number of accesses
 #   int
-_int_fmt = '@i'
+_int_fmt = '@q'
 _int_fmt_size = struct.calcsize(_int_fmt)
 
 # each access contains a struct (native size + padding)
-# detach time + bytes disk + bytes ram + bytes missed
-# time_t      + long long  + long long + long long
-_status_fmt = '@lqqq'
+# AttachTime + DetachTime + BytesDisk + BytesRam  + BytesMissed
+# time_t     + long long  + long long + long long + long long
+_status_fmt = '@qqqqq'
 _status_fmt_size = struct.calcsize(_status_fmt)
 
 class ReadCInfoError(Exception):
@@ -158,6 +159,7 @@ def read_cinfo(cinfo_file, now):
     result = { "naccesses": 0,
                "last_access": 0,
                "by_hour" : { "01": 0, "12": 0, "24": 0 },
+               "bytes_hr" : { "01": 0, "12": 0, "24": 0 },
              }
 
     cf = open(cinfo_file, 'rb')
@@ -168,15 +170,26 @@ def read_cinfo(cinfo_file, now):
         # a mangled file
         raise ReadCInfoError("%s header too short" % cinfo_file, result)
 
-    version, buffer_size, status_array_size_bits = struct.unpack(_header_fmt, buf)
+    version, buffer_size, file_size = struct.unpack(_header_fmt, buf)
 
-    # we only understand version 0
-    if version != 0:
+    # we only understand version 2
+    if version != 2:
         raise ReadCInfoError("%s unknown version: %s" % (cinfo_file, version), result)
 
-    # get the size of the status array and skip over it
-    status_array_size_bytes = (status_array_size_bits - 1)//8 + 1
-    cf.seek(status_array_size_bytes, os.SEEK_CUR)
+    # Get the size of the state vector and skip over it
+    # buff_synced uses 1 bit per bufferSize block of bytes
+    # Length is rounded up to the nearest byte
+    buff_synced_len = int(math.ceil(float(file_size)/buffer_size/8))
+
+    # If the file_size is zero, state vector length is 1
+    # (Difference is due to Python's integer division returning the floor)
+    if file_size == 0:
+        buff_synced_len = 1
+
+    cf.read(buff_synced_len)
+
+    # Go past cksum (char[16]) and creationTime (time_t)
+    cf.read(16 + 8)
 
     # now the access count (an int)
     buf = cf.read(_int_fmt_size)
@@ -198,28 +211,26 @@ def read_cinfo(cinfo_file, now):
     hr_12 = now - 12*60*60
     hr_24 = now - 24*60*60
 
-    # seek to the most recent access and work backwards
-    start_pos = cf.tell() # don't go before this
-
+    # Read AStat structs
     try:
-        cf.seek(start_pos + (access_count-1)*_status_fmt_size, os.SEEK_SET)
-        buf = cf.read(_status_fmt_size)
-        access_time, _, _, _ = struct.unpack(_status_fmt, buf)
-        result["last_access"] = access_time
-        while True:
-            if access_time >= hr_01: result["by_hour"]["01"] += 1
-            if access_time >= hr_12: result["by_hour"]["12"] += 1
-            if access_time >= hr_24: result["by_hour"]["24"] += 1
+        for buf in iter(lambda: cf.read(_status_fmt_size), b''):
+            access_time, _, bytes_disk, bytes_ram, _ = struct.unpack(_status_fmt, buf)
+            result["last_access"] = access_time
+
+            #print access_time, bytes_disk, bytes_ram
+            #print time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(access_time))
+
+            intervals = list()
+            if access_time >= hr_01: intervals.append('01')
+            if access_time >= hr_12: intervals.append('12')
+            if access_time >= hr_24: intervals.append('24')
             else:
                 # no longer interested
-                break
+                next
 
-            cf.seek(-2*_status_fmt_size, os.SEEK_CUR)
-            if cf.tell() < start_pos:
-                # done them all
-                break
-            buf = cf.read(_status_fmt_size)
-            access_time, _, _, _ = struct.unpack(_status_fmt, buf)
+            for interval in intervals:
+                result["by_hour"][interval] += 1
+                result["bytes_hr"][interval] += bytes_disk + bytes_ram
     except struct.error, ex:
         # return what we've got
         raise ReadCInfoError("%s unable to decode access time data: %s" % (cinfo_file, str(ex)), result)

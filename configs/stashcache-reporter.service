@@ -4,7 +4,7 @@ Description=Report StashCache usage stats
 [Service]
 User=root
 Group=root
-Type=oneshot
+Type=simple
 ExecStart=/usr/sbin/stashcache --one-shot
 
 [Install]
