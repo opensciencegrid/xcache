@@ -1,6 +1,6 @@
 Name:      stashcache
 Summary:   StashCache metapackages
-Version:   0.9
+Version:   0.10
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -123,6 +123,13 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
 
 %changelog
+* Tue Oct 23 2018 Marian Zvada <marian.zvada@cern.ch> 0.10-1
+- Remove condor daemon dependency from stats reporter
+- Use systemd timer to periodically report stats
+- Modify stats reporter to use python multiprocessing so ad won't expire
+  during a long collection run
+- Update XRootD cinfo parser to format v2
+
 * Fri Sep 28 2018 Mátyás Selmeci <matyas@cs.wisc.edu> 0.9-1
 - https://github.com/opensciencegrid/StashCache-Daemon/pull/8
   - Reduce the dependencies for the unauthenticated xrootd
