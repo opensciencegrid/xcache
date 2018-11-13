@@ -10,8 +10,3 @@ g /osg/ligo /user/ligo rl \
 # User ligo is granted read/lookup for path /
 u ligo /user/ligo lr \
        /          lr
-
-# All users are denied  read/lookup for path /user/ligo
-# All users are granted read/lookup for path /
-u * /user/ligo -rl \
-    /           rl
