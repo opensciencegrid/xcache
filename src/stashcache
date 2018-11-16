@@ -137,7 +137,10 @@ class StashCacheReporter(object):
         self.logger.info('Advertising StashCache ads to collectors: %s', self.collectors)
         # Save and restore euid, as advertise() changes it
         old_uid = os.geteuid()
-        coll.advertise([cache_ad], 'UPDATE_STARTD_AD')
+        try:
+            coll.advertise([cache_ad], 'UPDATE_STARTD_AD')
+        except ValueError as err:
+            self.logger.warning('Could not advertise to %s: %s', self.collectors, err)
         os.seteuid(old_uid)
 
         return True
