@@ -1,3 +1,3 @@
 #!/bin/sh
-curl https://topology.opensciencegrid.org/stashcache/authfile > /run/stashcache-cache-server/Authfile.tmp
+curl https://topology.opensciencegrid.org/stashcache/authfile-public > /run/stashcache-cache-server/Authfile.tmp
 mv /run/stashcache-cache-server/Authfile.tmp /run/stashcache-cache-server/Authfile
