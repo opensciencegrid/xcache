@@ -16,7 +16,7 @@ VERSION := 0.9
 SBIN_FILES := src/stashcache
 INSTALL_SBIN_DIR := usr/sbin
 XROOTD_CONFIG := configs/Authfile-auth configs/Authfile-noauth configs/stashcache-robots.txt configs/xrootd-stashcache-cache-server.cfg configs/xrootd-stashcache-origin-server.cfg
-SYSTEMD_UNITS := configs/xrootd-renew-proxy.service configs/xrootd-renew-proxy.timer configs/stashcache-reporter.service configs/stashcache-reporter.timer
+SYSTEMD_UNITS := configs/xrootd-renew-proxy.service configs/xrootd-renew-proxy.timer configs/stashcache-reporter.service configs/stashcache-reporter.timer configs/stashcache-authfile-public.service configs/stashcache-authfile-public.timer configs/stashcache-authfile.service configs/stashcache-authfile.timer
 INSTALL_XROOTD_DIR := etc/xrootd
 INSTALL_SYSTEMD_UNITDIR := usr/lib/systemd/system
 PYTHON_LIB := src/xrootd_cache_stats.py
@@ -72,6 +72,17 @@ install:
 	install -p -m 0644 configs/10-stashcache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stashcache-cache-server.service.d
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stashcache-cache-server-auth.service.d
 	install -p -m 0644 configs/10-stashcache-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stashcache-cache-server-auth.service.d
+	# systemd tempfiles
+	mkdir -p $(DESTDIR)/run/stashcache-cache-server
+	mkdir -p $(DESTDIR)/run/stashcache-cache-server-auth
+	mkdir -p $(DESTDIR)/usr/lib/tmpfiles.d
+	install -p -m 0644 configs/stashcache-cache-server.conf $(DESTDIR)/usr/lib/tmpfiles.d
+	install -p -m 0644 configs/stashcache-cache-server-auth.conf $(DESTDIR)/usr/lib/tmpfiles.d
+	# Authfile updater scripts
+	mkdir -p $(DESTDIR)/usr/libexec/stashcache-cache-server
+	install -p -m 0644 src/authfile-public-update  $(DESTDIR)/usr/libexec/stashcache-cache-server
+	mkdir -p $(DESTDIR)/usr/libexec/stashcache-cache-server-auth
+	install -p -m 0644 src/authfile-update  $(DESTDIR)/usr/libexec/stashcache-cache-server-auth
 
 $(TARBALL_NAME): $(DIST_FILES)
 	$(eval TEMP_DIR := $(shell mktemp -d -p . $(DIST_DIR_PREFIX)XXXXXXXXXX))

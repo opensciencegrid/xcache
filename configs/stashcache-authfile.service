@@ -1,0 +1,11 @@
+[Unit]
+Description=StashCache Authfile generator
+
+[Service]
+User=xrootd
+Group=xrootd
+Type=simple
+ExecStart=/usr/libexec/stashcache-cache-server-auth/authfile-update
+
+[Install]
+WantedBy=multi-user.target

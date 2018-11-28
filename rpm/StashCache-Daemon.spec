@@ -58,6 +58,7 @@ Group: Grid
 Summary: Metapackage for a cache server
 
 Requires: %{name}-daemon
+Requires: curl
 
 %description cache-server
 
@@ -74,8 +75,9 @@ Group: Grid
 Summary: Metapackage for an authenticated cache server
 
 Requires: %{name}-cache-server
-Requires: xrootd-lcmaps >= 1.3.3
+Requires: xrootd-lcmaps >= 1.5.0
 Requires: globus-proxy-utils
+Requires: curl
 
 %description cache-server-auth
 %{summary}
@@ -116,12 +118,23 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config(noreplace) %{_sysconfdir}/xrootd/stashcache-robots.txt
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/Authfile-noauth
+%{_unitdir}/stashcache-authfile-public.service
+%{_unitdir}/stashcache-authfile-public.timer
+%{_libexecdir}/%{name}/authfile-public-update
+%{_tmpfilesdir}/%{name}.conf
+%dir /run/%{name}/
 
 %files cache-server-auth
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server-auth.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/Authfile-auth
 %{_unitdir}/xrootd-renew-proxy.service
 %{_unitdir}/xrootd-renew-proxy.timer
+%{_unitdir}/stashcache-authfile.service
+%{_unitdir}/stashcache-authfile.timer
+%{_libexecdir}/%{name}/authfile-update
+%{_tmpfilesdir}/%{name}.conf
+%dir /run/%{name}/
+
 %attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
 
 %changelog
