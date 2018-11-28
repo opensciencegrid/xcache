@@ -67,6 +67,11 @@ install:
 	# systemd unit files
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)
 	install -p -m 0644 $(SYSTEMD_UNITS) $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)
+	# systemd unit overrides
+	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stashcache-cache-server.service.d
+	install -p -m 0644 configs/10-stashcache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stashcache-cache-server.service.d
+	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stashcache-cache-server-auth.service.d
+	install -p -m 0644 configs/10-stashcache-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stashcache-cache-server-auth.service.d
 
 $(TARBALL_NAME): $(DIST_FILES)
 	$(eval TEMP_DIR := $(shell mktemp -d -p . $(DIST_DIR_PREFIX)XXXXXXXXXX))

@@ -106,6 +106,8 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{python_sitelib}/xrootd_cache_stats.py*
 %{_unitdir}/stashcache-reporter.service
 %{_unitdir}/stashcache-reporter.timer
+%{_unitdir}/xrootd@stashcache-cache-server.service.d/10-stashcache-overrides.conf
+%{_unitdir}/xrootd@stashcache-cache-server-auth.service.d/10-stashcache-auth-overrides.conf
 
 %files origin-server
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-origin-server.cfg
