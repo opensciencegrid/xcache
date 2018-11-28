@@ -80,9 +80,9 @@ install:
 	install -p -m 0644 configs/stashcache-cache-server-auth.conf $(DESTDIR)/usr/lib/tmpfiles.d
 	# Authfile updater scripts
 	mkdir -p $(DESTDIR)/usr/libexec/stashcache-cache-server
-	install -p -m 0644 src/authfile-public-update  $(DESTDIR)/usr/libexec/stashcache-cache-server
+	install -p -m 0755 src/authfile-public-update  $(DESTDIR)/usr/libexec/stashcache-cache-server
 	mkdir -p $(DESTDIR)/usr/libexec/stashcache-cache-server-auth
-	install -p -m 0644 src/authfile-update  $(DESTDIR)/usr/libexec/stashcache-cache-server-auth
+	install -p -m 0755 src/authfile-update  $(DESTDIR)/usr/libexec/stashcache-cache-server-auth
 
 $(TARBALL_NAME): $(DIST_FILES)
 	$(eval TEMP_DIR := $(shell mktemp -d -p . $(DIST_DIR_PREFIX)XXXXXXXXXX))
