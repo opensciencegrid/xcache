@@ -120,9 +120,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config(noreplace) %{_sysconfdir}/xrootd/Authfile-noauth
 %{_unitdir}/stashcache-authfile-public.service
 %{_unitdir}/stashcache-authfile-public.timer
-%{_libexecdir}/%{name}/authfile-public-update
-%{_tmpfilesdir}/%{name}.conf
-%dir /run/%{name}/
+%{_libexecdir}/%{name}-cache-server/authfile-public-update
+%{_tmpfilesdir}/%{name}-cache-server.conf
+%dir /run/%{name}-cache-server/
 
 %files cache-server-auth
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server-auth.cfg
@@ -131,9 +131,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/xrootd-renew-proxy.timer
 %{_unitdir}/stashcache-authfile.service
 %{_unitdir}/stashcache-authfile.timer
-%{_libexecdir}/%{name}/authfile-update
-%{_tmpfilesdir}/%{name}.conf
-%dir /run/%{name}/
+%{_libexecdir}/%{name}-cache-server-auth/authfile-update
+%{_tmpfilesdir}/%{name}-cache-server-auth.conf
+%dir /run/%{name}-cache-server-auth/
 
 %attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
 
