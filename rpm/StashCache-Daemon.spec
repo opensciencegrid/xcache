@@ -122,7 +122,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/stashcache-authfile-public.timer
 %{_libexecdir}/%{name}-cache-server/authfile-public-update
 %{_tmpfilesdir}/%{name}-cache-server.conf
-%dir /run/%{name}-cache-server/
+%attr(0755, xrootd, xrootd) %dir /run/%{name}-cache-server/
 
 %files cache-server-auth
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server-auth.cfg
@@ -133,7 +133,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/stashcache-authfile.timer
 %{_libexecdir}/%{name}-cache-server-auth/authfile-update
 %{_tmpfilesdir}/%{name}-cache-server-auth.conf
-%dir /run/%{name}-cache-server-auth/
+%attr(0755, xrootd, xrootd) %dir /run/%{name}-cache-server-auth/
 
 %attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
 
