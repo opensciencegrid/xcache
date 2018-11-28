@@ -4,7 +4,7 @@ Description=StashCache public Authfile generator
 [Service]
 User=xrootd
 Group=xrootd
-Type=simple
+Type=oneshot
 ExecStart=/usr/libexec/stashcache-cache-server/authfile-public-update
 
 [Install]
