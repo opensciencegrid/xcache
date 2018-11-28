@@ -58,6 +58,7 @@ Group: Grid
 Summary: Metapackage for a cache server
 
 Requires: %{name}-daemon
+Requires: curl
 
 %description cache-server
 
@@ -74,8 +75,9 @@ Group: Grid
 Summary: Metapackage for an authenticated cache server
 
 Requires: %{name}-cache-server
-Requires: xrootd-lcmaps >= 1.3.3
+Requires: xrootd-lcmaps >= 1.5.0
 Requires: globus-proxy-utils
+Requires: curl
 
 %description cache-server-auth
 %{summary}
@@ -106,6 +108,8 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{python_sitelib}/xrootd_cache_stats.py*
 %{_unitdir}/stashcache-reporter.service
 %{_unitdir}/stashcache-reporter.timer
+%{_unitdir}/xrootd@stashcache-cache-server.service.d/10-stashcache-overrides.conf
+%{_unitdir}/xrootd@stashcache-cache-server-auth.service.d/10-stashcache-auth-overrides.conf
 
 %files origin-server
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-origin-server.cfg
@@ -114,12 +118,24 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config(noreplace) %{_sysconfdir}/xrootd/stashcache-robots.txt
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/Authfile-noauth
+%{_unitdir}/stashcache-authfile-public.service
+%{_unitdir}/stashcache-authfile-public.timer
+%{_libexecdir}/%{name}-cache-server/authfile-public-update
+%{_tmpfilesdir}/%{name}-cache-server.conf
+%attr(0755, xrootd, xrootd) %dir /run/%{name}-cache-server/
 
 %files cache-server-auth
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server-auth.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/Authfile-auth
 %{_unitdir}/xrootd-renew-proxy.service
 %{_unitdir}/xrootd-renew-proxy.timer
+%{_unitdir}/stashcache-authfile.service
+%{_unitdir}/stashcache-authfile.timer
+%{_libexecdir}/%{name}-cache-server-auth/authfile-update
+%{_libexecdir}/%{name}-cache-server-auth/renew-proxy
+%{_tmpfilesdir}/%{name}-cache-server-auth.conf
+%attr(0755, xrootd, xrootd) %dir /run/%{name}-cache-server-auth/
+
 %attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
 
 %changelog

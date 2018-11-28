@@ -1,11 +1,17 @@
 [Unit]
-Description=Renew xrootd proxy
+Description=Generate fresh xrootd proxy
+
+# Have systemd require the existence of these files;
+# if they aren't present, this service will fail with
+# a reasonable error message.
+AssertPathExists=/etc/grid-security/xrd/xrdcert.pem
+AssertPathExists=/etc/grid-security/xrd/xrdkey.pem
 
 [Service]
 User=xrootd
 Group=xrootd
-Type = oneshot
-ExecStart = /bin/grid-proxy-init -cert /etc/grid-security/xrd/xrdcert.pem -key /etc/grid-security/xrd/xrdkey.pem -out /tmp/x509up_xrootd -valid 48:00
+Type=oneshot
+ExecStart = /usr/libexec/stashcache-cache-server-auth/renew-proxy
 
 [Install]
 WantedBy=multi-user.target

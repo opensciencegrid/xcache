@@ -1,0 +1,11 @@
+[Unit]
+Description=StashCache Authfile generator
+
+[Timer]
+OnBootSec=15m
+OnUnitActiveSec=15m
+RandomizedDelaySec=3m
+Unit=stashcache-authfile.service
+
+[Install]
+WantedBy=timers.target
