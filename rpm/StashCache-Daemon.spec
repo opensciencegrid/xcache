@@ -132,6 +132,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/stashcache-authfile.service
 %{_unitdir}/stashcache-authfile.timer
 %{_libexecdir}/%{name}-cache-server-auth/authfile-update
+%{_libexecdir}/%{name}-cache-server-auth/renew-proxy
 %{_tmpfilesdir}/%{name}-cache-server-auth.conf
 %attr(0755, xrootd, xrootd) %dir /run/%{name}-cache-server-auth/
 

@@ -82,7 +82,7 @@ install:
 	mkdir -p $(DESTDIR)/usr/libexec/stashcache-cache-server
 	install -p -m 0755 src/authfile-public-update  $(DESTDIR)/usr/libexec/stashcache-cache-server
 	mkdir -p $(DESTDIR)/usr/libexec/stashcache-cache-server-auth
-	install -p -m 0755 src/authfile-update  $(DESTDIR)/usr/libexec/stashcache-cache-server-auth
+	install -p -m 0755 src/authfile-update src/renew-proxy $(DESTDIR)/usr/libexec/stashcache-cache-server-auth
 
 $(TARBALL_NAME): $(DIST_FILES)
 	$(eval TEMP_DIR := $(shell mktemp -d -p . $(DIST_DIR_PREFIX)XXXXXXXXXX))
