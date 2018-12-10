@@ -15,7 +15,9 @@ VERSION := 0.9
 
 SBIN_FILES := src/stashcache
 INSTALL_SBIN_DIR := usr/sbin
-XROOTD_CONFIG := configs/Authfile-auth configs/Authfile-noauth configs/stashcache-robots.txt configs/xrootd-stashcache-cache-server.cfg configs/xrootd-stashcache-origin-server.cfg
+XROOTD_CONFIG := configs/Authfile-auth configs/Authfile-noauth configs/stashcache-robots.txt configs/xrootd-stashcache-cache-server.cfg configs/xrootd-stashcache-origin-server.cfg configs/osg-site-local.cfg
+XROOTD_CONFIGD := configs/config.d/40-osg-http.cfg configs/config.d/40-osg-monitoring.cfg configs/config.d/40-osg-xcache.cfg configs/config.d/50-stashcache-authz.cfg configs/config.d/50-stashcache-logging.cfg
+
 SYSTEMD_UNITS := configs/xrootd-renew-proxy.service configs/xrootd-renew-proxy.timer configs/stashcache-reporter.service configs/stashcache-reporter.timer configs/stashcache-authfile-public.service configs/stashcache-authfile-public.timer configs/stashcache-authfile.service configs/stashcache-authfile.timer
 INSTALL_XROOTD_DIR := etc/xrootd
 INSTALL_SYSTEMD_UNITDIR := usr/lib/systemd/system
@@ -64,6 +66,8 @@ install:
 	# XRootD configuration files
 	install -p -m 0644 $(XROOTD_CONFIG) $(DESTDIR)/$(INSTALL_XROOTD_DIR)
 	ln -srf $(DESTDIR)/$(INSTALL_XROOTD_DIR)/xrootd-stashcache-cache-server.cfg $(DESTDIR)/$(INSTALL_XROOTD_DIR)/xrootd-stashcache-cache-server-auth.cfg
+	mkdir -p $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d
+	install -p -m 0644 $(XROOTD_CONFIGD) $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d
 	# systemd unit files
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)
 	install -p -m 0644 $(SYSTEMD_UNITS) $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)

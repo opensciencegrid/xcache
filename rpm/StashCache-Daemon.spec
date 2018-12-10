@@ -116,8 +116,14 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 
 %files cache-server
 %config(noreplace) %{_sysconfdir}/xrootd/stashcache-robots.txt
-%config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/Authfile-noauth
+%config %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server.cfg
+%config %{_sysconfdir}/xrootd/osg-site-local.cfg
+%config %{_sysconfdir}/xrootd/config.d/40-osg-http.cfg
+%config %{_sysconfdir}/xrootd/config.d/40-osg-monitoring.cfg
+%config %{_sysconfdir}/xrootd/config.d/40-osg-xcache.cfg
+%config %{_sysconfdir}/xrootd/config.d/50-stashcache-authz.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/50-stashcache-logging.cfg
 %{_unitdir}/stashcache-authfile-public.service
 %{_unitdir}/stashcache-authfile-public.timer
 %{_libexecdir}/%{name}-cache-server/authfile-public-update
