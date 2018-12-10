@@ -1,4 +1,4 @@
 #!/bin/bash
-CACHE_FQDN="${CACHE_FQDN:=$(hostname)}"
+CACHE_FQDN=${CACHE_FQDN:-$(hostname -f)}
 curl --silent --show-error --fail "https://topology.opensciencegrid.org/stashcache/authfile-public?cache_fqdn=$CACHE_FQDN" > /run/stashcache-cache-server/Authfile.tmp && \
 mv /run/stashcache-cache-server/Authfile.tmp /run/stashcache-cache-server/Authfile
