@@ -19,6 +19,8 @@ BuildRequires: systemd
 Group: Grid
 Summary: Scripts and configuration for StashCache management
 
+# Necessary for daemon to report back to the OSG Collector.
+Requires: condor-python
 # We utilize a configuration directive (`continue`) introduced in XRootD 4.9.
 Requires: xrootd-server >= 1:4.9.0
 Requires: grid-certificates >= 7
