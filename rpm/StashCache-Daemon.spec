@@ -121,7 +121,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/40-osg-xcache.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stashcache-authz.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/50-stashcache-logging.cfg
-%config(noreplace) %{_sysconfdir}/xrootd/10-osg-site-local.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/10-osg-site-local.cfg
 %{_unitdir}/stashcache-authfile-public.service
 %{_unitdir}/stashcache-authfile-public.timer
 %{_libexecdir}/%{name}-cache-server/authfile-public-update
