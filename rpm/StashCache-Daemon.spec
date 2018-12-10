@@ -1,6 +1,6 @@
 Name:      stashcache
 Summary:   StashCache metapackages
-Version:   1.0
+Version:   1.0.0
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -19,9 +19,8 @@ BuildRequires: systemd
 Group: Grid
 Summary: Scripts and configuration for StashCache management
 
-Requires: xrootd-server >= 1:4.6.1
-Requires: xrootd-python >= 1:4.6.1
-Requires: condor-python >= 8.4.11
+# We utilize a configuration directive (`continue`) introduced in XRootD 4.9.
+Requires: xrootd-server >= 1:4.9.0
 Requires: grid-certificates >= 7
 Requires: fetch-crl
 
@@ -77,7 +76,6 @@ Summary: Metapackage for an authenticated cache server
 Requires: %{name}-cache-server
 Requires: xrootd-lcmaps >= 1.5.0
 Requires: globus-proxy-utils
-Requires: curl
 
 %description cache-server-auth
 %{summary}
@@ -118,12 +116,12 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config(noreplace) %{_sysconfdir}/xrootd/stashcache-robots.txt
 %config(noreplace) %{_sysconfdir}/xrootd/Authfile-noauth
 %config %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server.cfg
-%config %{_sysconfdir}/xrootd/osg-site-local.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-http.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-monitoring.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-xcache.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stashcache-authz.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/50-stashcache-logging.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/10-osg-site-local.cfg
 %{_unitdir}/stashcache-authfile-public.service
 %{_unitdir}/stashcache-authfile-public.timer
 %{_libexecdir}/%{name}-cache-server/authfile-public-update
@@ -145,7 +143,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
 
 %changelog
-* Mon Dec 10 2018 Brian Bockelman <bbockelm@cse.unl.edu> - 1.0-1
+* Mon Dec 10 2018 Brian Bockelman <bbockelm@cse.unl.edu> - 1.0.0-1
 - Overhaul configuration files to use new Xrootd 'continue' directive.
 - Utilize systemd dependencies so all services start when XRootD does.
 - Auto-generate the authorization files.
