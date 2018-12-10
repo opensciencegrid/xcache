@@ -1,6 +1,6 @@
 Name:      stashcache
 Summary:   StashCache metapackages
-Version:   0.10
+Version:   1.0
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -145,6 +145,11 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
 
 %changelog
+* Mon Dec 10 2018 Brian Bockelman <bbockelm@cse.unl.edu> - 1.0-1
+- Overhaul configuration files to use new Xrootd 'continue' directive.
+- Utilize systemd dependencies so all services start when XRootD does.
+- Auto-generate the authorization files.
+
 * Tue Oct 23 2018 Marian Zvada <marian.zvada@cern.ch> 0.10-1
 - Remove condor daemon dependency from stats reporter
 - Use systemd timer to periodically report stats
