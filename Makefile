@@ -15,10 +15,28 @@ VERSION := 1.0.0
 
 SBIN_FILES := src/stashcache
 INSTALL_SBIN_DIR := usr/sbin
-XROOTD_CONFIG := configs/Authfile-auth configs/Authfile-noauth configs/stashcache-robots.txt configs/xrootd-stashcache-cache-server.cfg configs/xrootd-stashcache-origin-server.cfg
-XROOTD_CONFIGD := configs/config.d/40-osg-http.cfg configs/config.d/40-osg-monitoring.cfg configs/config.d/40-osg-xcache.cfg configs/config.d/50-stashcache-authz.cfg configs/config.d/50-stashcache-logging.cfg configs/config.d/10-osg-site-local.cfg
+XROOTD_CONFIG := configs/Authfile-auth \
+                 configs/Authfile-noauth \
+                 configs/stashcache-robots.txt \
+                 configs/xrootd-stashcache-cache-server.cfg \
+                 configs/xrootd-stashcache-origin-server.cfg
 
-SYSTEMD_UNITS := configs/xrootd-renew-proxy.service configs/xrootd-renew-proxy.timer configs/stashcache-reporter.service configs/stashcache-reporter.timer configs/stashcache-authfile-public.service configs/stashcache-authfile-public.timer configs/stashcache-authfile.service configs/stashcache-authfile.timer
+XROOTD_CONFIGD := configs/config.d/40-osg-http.cfg \
+                  configs/config.d/40-osg-monitoring.cfg \
+                  configs/config.d/40-osg-xcache.cfg \
+                  configs/config.d/50-stashcache-authz.cfg \
+                  configs/config.d/50-stashcache-logging.cfg \
+                  configs/config.d/10-osg-site-local.cfg
+
+SYSTEMD_UNITS := configs/xrootd-renew-proxy.service \
+                 configs/xrootd-renew-proxy.timer \
+                 configs/stashcache-reporter.service \
+                 configs/stashcache-reporter.timer \
+                 configs/stashcache-authfile-public.service \
+                 configs/stashcache-authfile-public.timer \
+                 configs/stashcache-authfile.service \
+                 configs/stashcache-authfile.timer
+
 INSTALL_XROOTD_DIR := etc/xrootd
 INSTALL_SYSTEMD_UNITDIR := usr/lib/systemd/system
 PYTHON_LIB := src/xrootd_cache_stats.py
