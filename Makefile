@@ -25,9 +25,12 @@ XROOTD_CONFIG := configs/Authfile-auth \
 XROOTD_CONFIGD := configs/config.d/40-osg-http.cfg \
                   configs/config.d/40-osg-monitoring.cfg \
                   configs/config.d/40-osg-xcache.cfg \
+                  configs/config.d/40-osg-paths.cfg \
                   configs/config.d/50-stashcache-authz.cfg \
+                  configs/config.d/50-stash-origin-authz.cfg \
                   configs/config.d/50-stashcache-logging.cfg \
-                  configs/config.d/10-osg-site-local.cfg
+                  configs/config.d/10-origin-site-local.cfg \
+                  configs/config.d/10-cache-site-local.cfg
 
 SYSTEMD_UNITS := configs/xrootd-renew-proxy.service \
                  configs/xrootd-renew-proxy.timer \

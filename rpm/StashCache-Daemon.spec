@@ -110,21 +110,24 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/stashcache-reporter.timer
 %{_unitdir}/xrootd@stashcache-cache-server.service.d/10-stashcache-overrides.conf
 %{_unitdir}/xrootd@stashcache-cache-server-auth.service.d/10-stashcache-auth-overrides.conf
+%config %{_sysconfdir}/xrootd/config.d/40-osg-monitoring.cfg
+%config %{_sysconfdir}/xrootd/config.d/40-osg-paths.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/50-stashcache-logging.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/digauth.cfg
 
 %files origin-server
-%config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-origin-server.cfg
+%config %{_sysconfdir}/xrootd/xrootd-stashcache-origin-server.cfg
+%config %{_sysconfdir}/xrootd/config.d/50-stash-origin-authz.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/10-origin-site-local.cfg
 
 %files cache-server
 %config(noreplace) %{_sysconfdir}/xrootd/stashcache-robots.txt
 %config(noreplace) %{_sysconfdir}/xrootd/Authfile-noauth
 %config %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-http.cfg
-%config %{_sysconfdir}/xrootd/config.d/40-osg-monitoring.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-xcache.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stashcache-authz.cfg
-%config(noreplace) %{_sysconfdir}/xrootd/config.d/50-stashcache-logging.cfg
-%config(noreplace) %{_sysconfdir}/xrootd/config.d/10-osg-site-local.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/10-cache-site-local.cfg
 %{_unitdir}/stashcache-authfile-public.service
 %{_unitdir}/stashcache-authfile-public.timer
 %{_libexecdir}/%{name}-cache-server/authfile-public-update
