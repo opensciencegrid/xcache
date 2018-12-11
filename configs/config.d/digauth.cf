@@ -11,3 +11,5 @@
 #
 #all allow host h=login01.osgconnect.mwt2.org
 #all allow host h=*.unl.edu
+#all allow gsi g=cms n=theuser 
+#more examples: http://xrootd.org/doc/dev48/xrd_config.htm#_Toc496911334
