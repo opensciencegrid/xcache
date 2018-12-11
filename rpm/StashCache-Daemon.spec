@@ -83,7 +83,7 @@ Requires: globus-proxy-utils
 %{summary}
 
 %post cache-server-auth
-%systemd_post xrootd@stashcache-cache-server-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer stashcache-authfile.service stashcache-authfile.stimer
+%systemd_post xrootd@stashcache-cache-server-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer stashcache-authfile.service stashcache-authfile.timer
 %preun cache-server-auth
 %systemd_preun xrootd@stashcache-cache-server-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer stashcache-authfile.service stashcache-authfile.timer
 %postun cache-server-auth
