@@ -1,0 +1,13 @@
+#
+# Configure remote debugging for the cache server for the OSG Data Federation.
+# To enable - uncomment/adjust last line(s) when there is a problem with the server.
+#
+# ************************************************************
+# * NOTE: Changes to this file will be PRESERVED on upgrades *
+# ************************************************************
+#
+# This file is part of the StashCache Daemon
+# https://opensciencegrid.github.io/StashCache-Daemon
+#
+#all allow host h=login01.osgconnect.mwt2.org
+#all allow host h=*.unl.edu
