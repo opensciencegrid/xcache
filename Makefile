@@ -26,7 +26,8 @@ XROOTD_CONFIGD := configs/config.d/40-osg-http.cfg \
                   configs/config.d/40-osg-xcache.cfg \
                   configs/config.d/50-stashcache-authz.cfg \
                   configs/config.d/50-stashcache-logging.cfg \
-                  configs/config.d/10-osg-site-local.cfg
+                  configs/config.d/10-osg-site-local.cfg \
+                  configs/config.d/digauth.cfg
 
 SYSTEMD_UNITS := configs/xrootd-renew-proxy.service \
                  configs/xrootd-renew-proxy.timer \
