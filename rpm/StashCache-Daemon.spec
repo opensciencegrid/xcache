@@ -118,6 +118,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %files origin-server
 %config %{_sysconfdir}/xrootd/xrootd-stashcache-origin-server.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-origin-authz.cfg
+%config %{_sysconfdir}/xrootd/config.d/50-stash-origin-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/10-origin-site-local.cfg
 
 %files cache-server
