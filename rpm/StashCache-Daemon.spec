@@ -110,6 +110,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/stashcache-reporter.timer
 %{_unitdir}/xrootd@stashcache-cache-server.service.d/10-stashcache-overrides.conf
 %{_unitdir}/xrootd@stashcache-cache-server-auth.service.d/10-stashcache-auth-overrides.conf
+%config(noreplace) %{_sysconfdir}/xrootd/digauth.cfg
 
 %files origin-server
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-origin-server.cfg
