@@ -64,11 +64,11 @@ Requires: curl
 %description cache-server
 
 %post cache-server
-%systemd_post xrootd@stashcache-cache-server.service
+%systemd_post xrootd@stashcache-cache-server.service stashcache-authfile-public.service stashcache-authfile-public.timer
 %preun cache-server
-%systemd_preun xrootd@stashcache-cache-server.service
+%systemd_preun xrootd@stashcache-cache-server.service stashcache-authfile-public.service stashcache-authfile-public.timer
 %postun cache-server
-%systemd_postun_with_restart xrootd@stashcache-cache-server.service
+%systemd_postun_with_restart xrootd@stashcache-cache-server.service stashcache-authfile-public.service stashcache-authfile-public.timer
 
 ########################################
 %package cache-server-auth
@@ -83,11 +83,11 @@ Requires: globus-proxy-utils
 %{summary}
 
 %post cache-server-auth
-%systemd_post xrootd@stashcache-cache-server-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
+%systemd_post xrootd@stashcache-cache-server-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer stashcache-authfile.service stashcache-authfile.timer
 %preun cache-server-auth
-%systemd_preun xrootd@stashcache-cache-server-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
+%systemd_preun xrootd@stashcache-cache-server-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer stashcache-authfile.service stashcache-authfile.timer
 %postun cache-server-auth
-%systemd_postun_with_restart xrootd@stashcache-cache-server-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
+%systemd_postun_with_restart xrootd@stashcache-cache-server-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer stashcache-authfile.service stashcache-authfile.timer
 
 %prep
 %setup -n StashCache-Daemon-%{version} -q
