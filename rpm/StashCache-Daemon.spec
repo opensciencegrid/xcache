@@ -1,4 +1,4 @@
-Name:      stashcache
+Name:      xcache
 Summary:   StashCache metapackages
 Version:   1.0.0
 Release:   1%{?dist}
@@ -30,11 +30,11 @@ Requires: fetch-crl
 %{summary}
 
 %post daemon
-%systemd_post stashcache-reporter.service stashcache-reporter.timer
+%systemd_post xcache-reporter.service xcache-reporter.timer
 %preun daemon
-%systemd_preun stashcache-reporter.service stashcache-reporter.timer
+%systemd_preun xcache-reporter.service xcache-reporter.timer
 %postun daemon
-%systemd_postun_with_restart stashcache-reporter.service stashcache-reporter.timer
+%systemd_postun_with_restart xcache-reporter.service xcache-reporter.timer
 
 ########################################
 %package origin-server
@@ -47,11 +47,11 @@ Requires: %{name}-daemon
 %{summary}
 
 %post origin-server
-%systemd_post xrootd@stashcache-origin-server.service cmsd@stashcache-origin-server.service
+%systemd_post xrootd@stash-origin.service cmsd@stash-origin.service
 %preun origin-server
-%systemd_preun xrootd@stashcache-origin-server.service cmsd@stashcache-origin-server.service
+%systemd_preun xrootd@stash-origin.service cmsd@stash-origin.service
 %postun origin-server
-%systemd_postun_with_restart xrootd@stashcache-origin-server.service cmsd@stashcache-origin-server.service
+%systemd_postun_with_restart xrootd@stash-origin.service cmsd@stash-origin.service
 
 ########################################
 %package cache-server
@@ -64,11 +64,11 @@ Requires: curl
 %description cache-server
 
 %post cache-server
-%systemd_post xrootd@stashcache-cache-server.service stashcache-authfile-public.service stashcache-authfile-public.timer
+%systemd_post xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer
 %preun cache-server
-%systemd_preun xrootd@stashcache-cache-server.service stashcache-authfile-public.service stashcache-authfile-public.timer
+%systemd_preun xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer
 %postun cache-server
-%systemd_postun_with_restart xrootd@stashcache-cache-server.service stashcache-authfile-public.service stashcache-authfile-public.timer
+%systemd_postun_with_restart xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer
 
 ########################################
 %package cache-server-auth
@@ -83,11 +83,11 @@ Requires: globus-proxy-utils
 %{summary}
 
 %post cache-server-auth
-%systemd_post xrootd@stashcache-cache-server-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer stashcache-authfile.service stashcache-authfile.timer
+%systemd_post xrootd@stash-cache-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
 %preun cache-server-auth
-%systemd_preun xrootd@stashcache-cache-server-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer stashcache-authfile.service stashcache-authfile.timer
+%systemd_preun xrootd@stash-cache-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
 %postun cache-server-auth
-%systemd_postun_with_restart xrootd@stashcache-cache-server-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer stashcache-authfile.service stashcache-authfile.timer
+%systemd_postun_with_restart xrootd@stash-cache-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
 
 %prep
 %setup -n StashCache-Daemon-%{version} -q
@@ -104,44 +104,42 @@ make install DESTDIR=%{buildroot}
 mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 
 %files daemon
-%{_sbindir}/stashcache
+%{_sbindir}/xcache
 %{python_sitelib}/xrootd_cache_stats.py*
-%{_unitdir}/stashcache-reporter.service
-%{_unitdir}/stashcache-reporter.timer
-%{_unitdir}/xrootd@stashcache-cache-server.service.d/10-stashcache-overrides.conf
-%{_unitdir}/xrootd@stashcache-cache-server-auth.service.d/10-stashcache-auth-overrides.conf
+%{_unitdir}/xcache-reporter.service
+%{_unitdir}/xcache-reporter.timer
+%{_unitdir}/xrootd@stash-cache.service.d/10-stash-cache-overrides.conf
+%{_unitdir}/xrootd@stash-cache-auth.service.d/10-stash-cache-auth-overrides.conf
 %config %{_sysconfdir}/xrootd/config.d/40-osg-monitoring.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-paths.cfg
-%config(noreplace) %{_sysconfdir}/xrootd/config.d/50-stashcache-logging.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/50-stash-cache-logging.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/digauth.cfg
 
 %files origin-server
-%config %{_sysconfdir}/xrootd/xrootd-stashcache-origin-server.cfg
+%config %{_sysconfdir}/xrootd/xrootd-stash-origin-server.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-origin-authz.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-origin-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/10-origin-site-local.cfg
 
 %files cache-server
-%config(noreplace) %{_sysconfdir}/xrootd/stashcache-robots.txt
+%config(noreplace) %{_sysconfdir}/xrootd/xcache-robots.txt
 %config(noreplace) %{_sysconfdir}/xrootd/Authfile-noauth
-%config %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server.cfg
+%config %{_sysconfdir}/xrootd/xrootd-stash-cache.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-http.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-xcache.cfg
-%config %{_sysconfdir}/xrootd/config.d/50-stashcache-authz.cfg
+%config %{_sysconfdir}/xrootd/config.d/50-stash-cache-authz.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/10-cache-site-local.cfg
-%{_unitdir}/stashcache-authfile-public.service
-%{_unitdir}/stashcache-authfile-public.timer
 %{_libexecdir}/%{name}-cache-server/authfile-public-update
 %{_tmpfilesdir}/%{name}-cache-server.conf
 %attr(0755, xrootd, xrootd) %dir /run/%{name}-cache-server/
 
 %files cache-server-auth
-%config(noreplace) %{_sysconfdir}/xrootd/xrootd-stashcache-cache-server-auth.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/xrootd-stash-cache-auth.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/Authfile-auth
 %{_unitdir}/xrootd-renew-proxy.service
 %{_unitdir}/xrootd-renew-proxy.timer
-%{_unitdir}/stashcache-authfile.service
-%{_unitdir}/stashcache-authfile.timer
+%{_unitdir}/stash-cache-authfile.service
+%{_unitdir}/stash-cache-authfile.timer
 %{_libexecdir}/%{name}-cache-server-auth/authfile-update
 %{_libexecdir}/%{name}-cache-server-auth/renew-proxy
 %{_tmpfilesdir}/%{name}-cache-server-auth.conf

@@ -1,12 +1,12 @@
 [Unit]
-Description=Report StashCache usage stats
+Description=Report XCache usage stats
 Wants=fetch-crl-cron.service
 
 [Service]
 User=root
 Group=root
 Type=simple
-ExecStart=/usr/sbin/stashcache --one-shot
+ExecStart=/usr/sbin/xcache --one-shot
 
 [Install]
 WantedBy=multi-user.target
