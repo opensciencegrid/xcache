@@ -56,7 +56,7 @@ Summary: The OSG data federation cache server
 
 Requires: %{name}
 Requires: curl
-Requires: xrootd-lcmaps >= 1.5.0
+Requires: xrootd-lcmaps >= 1.5.1
 Requires: globus-proxy-utils
 
 Obsoletes: stashcache-cache-server <= 1.0.0
