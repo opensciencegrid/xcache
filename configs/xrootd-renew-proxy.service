@@ -11,7 +11,7 @@ AssertPathExists=/etc/grid-security/xrd/xrdkey.pem
 User=xrootd
 Group=xrootd
 Type=oneshot
-ExecStart = /usr/libexec/stash-cache-auth/renew-proxy
+ExecStart = /usr/libexec/xcache/renew-proxy
 
 [Install]
 WantedBy=multi-user.target
