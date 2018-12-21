@@ -104,10 +104,8 @@ install:
 	install -p -m 0644 configs/stash-cache.conf $(DESTDIR)/usr/lib/tmpfiles.d
 	install -p -m 0644 configs/stash-cache-auth.conf $(DESTDIR)/usr/lib/tmpfiles.d
 	# Authfile updater scripts
-	mkdir -p $(DESTDIR)/usr/libexec/stash-cache
-	install -p -m 0755 src/authfile-public-update  $(DESTDIR)/usr/libexec/stash-cache
-	mkdir -p $(DESTDIR)/usr/libexec/stash-cache-auth
-	install -p -m 0755 src/authfile-update src/renew-proxy $(DESTDIR)/usr/libexec/stash-cache-auth
+	mkdir -p $(DESTDIR)/$(INSTALL_LIBEXEC_DIR)/
+	install -p -m 0755 src/authfile-update src/renew-proxy $(DESTDIR)/$(INSTALL_LIBEXEC_DIR)/
 
 $(TARBALL_NAME): $(DIST_FILES)
 	$(eval TEMP_DIR := $(shell mktemp -d -p . $(DIST_DIR_PREFIX)XXXXXXXXXX))

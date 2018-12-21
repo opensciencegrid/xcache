@@ -116,7 +116,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config(noreplace) %{_sysconfdir}/xrootd/digauth.cfg
 
 %files origin-server
-%config %{_sysconfdir}/xrootd/xrootd-stash-origin-server.cfg
+%config %{_sysconfdir}/xrootd/xrootd-stash-origin.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-origin-authz.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-origin-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/10-origin-site-local.cfg
@@ -129,9 +129,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/40-osg-xcache.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-cache-authz.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/10-cache-site-local.cfg
-%{_libexecdir}/%{name}-cache-server/authfile-public-update
-%{_tmpfilesdir}/%{name}-cache-server.conf
-%attr(0755, xrootd, xrootd) %dir /run/%{name}-cache-server/
+%{_libexecdir}/xcache/authfile-update
+%{_tmpfilesdir}/stash-cache.conf
+%attr(0755, xrootd, xrootd) %dir /run/stash-cache/
 
 %files cache-server-auth
 %config(noreplace) %{_sysconfdir}/xrootd/xrootd-stash-cache-auth.cfg
@@ -140,10 +140,8 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/xrootd-renew-proxy.timer
 %{_unitdir}/stash-cache-authfile.service
 %{_unitdir}/stash-cache-authfile.timer
-%{_libexecdir}/%{name}-cache-server-auth/authfile-update
-%{_libexecdir}/%{name}-cache-server-auth/renew-proxy
-%{_tmpfilesdir}/%{name}-cache-server-auth.conf
-%attr(0755, xrootd, xrootd) %dir /run/%{name}-cache-server-auth/
+%{_libexecdir}/xcache/renew-proxy
+%attr(0755, xrootd, xrootd) %dir /run/stash-cache-auth/
 
 %attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
 
