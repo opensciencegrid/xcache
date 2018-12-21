@@ -20,7 +20,8 @@ Requires: xrootd-server >= 1:4.9.0
 Requires: grid-certificates >= 7
 Requires: fetch-crl
 
-Obsoletes: stashcache-daemon <= 1.0.0
+Provides: stashcache-daemon = %{name}-%{version}
+Obsoletes: stashcache-daemon < 1.0.0
 
 %description
 %{summary}
@@ -38,7 +39,8 @@ Summary: The OSG Data Federation origin server
 
 Requires: %{name}
 
-Obsoletes: stashcache-origin-server <= 1.0.0
+Provides: stashcache-origin-server = %{name}-%{version}
+Obsoletes: stashcache-origin-server < 1.0.0
 
 %description -n stash-origin
 %{summary}
@@ -59,8 +61,10 @@ Requires: curl
 Requires: xrootd-lcmaps >= 1.5.1
 Requires: globus-proxy-utils
 
-Obsoletes: stashcache-cache-server <= 1.0.0
-Obsoletes: stashcache-cache-server-auth <= 1.0.0
+Provides: stashcache-cache-server = %{name}-%{version}
+Provides: stashcache-cache-server-auth = %{name}-%{version}
+Obsoletes: stashcache-cache-server < 1.0.0
+Obsoletes: stashcache-cache-server-auth < 1.0.0
 
 %description -n stash-cache
 %{summary}
