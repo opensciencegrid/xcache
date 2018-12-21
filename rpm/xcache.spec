@@ -119,7 +119,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/stash-cache-authfile.service
 %{_unitdir}/stash-cache-authfile.timer
 %{_unitdir}/xrootd@stash-cache.service.d/10-stash-cache-overrides.conf
-%{_unitdir}/xrootd@stash-cache-auth.service.d/10-stash-cache-overrides.conf
+%{_unitdir}/xrootd@stash-cache-auth.service.d/10-stash-cache-auth-overrides.conf
 %{_tmpfilesdir}/stash-cache.conf
 %attr(0755, xrootd, xrootd) %dir /run/stash-cache/
 %attr(0755, xrootd, xrootd) %dir /run/stash-cache-auth/
