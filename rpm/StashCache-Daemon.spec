@@ -109,7 +109,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/xcache-reporter.service
 %{_unitdir}/xcache-reporter.timer
 %{_unitdir}/xrootd@stash-cache.service.d/10-stash-cache-overrides.conf
-%{_unitdir}/xrootd@stash-cache-auth.service.d/10-stash-cache-auth-overrides.conf
+%{_unitdir}/xrootd@stash-cache-auth.service.d/10-stash-cache-overrides.conf
 %config %{_sysconfdir}/xrootd/config.d/40-osg-monitoring.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/50-stash-cache-logging.cfg
