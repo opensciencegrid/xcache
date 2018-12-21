@@ -1,96 +1,72 @@
 Name:      xcache
-Summary:   StashCache metapackages
+Summary:   XCache scripts and configurations
 Version:   1.0.0
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
-URL:       https://opensciencegrid.github.io/StashCache/
+URL:       https://opensciencegrid.org/docs/
 BuildArch: noarch
-Source0:   StashCache-Daemon-%{version}.tar.gz
+Source0:   %{name}-%{version}.tar.gz
 
 BuildRequires: systemd
 %{?systemd_requires}
 
-%description
-%{summary}
-
-########################################
-%package daemon
-Group: Grid
-Summary: Scripts and configuration for StashCache management
-
 # Necessary for daemon to report back to the OSG Collector.
 Requires: condor-python
+
 # We utilize a configuration directive (`continue`) introduced in XRootD 4.9.
 Requires: xrootd-server >= 1:4.9.0
+
 Requires: grid-certificates >= 7
 Requires: fetch-crl
 
-%description daemon
+%description
 %{summary}
 
-%post daemon
+%post
 %systemd_post xcache-reporter.service xcache-reporter.timer
-%preun daemon
+%preun
 %systemd_preun xcache-reporter.service xcache-reporter.timer
-%postun daemon
+%postun
 %systemd_postun_with_restart xcache-reporter.service xcache-reporter.timer
 
 ########################################
-%package origin-server
-Group: Grid
-Summary: Metapackage for the origin server
+%package -n stash-origin
+Summary: The OSG Data Federation origin server
 
-Requires: %{name}-daemon
+Requires: %{name}
 
-%description origin-server
+%description -n stash-origin
 %{summary}
 
-%post origin-server
+%post -n stash-origin
 %systemd_post xrootd@stash-origin.service cmsd@stash-origin.service
-%preun origin-server
+%preun -n stash-origin
 %systemd_preun xrootd@stash-origin.service cmsd@stash-origin.service
-%postun origin-server
+%postun -n stash-origin
 %systemd_postun_with_restart xrootd@stash-origin.service cmsd@stash-origin.service
 
 ########################################
-%package cache-server
-Group: Grid
-Summary: Metapackage for a cache server
+%package -n stash-cache
+Summary: The OSG data federation cache server
 
-Requires: %{name}-daemon
+Requires: %{name}
 Requires: curl
-
-%description cache-server
-
-%post cache-server
-%systemd_post xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer
-%preun cache-server
-%systemd_preun xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer
-%postun cache-server
-%systemd_postun_with_restart xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer
-
-########################################
-%package cache-server-auth
-Group: Grid
-Summary: Metapackage for an authenticated cache server
-
-Requires: %{name}-cache-server
 Requires: xrootd-lcmaps >= 1.5.0
 Requires: globus-proxy-utils
 
-%description cache-server-auth
+%description -n stash-cache
 %{summary}
 
-%post cache-server-auth
-%systemd_post xrootd@stash-cache-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
-%preun cache-server-auth
-%systemd_preun xrootd@stash-cache-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
-%postun cache-server-auth
-%systemd_postun_with_restart xrootd@stash-cache-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
+%post -n stash-cache
+%systemd_post xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer xrootd@stash-cache-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
+%preun -n stash-cache
+%systemd_preun xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer xrootd@stash-cache-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
+%postun -n stash-cache
+%systemd_postun_with_restart xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer xrootd@stash-cache-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
 
 %prep
-%setup -n StashCache-Daemon-%{version} -q
+%setup -n %{name}-%{version} -q
 
 %install
 %if 0%{?el6}
@@ -103,47 +79,44 @@ make install DESTDIR=%{buildroot}
 # Create xrootd certificate directory
 mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 
-%files daemon
-%{_libexecdir}/xcache/xcache-reporter
+%files
+%{_libexecdir}/%{name}/xcache-reporter
 %{python_sitelib}/xrootd_cache_stats.py*
 %{_unitdir}/xcache-reporter.service
 %{_unitdir}/xcache-reporter.timer
-%{_unitdir}/xrootd@stash-cache.service.d/10-stash-cache-overrides.conf
-%{_unitdir}/xrootd@stash-cache-auth.service.d/10-stash-cache-overrides.conf
 %config %{_sysconfdir}/xrootd/config.d/40-osg-monitoring.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/50-stash-cache-logging.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/digauth.cfg
+%attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
 
-%files origin-server
+%files -n stash-origin
 %config %{_sysconfdir}/xrootd/xrootd-stash-origin.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-origin-authz.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-origin-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/10-origin-site-local.cfg
 
-%files cache-server
+%files -n stash-cache
+%config(noreplace) %{_sysconfdir}/xrootd/Authfile-auth
+%config(noreplace) %{_sysconfdir}/xrootd/Authfile-public
 %config(noreplace) %{_sysconfdir}/xrootd/xcache-robots.txt
-%config(noreplace) %{_sysconfdir}/xrootd/Authfile-noauth
 %config %{_sysconfdir}/xrootd/xrootd-stash-cache.cfg
+%config %{_sysconfdir}/xrootd/xrootd-stash-cache-auth.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-http.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-xcache.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-cache-authz.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/10-cache-site-local.cfg
-%{_libexecdir}/xcache/authfile-update
-%{_tmpfilesdir}/stash-cache.conf
-%attr(0755, xrootd, xrootd) %dir /run/stash-cache/
-
-%files cache-server-auth
-%config(noreplace) %{_sysconfdir}/xrootd/xrootd-stash-cache-auth.cfg
-%config(noreplace) %{_sysconfdir}/xrootd/Authfile-auth
+%{_libexecdir}/%{name}/authfile-update
+%{_libexecdir}/%{name}/renew-proxy
 %{_unitdir}/xrootd-renew-proxy.service
 %{_unitdir}/xrootd-renew-proxy.timer
 %{_unitdir}/stash-cache-authfile.service
 %{_unitdir}/stash-cache-authfile.timer
-%{_libexecdir}/xcache/renew-proxy
+%{_unitdir}/xrootd@stash-cache.service.d/10-stash-cache-overrides.conf
+%{_unitdir}/xrootd@stash-cache-auth.service.d/10-stash-cache-overrides.conf
+%{_tmpfilesdir}/stash-cache.conf
+%attr(0755, xrootd, xrootd) %dir /run/stash-cache/
 %attr(0755, xrootd, xrootd) %dir /run/stash-cache-auth/
-
-%attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
 
 %changelog
 * Mon Dec 10 2018 Brian Bockelman <bbockelm@cse.unl.edu> - 1.0.0-1
