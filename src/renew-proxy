@@ -2,7 +2,7 @@
 
 HOSTCERT=/etc/grid-security/xrd/xrdcert.pem
 HOSTKEY=/etc/grid-security/xrd/xrdkey.pem
-PROXYFILE=/run/stashcache-cache-server-auth/x509_proxy
+PROXYFILE=/run/stash-cache-auth/x509_proxy
 /bin/grid-proxy-init -cert "$HOSTCERT" \
                      -key "$HOSTKEY" \
                      -out "${PROXYFILE}.tmp" \

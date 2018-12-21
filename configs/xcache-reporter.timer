@@ -1,11 +1,11 @@
 [Unit]
-Description=Report StashCache usage stats periodically
+Description=Report XCache usage stats periodically
 
 [Timer]
 OnBootSec=5m
 OnUnitActiveSec=10m
 RandomizedDelaySec=3m
-Unit=stashcache-reporter.service
+Unit=xcache-reporter.service
 
 [Install]
 WantedBy=timers.target

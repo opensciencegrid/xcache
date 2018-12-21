@@ -1,11 +1,11 @@
-# Makefile for stashcache-daemon
+# Makefile for xcache-daemon
 
 
 # ------------------------------------------------------------------------------
 # Release information: Update for each release
 # ------------------------------------------------------------------------------
 
-PACKAGE := stashcache
+PACKAGE := xcache
 VERSION := 1.0.0
 
 
@@ -13,40 +13,37 @@ VERSION := 1.0.0
 # Other configuration: May need to change for a release
 # ------------------------------------------------------------------------------
 
-SBIN_FILES := src/stashcache
-INSTALL_SBIN_DIR := usr/sbin
+LIBEXEC_FILES := src/xcache-reporter
+INSTALL_LIBEXEC_DIR := usr/libexec/xcache
 XROOTD_CONFIG := configs/Authfile-auth \
-                 configs/Authfile-noauth \
-                 configs/stashcache-robots.txt \
-                 configs/xrootd-stashcache-cache-server.cfg \
-                 configs/xrootd-stashcache-origin-server.cfg \
+                 configs/xcache-robots.txt \
+                 configs/xrootd-stash-cache.cfg \
+                 configs/xrootd-stash-origin.cfg \
                  configs/digauth.cfg
 
 XROOTD_CONFIGD := configs/config.d/40-osg-http.cfg \
                   configs/config.d/40-osg-monitoring.cfg \
                   configs/config.d/40-osg-xcache.cfg \
                   configs/config.d/40-osg-paths.cfg \
-                  configs/config.d/50-stashcache-authz.cfg \
+                  configs/config.d/50-stash-cache-authz.cfg \
                   configs/config.d/50-stash-origin-authz.cfg \
                   configs/config.d/50-stash-origin-paths.cfg \
-                  configs/config.d/50-stashcache-logging.cfg \
+                  configs/config.d/50-stash-cache-logging.cfg \
                   configs/config.d/10-origin-site-local.cfg \
                   configs/config.d/10-cache-site-local.cfg
 
 SYSTEMD_UNITS := configs/xrootd-renew-proxy.service \
                  configs/xrootd-renew-proxy.timer \
-                 configs/stashcache-reporter.service \
-                 configs/stashcache-reporter.timer \
-                 configs/stashcache-authfile-public.service \
-                 configs/stashcache-authfile-public.timer \
-                 configs/stashcache-authfile.service \
-                 configs/stashcache-authfile.timer
+                 configs/xcache-reporter.service \
+                 configs/xcache-reporter.timer \
+                 configs/stash-cache-authfile.service \
+                 configs/stash-cache-authfile.timer
 
 INSTALL_XROOTD_DIR := etc/xrootd
 INSTALL_SYSTEMD_UNITDIR := usr/lib/systemd/system
 PYTHON_LIB := src/xrootd_cache_stats.py
 
-DIST_FILES := $(SBIN_FILES) $(PYTHON_LIB) Makefile
+DIST_FILES := $(LIBEXEC_FILES) $(PYTHON_LIB) Makefile
 
 
 # ------------------------------------------------------------------------------
@@ -80,42 +77,39 @@ ifneq ($(strip $(DIST_DIR_PREFIX)),) # avoid evil
 endif
 
 install:
-	mkdir -p $(DESTDIR)/$(INSTALL_SBIN_DIR)
-	install -p -m 0755 $(SBIN_FILES) $(DESTDIR)/$(INSTALL_SBIN_DIR)
-	sed -i -e 's/##VERSION##/$(VERSION)/g' $(DESTDIR)/$(INSTALL_SBIN_DIR)/stashcache
+	mkdir -p $(DESTDIR)/$(INSTALL_LIBEXEC_DIR)
+	install -p -m 0755 $(LIBEXEC_FILES) $(DESTDIR)/$(INSTALL_LIBEXEC_DIR)
+	sed -i -e 's/##VERSION##/$(VERSION)/g' $(DESTDIR)/$(INSTALL_LIBEXEC_DIR)/xcache-reporter
 	mkdir -p $(DESTDIR)/$(INSTALL_PYTHON_DIR)
 	install -p -m 0644 $(PYTHON_LIB) $(DESTDIR)/$(INSTALL_PYTHON_DIR)
 	mkdir -p $(DESTDIR)/$(INSTALL_XROOTD_DIR)
 	# XRootD configuration files
 	install -p -m 0644 $(XROOTD_CONFIG) $(DESTDIR)/$(INSTALL_XROOTD_DIR)
-	ln -srf $(DESTDIR)/$(INSTALL_XROOTD_DIR)/xrootd-stashcache-cache-server.cfg $(DESTDIR)/$(INSTALL_XROOTD_DIR)/xrootd-stashcache-cache-server-auth.cfg
+	ln -srf $(DESTDIR)/$(INSTALL_XROOTD_DIR)/xrootd-stash-cache.cfg $(DESTDIR)/$(INSTALL_XROOTD_DIR)/xrootd-stash-cache-auth.cfg
 	mkdir -p $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d
 	install -p -m 0644 $(XROOTD_CONFIGD) $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d
 	# systemd unit files
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)
 	install -p -m 0644 $(SYSTEMD_UNITS) $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)
 	# systemd unit overrides
-	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stashcache-cache-server.service.d
-	install -p -m 0644 configs/10-stashcache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stashcache-cache-server.service.d
-	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stashcache-cache-server-auth.service.d
-	install -p -m 0644 configs/10-stashcache-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stashcache-cache-server-auth.service.d
+	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache.service.d
+	install -p -m 0644 configs/10-stash-cache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache.service.d/
+	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache-auth.service.d
+	install -p -m 0644 configs/10-stash-cache-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache-auth.service.d/
 	# systemd tempfiles
-	mkdir -p $(DESTDIR)/run/stashcache-cache-server
-	mkdir -p $(DESTDIR)/run/stashcache-cache-server-auth
+	mkdir -p $(DESTDIR)/run/stash-cache
+	mkdir -p $(DESTDIR)/run/stash-cache-auth
 	mkdir -p $(DESTDIR)/usr/lib/tmpfiles.d
-	install -p -m 0644 configs/stashcache-cache-server.conf $(DESTDIR)/usr/lib/tmpfiles.d
-	install -p -m 0644 configs/stashcache-cache-server-auth.conf $(DESTDIR)/usr/lib/tmpfiles.d
+	install -p -m 0644 configs/stash-cache.conf $(DESTDIR)/usr/lib/tmpfiles.d
 	# Authfile updater scripts
-	mkdir -p $(DESTDIR)/usr/libexec/stashcache-cache-server
-	install -p -m 0755 src/authfile-public-update  $(DESTDIR)/usr/libexec/stashcache-cache-server
-	mkdir -p $(DESTDIR)/usr/libexec/stashcache-cache-server-auth
-	install -p -m 0755 src/authfile-update src/renew-proxy $(DESTDIR)/usr/libexec/stashcache-cache-server-auth
+	mkdir -p $(DESTDIR)/$(INSTALL_LIBEXEC_DIR)/
+	install -p -m 0755 src/authfile-update src/renew-proxy $(DESTDIR)/$(INSTALL_LIBEXEC_DIR)/
 
 $(TARBALL_NAME): $(DIST_FILES)
 	$(eval TEMP_DIR := $(shell mktemp -d -p . $(DIST_DIR_PREFIX)XXXXXXXXXX))
 	mkdir -p $(TEMP_DIR)/$(TARBALL_DIR)
 	cp -pr $(DIST_FILES) $(TEMP_DIR)/$(TARBALL_DIR)/
-	sed -i -e 's/##VERSION##/$(VERSION)/g' $(TEMP_DIR)/$(TARBALL_DIR)/stashcache
+	sed -i -e 's/##VERSION##/$(VERSION)/g' $(TEMP_DIR)/$(TARBALL_DIR)/xcache-reporter
 	tar czf $(TARBALL_NAME) -C $(TEMP_DIR) $(TARBALL_DIR)
 	rm -rf $(TEMP_DIR)
 
@@ -134,5 +128,5 @@ else
 endif
 
 check:
-	pylint -E $(SBIN_FILES) $(PYTHON_LIB)
+	pylint -E $(LIBEXEC_FILES) $(PYTHON_LIB)
 
