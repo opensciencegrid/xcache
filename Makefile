@@ -16,7 +16,6 @@ VERSION := 1.0.0
 LIBEXEC_FILES := src/xcache-reporter
 INSTALL_LIBEXEC_DIR := usr/libexec/xcache
 XROOTD_CONFIG := configs/Authfile-auth \
-                 configs/Authfile-noauth \
                  configs/xcache-robots.txt \
                  configs/xrootd-stash-cache.cfg \
                  configs/xrootd-stash-origin.cfg \

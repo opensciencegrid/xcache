@@ -20,6 +20,8 @@ Requires: xrootd-server >= 1:4.9.0
 Requires: grid-certificates >= 7
 Requires: fetch-crl
 
+Obsoletes: stashcache-daemon <= 1.0.0
+
 %description
 %{summary}
 
@@ -35,6 +37,8 @@ Requires: fetch-crl
 Summary: The OSG Data Federation origin server
 
 Requires: %{name}
+
+Obsoletes: stashcache-origin-server <= 1.0.0
 
 %description -n stash-origin
 %{summary}
@@ -54,6 +58,9 @@ Requires: %{name}
 Requires: curl
 Requires: xrootd-lcmaps >= 1.5.0
 Requires: globus-proxy-utils
+
+Obsoletes: stashcache-cache-server <= 1.0.0
+Obsoletes: stashcache-cache-server-auth <= 1.0.0
 
 %description -n stash-cache
 %{summary}
@@ -98,7 +105,6 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 
 %files -n stash-cache
 %config(noreplace) %{_sysconfdir}/xrootd/Authfile-auth
-%config(noreplace) %{_sysconfdir}/xrootd/Authfile-public
 %config(noreplace) %{_sysconfdir}/xrootd/xcache-robots.txt
 %config %{_sysconfdir}/xrootd/xrootd-stash-cache.cfg
 %config %{_sysconfdir}/xrootd/xrootd-stash-cache-auth.cfg
