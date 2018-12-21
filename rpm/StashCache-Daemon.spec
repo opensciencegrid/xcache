@@ -104,7 +104,7 @@ make install DESTDIR=%{buildroot}
 mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 
 %files daemon
-%{_sbindir}/xcache
+%{_sbindir}/xcache-reporter
 %{python_sitelib}/xrootd_cache_stats.py*
 %{_unitdir}/xcache-reporter.service
 %{_unitdir}/xcache-reporter.timer

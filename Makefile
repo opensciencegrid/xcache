@@ -13,8 +13,8 @@ VERSION := 1.0.0
 # Other configuration: May need to change for a release
 # ------------------------------------------------------------------------------
 
-SBIN_FILES := src/xcache
-INSTALL_SBIN_DIR := usr/sbin
+LIBEXEC_FILES := src/xcache-reporter
+INSTALL_LIBEXEC_DIR := usr/libexec/xcache
 XROOTD_CONFIG := configs/Authfile-auth \
                  configs/Authfile-noauth \
                  configs/xcache-robots.txt \
@@ -44,7 +44,7 @@ INSTALL_XROOTD_DIR := etc/xrootd
 INSTALL_SYSTEMD_UNITDIR := usr/lib/systemd/system
 PYTHON_LIB := src/xrootd_cache_stats.py
 
-DIST_FILES := $(SBIN_FILES) $(PYTHON_LIB) Makefile
+DIST_FILES := $(LIBEXEC_FILES) $(PYTHON_LIB) Makefile
 
 
 # ------------------------------------------------------------------------------
@@ -78,9 +78,9 @@ ifneq ($(strip $(DIST_DIR_PREFIX)),) # avoid evil
 endif
 
 install:
-	mkdir -p $(DESTDIR)/$(INSTALL_SBIN_DIR)
-	install -p -m 0755 $(SBIN_FILES) $(DESTDIR)/$(INSTALL_SBIN_DIR)
-	sed -i -e 's/##VERSION##/$(VERSION)/g' $(DESTDIR)/$(INSTALL_SBIN_DIR)/xcache
+	mkdir -p $(DESTDIR)/$(INSTALL_LIBEXEC_DIR)
+	install -p -m 0755 $(LIBEXEC_FILES) $(DESTDIR)/$(INSTALL_LIBEXEC_DIR)
+	sed -i -e 's/##VERSION##/$(VERSION)/g' $(DESTDIR)/$(INSTALL_LIBEXEC_DIR)/xcache-reporter
 	mkdir -p $(DESTDIR)/$(INSTALL_PYTHON_DIR)
 	install -p -m 0644 $(PYTHON_LIB) $(DESTDIR)/$(INSTALL_PYTHON_DIR)
 	mkdir -p $(DESTDIR)/$(INSTALL_XROOTD_DIR)
@@ -113,7 +113,7 @@ $(TARBALL_NAME): $(DIST_FILES)
 	$(eval TEMP_DIR := $(shell mktemp -d -p . $(DIST_DIR_PREFIX)XXXXXXXXXX))
 	mkdir -p $(TEMP_DIR)/$(TARBALL_DIR)
 	cp -pr $(DIST_FILES) $(TEMP_DIR)/$(TARBALL_DIR)/
-	sed -i -e 's/##VERSION##/$(VERSION)/g' $(TEMP_DIR)/$(TARBALL_DIR)/xcache
+	sed -i -e 's/##VERSION##/$(VERSION)/g' $(TEMP_DIR)/$(TARBALL_DIR)/xcache-reporter
 	tar czf $(TARBALL_NAME) -C $(TEMP_DIR) $(TARBALL_DIR)
 	rm -rf $(TEMP_DIR)
 
@@ -132,5 +132,5 @@ else
 endif
 
 check:
-	pylint -E $(SBIN_FILES) $(PYTHON_LIB)
+	pylint -E $(LIBEXEC_FILES) $(PYTHON_LIB)
 
