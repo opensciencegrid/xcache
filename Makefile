@@ -103,7 +103,6 @@ install:
 	mkdir -p $(DESTDIR)/run/stash-cache-auth
 	mkdir -p $(DESTDIR)/usr/lib/tmpfiles.d
 	install -p -m 0644 configs/stash-cache.conf $(DESTDIR)/usr/lib/tmpfiles.d
-	install -p -m 0644 configs/stash-cache-auth.conf $(DESTDIR)/usr/lib/tmpfiles.d
 	# Authfile updater scripts
 	mkdir -p $(DESTDIR)/$(INSTALL_LIBEXEC_DIR)/
 	install -p -m 0755 src/authfile-update src/renew-proxy $(DESTDIR)/$(INSTALL_LIBEXEC_DIR)/
