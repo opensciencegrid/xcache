@@ -1,0 +1,11 @@
+[Unit]
+Description=Origin Authfile generator
+
+[Timer]
+OnBootSec=15m
+OnUnitActiveSec=15m
+RandomizedDelaySec=3m
+Unit=stash-origin-authfile.service
+
+[Install]
+WantedBy=timers.target
