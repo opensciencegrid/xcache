@@ -1,28 +1,22 @@
-# StashCache-Daemon meta package
+# OSG XCache packaging
 
-## Dependencies
+This repository is the OSG implementation of an XCache (XRootD Caching Proxy) setup.
+XCache allows one to setup a "cache" server which saves frequently-accessed
+files at a specified "origin" to local storage, allowing repeated accesses of the same
+resource to be served without having to transfer them multiple times over the wide-area-network.
 
-* condor-python
-* xrootd-python
+XCache is not a generic HTTP cache.  Files in the cache do not expire, nor are there
+integrity checking mechanism such as HTTP's `ETag`.  Unlike many HTTP caches, it _can_
+stream partial responses: if the client requests only a few bytes from a multi-gigabyte
+resource, XCache will send the response before the full download completes.
 
-## StashCache Description
+XCache installation is covered in the [OSG documentation](https://opensciencegrid.org/docs/data/stashcache/install-cache/)
 
-The script `/usr/sbin/stashcache` is used as an intermediary between a condor_master and a StashCache
-cache server. Its two main functions are to accept signals from the
-`condor_master` and to advertise the cache stats back to the master. It is not
-intended to be run standalone but rather by the condor_master. It calls
-`xrootd_cache_stats.py` to query the XRootD cache.
+## Features
 
-## Invoking xrootd_cache_stats.py
-This is a script for collecting information about the files in a Stash cache and formatting them as an HTCondor classad.
+The OSG packaging features:
 
-If run as:
-
-`xrootd_cache_stats.py <base xrootd URL> <top level cache directory> [max cache fraction]`
-
-It will print the classad to stdout, for example:
-
-`xrootd_cache_stats.py root://fermicloud126.fnal.gov /stash 0.9`
-
-The max cache fraction is needed to correctly calculate the remaining cache size.
-It should match the value in the xrootd config file.
+- Data can be exported via the HTTP, HTTPS, and Xrootd protocols.
+- Configurations for both running an origin and running a cache.
+- Integrated authentication and authorization for caches.
+- Usage monitoring integrated with OSG's monitoring services.
