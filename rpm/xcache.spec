@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
 Version:   1.0.0
-Release:   1%{?dist}
+Release:   0.rc1%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -129,7 +129,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %attr(0755, xrootd, xrootd) %dir /run/stash-cache-auth/
 
 %changelog
-* Mon Dec 10 2018 Brian Bockelman <bbockelm@cse.unl.edu> - 1.0.0-1
+* Mon Jan 7 2019 Brian Bockelman <bbockelm@cse.unl.edu> - 1.0.0-0.rc1
 - Overhaul configuration files to use new Xrootd 'continue' directive.
 - Utilize systemd dependencies so all services start when XRootD does.
 - Auto-generate the authorization files.
