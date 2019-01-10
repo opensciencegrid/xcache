@@ -1,7 +1,48 @@
 #!/bin/bash
-CACHE_FQDN=${CACHE_FQDN:-$(hostname -f)}
-curl --silent --show-error --fail "https://topology.opensciencegrid.org/stashcache/authfile?cache_fqdn=${CACHE_FQDN}" > /run/stash-cache-auth/Authfile.tmp && \
-mv /run/stash-cache-auth/Authfile.tmp /run/stash-cache-auth/Authfile
-curl --silent --show-error --fail "https://topology.opensciencegrid.org/stashcache/authfile-public?cache_fqdn=$CACHE_FQDN" > /run/stash-cache/Authfile.tmp && \
-mv /run/stash-cache/Authfile.tmp /run/stash-cache/Authfile
+
+fetch () {
+    local src=$1 dst=$2
+    local tmp=$2.tmp
+    rm -f "$tmp"
+    http_code=$(curl --silent --show-error "$src" -o "$tmp" -w "%{http_code}")
+    if [[ $http_code != 200 ]]; then
+        echo >&2 "HTTP $http_code when fetching $src"
+        if [[ -e $tmp ]]; then
+            echo >&2 "File contents:"
+            cat >&2 "$tmp"
+        fi
+        return 1
+    else
+        mv -f "$tmp" "$dst"
+    fi
+}
+
+die_with_usage () {
+    echo >&2 "Usage: $(basename "$0") --cache|--origin"
+    exit 2
+}
+
+if [[ $# -ne 1 ]]; then
+    die_with_usage
+fi
+
+if [[ $1 == --cache ]]; then
+    CACHE_FQDN=${CACHE_FQDN:-$(hostname -f)}
+    ret=0
+    fetch "https://topology.opensciencegrid.org/stashcache/authfile?cache_fqdn=${CACHE_FQDN}"        /run/stash-cache-auth/Authfile
+    ret=$(( $ret | $? ))
+    fetch "https://topology.opensciencegrid.org/stashcache/authfile-public?cache_fqdn=${CACHE_FQDN}" /run/stash-cache/Authfile
+    ret=$(( $ret | $? ))
+    exit $ret
+elif [[ $1 == --origin ]]; then
+    ORIGIN_FQDN=${ORIGIN_FQDN:-$(hostname -f)}
+    ret=0
+    fetch "https://topology.opensciencegrid.org/stashcache/origin-authfile?fqdn=${ORIGIN_FQDN}"        /run/stash-origin-auth/Authfile
+    ret=$(( $ret | $? ))
+    fetch "https://topology.opensciencegrid.org/stashcache/origin-authfile-public?fqdn=${ORIGIN_FQDN}" /run/stash-origin/Authfile
+    ret=$(( $ret | $? ))
+    exit $ret
+else
+    die_with_usage
+fi
 
