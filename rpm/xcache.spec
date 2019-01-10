@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
 Version:   1.0.0
-Release:   0.rc1%{?dist}
+Release:   0.rc2%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -104,6 +104,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 
 %files -n stash-origin
 %config %{_sysconfdir}/xrootd/xrootd-stash-origin.cfg
+%config %{_sysconfdir}/xrootd/xrootd-stash-origin-auth.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-origin-authz.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-origin-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/10-origin-site-local.cfg
