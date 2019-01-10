@@ -3,11 +3,17 @@
 fetch () {
     local src=$1 dst=$2
     local tmp=$2.tmp
+    local ret
+
+    if [[ ! -d $(dirname "$dst") ]]; then
+        echo >&2 "Destination directory does not exist"
+        return 1
+    fi
     rm -f "$tmp"
-    http_code=$(curl --silent --show-error "$src" -o "$tmp" -w "%{http_code}")
-    if [[ $http_code != 200 ]]; then
-        echo >&2 "HTTP $http_code when fetching $src"
-        if [[ -e $tmp ]]; then
+    wget "$src" -q --content-on-error -O "$tmp"; ret=$?
+    if [[ $ret != 0 ]]; then
+        echo >&2 "Error fetching $src"
+        if [[ -s $tmp ]]; then
             echo >&2 "File contents:"
             cat >&2 "$tmp"
         fi

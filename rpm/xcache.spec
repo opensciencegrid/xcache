@@ -38,6 +38,7 @@ Obsoletes: stashcache-daemon < 1.0.0
 Summary: The OSG Data Federation origin server
 
 Requires: %{name}
+Requires: wget
 
 Provides: stashcache-origin-server = %{name}-%{version}
 Obsoletes: stashcache-origin-server < 1.0.0
@@ -57,7 +58,7 @@ Obsoletes: stashcache-origin-server < 1.0.0
 Summary: The OSG data federation cache server
 
 Requires: %{name}
-Requires: curl
+Requires: wget
 Requires: xrootd-lcmaps >= 1.5.1
 Requires: globus-proxy-utils
 
