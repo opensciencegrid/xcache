@@ -38,6 +38,7 @@ Obsoletes: stashcache-daemon < 1.0.0
 Summary: The OSG Data Federation origin server
 
 Requires: %{name}
+Requires: wget
 
 Provides: stashcache-origin-server = %{name}-%{version}
 Obsoletes: stashcache-origin-server < 1.0.0
@@ -57,7 +58,7 @@ Obsoletes: stashcache-origin-server < 1.0.0
 Summary: The OSG data federation cache server
 
 Requires: %{name}
-Requires: curl
+Requires: wget
 Requires: xrootd-lcmaps >= 1.5.1
 Requires: globus-proxy-utils
 
@@ -106,6 +107,14 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/50-stash-origin-authz.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-origin-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/10-origin-site-local.cfg
+%{_libexecdir}/%{name}/authfile-update
+%{_unitdir}/stash-origin-authfile.service
+%{_unitdir}/stash-origin-authfile.timer
+%{_unitdir}/xrootd@stash-origin.service.d/10-stash-origin-overrides.conf
+%{_unitdir}/xrootd@stash-origin-auth.service.d/10-stash-origin-auth-overrides.conf
+%{_tmpfilesdir}/stash-origin.conf
+%attr(0755, xrootd, xrootd) %dir /run/stash-origin/
+%attr(0755, xrootd, xrootd) %dir /run/stash-origin-auth/
 
 %files -n stash-cache
 %config(noreplace) %{_sysconfdir}/xrootd/Authfile-auth

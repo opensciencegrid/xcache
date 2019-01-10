@@ -1,0 +1,11 @@
+[Unit]
+Description=Origin Authfile generator
+
+[Service]
+User=xrootd
+Group=xrootd
+Type=oneshot
+ExecStart=/usr/libexec/xcache/authfile-update --origin
+
+[Install]
+WantedBy=multi-user.target

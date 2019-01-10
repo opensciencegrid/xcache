@@ -13,7 +13,9 @@ VERSION := 1.0.0
 # Other configuration: May need to change for a release
 # ------------------------------------------------------------------------------
 
-LIBEXEC_FILES := src/xcache-reporter
+LIBEXEC_FILES := src/xcache-reporter \
+                 src/authfile-update \
+                 src/renew-proxy
 INSTALL_LIBEXEC_DIR := usr/libexec/xcache
 XROOTD_CONFIG := configs/Authfile-auth \
                  configs/xcache-robots.txt \
@@ -36,6 +38,8 @@ SYSTEMD_UNITS := configs/xrootd-renew-proxy.service \
                  configs/xrootd-renew-proxy.timer \
                  configs/xcache-reporter.service \
                  configs/xcache-reporter.timer \
+                 configs/stash-origin-authfile.service \
+                 configs/stash-origin-authfile.timer \
                  configs/stash-cache-authfile.service \
                  configs/stash-cache-authfile.timer
 
@@ -96,14 +100,17 @@ install:
 	install -p -m 0644 configs/10-stash-cache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache.service.d/
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache-auth.service.d
 	install -p -m 0644 configs/10-stash-cache-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache-auth.service.d/
+	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin.service.d
+	install -p -m 0644 configs/10-stash-origin-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin.service.d/
+	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin-auth.service.d
+	install -p -m 0644 configs/10-stash-origin-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin-auth.service.d/
 	# systemd tempfiles
 	mkdir -p $(DESTDIR)/run/stash-cache
 	mkdir -p $(DESTDIR)/run/stash-cache-auth
+	mkdir -p $(DESTDIR)/run/stash-origin
+	mkdir -p $(DESTDIR)/run/stash-origin-auth
 	mkdir -p $(DESTDIR)/usr/lib/tmpfiles.d
-	install -p -m 0644 configs/stash-cache.conf $(DESTDIR)/usr/lib/tmpfiles.d
-	# Authfile updater scripts
-	mkdir -p $(DESTDIR)/$(INSTALL_LIBEXEC_DIR)/
-	install -p -m 0755 src/authfile-update src/renew-proxy $(DESTDIR)/$(INSTALL_LIBEXEC_DIR)/
+	install -p -m 0644 configs/stash-cache.conf configs/stash-origin.conf $(DESTDIR)/usr/lib/tmpfiles.d
 
 $(TARBALL_NAME): $(DIST_FILES)
 	$(eval TEMP_DIR := $(shell mktemp -d -p . $(DIST_DIR_PREFIX)XXXXXXXXXX))
