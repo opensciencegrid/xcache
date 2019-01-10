@@ -15,7 +15,6 @@ VERSION := 1.0.0
 
 LIBEXEC_FILES := src/xcache-reporter \
                  src/authfile-update \
-                 src/origin-authfile-update \
                  src/renew-proxy
 INSTALL_LIBEXEC_DIR := usr/libexec/xcache
 XROOTD_CONFIG := configs/Authfile-auth \

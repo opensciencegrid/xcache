@@ -106,7 +106,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/50-stash-origin-authz.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-origin-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/10-origin-site-local.cfg
-%{_libexecdir}/%{name}/origin-authfile-update
+%{_libexecdir}/%{name}/authfile-update
 %{_unitdir}/stash-origin-authfile.service
 %{_unitdir}/stash-origin-authfile.timer
 %{_unitdir}/xrootd@stash-origin.service.d/10-stash-origin-overrides.conf
