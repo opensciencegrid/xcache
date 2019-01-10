@@ -19,6 +19,10 @@ fetch () {
 
 die_with_usage () {
     echo >&2 "Usage: $(basename "$0") --cache|--origin"
+    echo >&2 "Environment variables used:"
+    echo >&2 "CACHE_FQDN        FQDN used for cache authfile query (default `hostname -f`)"
+    echo >&2 "ORIGIN_FQDN       FQDN used for origin authfile query (default `hostname -f`)"
+    echo >&2 "TOPOLOGY          Topology server to get the data from (default https://topology.opensciencegrid.org)"
     exit 2
 }
 
@@ -26,20 +30,22 @@ if [[ $# -ne 1 ]]; then
     die_with_usage
 fi
 
+TOPOLOGY=${TOPOLOGY:-https://topology.opensciencegrid.org}
+
 if [[ $1 == --cache ]]; then
     CACHE_FQDN=${CACHE_FQDN:-$(hostname -f)}
     ret=0
-    fetch "https://topology.opensciencegrid.org/stashcache/authfile?cache_fqdn=${CACHE_FQDN}"        /run/stash-cache-auth/Authfile
+    fetch "${TOPOLOGY}/stashcache/authfile?cache_fqdn=${CACHE_FQDN}"        /run/stash-cache-auth/Authfile
     ret=$(( $ret | $? ))
-    fetch "https://topology.opensciencegrid.org/stashcache/authfile-public?cache_fqdn=${CACHE_FQDN}" /run/stash-cache/Authfile
+    fetch "${TOPOLOGY}/stashcache/authfile-public?cache_fqdn=${CACHE_FQDN}" /run/stash-cache/Authfile
     ret=$(( $ret | $? ))
     exit $ret
 elif [[ $1 == --origin ]]; then
     ORIGIN_FQDN=${ORIGIN_FQDN:-$(hostname -f)}
     ret=0
-    fetch "https://topology.opensciencegrid.org/stashcache/origin-authfile?fqdn=${ORIGIN_FQDN}"        /run/stash-origin-auth/Authfile
+    fetch "${TOPOLOGY}/stashcache/origin-authfile?fqdn=${ORIGIN_FQDN}"        /run/stash-origin-auth/Authfile
     ret=$(( $ret | $? ))
-    fetch "https://topology.opensciencegrid.org/stashcache/origin-authfile-public?fqdn=${ORIGIN_FQDN}" /run/stash-origin/Authfile
+    fetch "${TOPOLOGY}/stashcache/origin-authfile-public?fqdn=${ORIGIN_FQDN}" /run/stash-origin/Authfile
     ret=$(( $ret | $? ))
     exit $ret
 else
