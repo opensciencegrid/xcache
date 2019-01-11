@@ -139,6 +139,10 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %attr(0755, xrootd, xrootd) %dir /run/stash-cache-auth/
 
 %changelog
+* Fri Jan 11 2019 Mátyás Selmeci <matyas@cs.wisc.edu> - 1.0.0-0.rc2
+- Auto-generate the origin authorization files as well.
+- Fix configuration file syntax.
+
 * Mon Jan 7 2019 Brian Bockelman <bbockelm@cse.unl.edu> - 1.0.0-0.rc1
 - Overhaul configuration files to use new Xrootd 'continue' directive.
 - Utilize systemd dependencies so all services start when XRootD does.
