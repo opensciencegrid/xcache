@@ -6,7 +6,7 @@ Wants=fetch-crl-cron.service
 User=root
 Group=root
 Type=simple
-ExecStart=/usr/sbin/xcache-reporter --one-shot
+ExecStart=/usr/libexec/xcache/xcache-reporter --one-shot
 
 [Install]
 WantedBy=multi-user.target
