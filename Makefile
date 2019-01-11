@@ -90,6 +90,7 @@ install:
 	# XRootD configuration files
 	install -p -m 0644 $(XROOTD_CONFIG) $(DESTDIR)/$(INSTALL_XROOTD_DIR)
 	ln -srf $(DESTDIR)/$(INSTALL_XROOTD_DIR)/xrootd-stash-cache.cfg $(DESTDIR)/$(INSTALL_XROOTD_DIR)/xrootd-stash-cache-auth.cfg
+	ln -srf $(DESTDIR)/$(INSTALL_XROOTD_DIR)/xrootd-stash-origin.cfg $(DESTDIR)/$(INSTALL_XROOTD_DIR)/xrootd-stash-origin-auth.cfg
 	mkdir -p $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d
 	install -p -m 0644 $(XROOTD_CONFIGD) $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d
 	# systemd unit files
