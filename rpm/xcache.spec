@@ -13,6 +13,7 @@ BuildRequires: systemd
 
 # Necessary for daemon to report back to the OSG Collector.
 Requires: condor-python
+Requires: python-xrootd
 
 # We utilize a configuration directive (`continue`) introduced in XRootD 4.9.
 Requires: xrootd-server >= 1:4.9.0
