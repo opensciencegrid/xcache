@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
 Version:   1.0.0
-Release:   0.rc2%{?dist}
+Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -140,6 +140,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %attr(0755, xrootd, xrootd) %dir /run/stash-cache-auth/
 
 %changelog
+* Mon Jan 14 2019 Brian Bockelman <brian.bockelman@cern.ch> - 1.0.0-1
+- Final release of XCache 1.0.0.
+
 * Fri Jan 11 2019 Mátyás Selmeci <matyas@cs.wisc.edu> - 1.0.0-0.rc2
 - Auto-generate the origin authorization files as well.
 - Fix configuration file syntax.
