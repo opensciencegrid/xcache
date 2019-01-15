@@ -30,7 +30,7 @@ XROOTD_CONFIGD := configs/config.d/40-osg-http.cfg \
                   configs/config.d/50-stash-cache-authz.cfg \
                   configs/config.d/50-stash-origin-authz.cfg \
                   configs/config.d/50-stash-origin-paths.cfg \
-                  configs/config.d/50-stash-cache-logging.cfg \
+                  configs/config.d/90-stash-cache-logging.cfg \
                   configs/config.d/10-origin-site-local.cfg \
                   configs/config.d/10-cache-site-local.cfg
 
