@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.0.0
+Version:   1.0.1
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -141,6 +141,11 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %attr(0755, xrootd, xrootd) %dir /run/stash-cache-auth/
 
 %changelog
+* Wed Jan 30 2019 Mátyás Selmeci <matyas@cs.wisc.edu> - 1.0.1-1
+- Config changes:
+  - fix name of logging config and decrease verbosity
+  - change default root dir from /stash to /mnt/stash
+
 * Mon Jan 14 2019 Brian Bockelman <brian.bockelman@cern.ch> - 1.0.0-1
 - Final release of XCache 1.0.0.
 
