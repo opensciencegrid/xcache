@@ -99,7 +99,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/xcache-reporter.timer
 %config %{_sysconfdir}/xrootd/config.d/40-osg-monitoring.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-paths.cfg
-%config(noreplace) %{_sysconfdir}/xrootd/config.d/90-stash-cache-logging.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/90-xcache-logging.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/digauth.cfg
 %attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
 
