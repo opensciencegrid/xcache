@@ -17,6 +17,7 @@ Requires: python-xrootd
 
 # We utilize a configuration directive (`continue`) introduced in XRootD 4.9.
 Requires: xrootd-server >= 1:4.9.0
+Requires: xrootd-libs
 
 Requires: grid-certificates >= 7
 Requires: fetch-crl
