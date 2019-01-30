@@ -17,31 +17,17 @@ LIBEXEC_FILES := src/xcache-reporter \
                  src/authfile-update \
                  src/renew-proxy
 INSTALL_LIBEXEC_DIR := usr/libexec/xcache
-XROOTD_CONFIG := configs/cache/xrootd/Authfile-auth \
-                 configs/cache/xrootd/xcache-robots.txt \
-                 configs/cache/xrootd/xrootd-stash-cache.cfg \
-                 configs/common/xrootd/digauth.cfg \
-                 configs/origin/xrootd/xrootd-stash-origin.cfg
+XROOTD_CONFIG := $(wildcard configs/cache/xrootd/*) \
+                 $(wildcard configs/common/xrootd/*) \
+                 $(wildcard configs/origin/xrootd/*)
 
-XROOTD_CONFIGD := configs/cache/config.d/10-cache-site-local.cfg \
-                  configs/cache/config.d/40-osg-http.cfg \
-                  configs/cache/config.d/40-osg-xcache.cfg \
-                  configs/cache/config.d/50-stash-cache-authz.cfg \
-                  configs/common/config.d/40-osg-monitoring.cfg \
-                  configs/common/config.d/40-osg-paths.cfg \
-                  configs/common/config.d/90-xcache-logging.cfg \
-                  configs/origin/config.d/10-origin-site-local.cfg \
-                  configs/origin/config.d/50-stash-origin-authz.cfg \
-                  configs/origin/config.d/50-stash-origin-paths.cfg
+XROOTD_CONFIGD := $(wildcard configs/cache/config.d/*) \
+                  $(wildcard configs/common/config.d/*) \
+                  $(wildcard configs/origin/config.d/*)
 
-SYSTEMD_UNITS := configs/cache/systemd/stash-cache-authfile.service \
-                 configs/cache/systemd/stash-cache-authfile.timer \
-                 configs/cache/systemd/xrootd-renew-proxy.service \
-                 configs/cache/systemd/xrootd-renew-proxy.timer \
-                 configs/common/systemd/xcache-reporter.service \
-                 configs/common/systemd/xcache-reporter.timer \
-                 configs/origin/systemd/stash-origin-authfile.service \
-                 configs/origin/systemd/stash-origin-authfile.timer
+SYSTEMD_UNITS := $(wildcard configs/cache/systemd/*) \
+                 $(wildcard configs/common/systemd/*) \
+                 $(wildcard configs/origin/systemd/*)
 
 TMPFILES_D := configs/cache/tmpfiles/stash-cache.conf \
               configs/origin/tmpfiles/stash-origin.conf
@@ -101,13 +87,13 @@ install:
 	install -p -m 0644 $(SYSTEMD_UNITS) $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)
 	# systemd unit overrides
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache.service.d
-	install -p -m 0644 configs/cache/systemd/10-stash-cache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache.service.d/
+	install -p -m 0644 configs/cache/overrides/10-stash-cache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache.service.d/
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache-auth.service.d
-	install -p -m 0644 configs/cache/systemd/10-stash-cache-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache-auth.service.d/
+	install -p -m 0644 configs/cache/overrides/10-stash-cache-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache-auth.service.d/
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin.service.d
-	install -p -m 0644 configs/origin/systemd/10-stash-origin-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin.service.d/
+	install -p -m 0644 configs/origin/overrides/10-stash-origin-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin.service.d/
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin-auth.service.d
-	install -p -m 0644 configs/origin/systemd/10-stash-origin-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin-auth.service.d/
+	install -p -m 0644 configs/origin/overrides/10-stash-origin-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin-auth.service.d/
 	# systemd tempfiles
 	mkdir -p $(DESTDIR)/run/stash-cache
 	mkdir -p $(DESTDIR)/run/stash-cache-auth
