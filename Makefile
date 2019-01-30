@@ -17,31 +17,20 @@ LIBEXEC_FILES := src/xcache-reporter \
                  src/authfile-update \
                  src/renew-proxy
 INSTALL_LIBEXEC_DIR := usr/libexec/xcache
-XROOTD_CONFIG := configs/Authfile-auth \
-                 configs/xcache-robots.txt \
-                 configs/xrootd-stash-cache.cfg \
-                 configs/xrootd-stash-origin.cfg \
-                 configs/digauth.cfg
+XROOTD_CONFIG := $(wildcard configs/stash-cache/xrootd/*) \
+                 $(wildcard configs/xcache/xrootd/*) \
+                 $(wildcard configs/stash-origin/xrootd/*)
 
-XROOTD_CONFIGD := configs/config.d/40-osg-http.cfg \
-                  configs/config.d/40-osg-monitoring.cfg \
-                  configs/config.d/40-osg-xcache.cfg \
-                  configs/config.d/40-osg-paths.cfg \
-                  configs/config.d/50-stash-cache-authz.cfg \
-                  configs/config.d/50-stash-origin-authz.cfg \
-                  configs/config.d/50-stash-origin-paths.cfg \
-                  configs/config.d/90-xcache-logging.cfg \
-                  configs/config.d/10-origin-site-local.cfg \
-                  configs/config.d/10-cache-site-local.cfg
+XROOTD_CONFIGD := $(wildcard configs/stash-cache/config.d/*) \
+                  $(wildcard configs/xcache/config.d/*) \
+                  $(wildcard configs/stash-origin/config.d/*)
 
-SYSTEMD_UNITS := configs/xrootd-renew-proxy.service \
-                 configs/xrootd-renew-proxy.timer \
-                 configs/xcache-reporter.service \
-                 configs/xcache-reporter.timer \
-                 configs/stash-origin-authfile.service \
-                 configs/stash-origin-authfile.timer \
-                 configs/stash-cache-authfile.service \
-                 configs/stash-cache-authfile.timer
+SYSTEMD_UNITS := $(wildcard configs/stash-cache/systemd/*) \
+                 $(wildcard configs/xcache/systemd/*) \
+                 $(wildcard configs/stash-origin/systemd/*)
+
+TMPFILES_D := configs/stash-cache/tmpfiles/stash-cache.conf \
+              configs/stash-origin/tmpfiles/stash-origin.conf
 
 INSTALL_XROOTD_DIR := etc/xrootd
 INSTALL_SYSTEMD_UNITDIR := usr/lib/systemd/system
@@ -98,20 +87,20 @@ install:
 	install -p -m 0644 $(SYSTEMD_UNITS) $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)
 	# systemd unit overrides
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache.service.d
-	install -p -m 0644 configs/10-stash-cache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache.service.d/
+	install -p -m 0644 configs/stash-cache/overrides/10-stash-cache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache.service.d/
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache-auth.service.d
-	install -p -m 0644 configs/10-stash-cache-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache-auth.service.d/
+	install -p -m 0644 configs/stash-cache/overrides/10-stash-cache-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache-auth.service.d/
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin.service.d
-	install -p -m 0644 configs/10-stash-origin-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin.service.d/
+	install -p -m 0644 configs/stash-origin/overrides/10-stash-origin-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin.service.d/
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin-auth.service.d
-	install -p -m 0644 configs/10-stash-origin-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin-auth.service.d/
+	install -p -m 0644 configs/stash-origin/overrides/10-stash-origin-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin-auth.service.d/
 	# systemd tempfiles
 	mkdir -p $(DESTDIR)/run/stash-cache
 	mkdir -p $(DESTDIR)/run/stash-cache-auth
 	mkdir -p $(DESTDIR)/run/stash-origin
 	mkdir -p $(DESTDIR)/run/stash-origin-auth
 	mkdir -p $(DESTDIR)/usr/lib/tmpfiles.d
-	install -p -m 0644 configs/stash-cache.conf configs/stash-origin.conf $(DESTDIR)/usr/lib/tmpfiles.d
+	install -p -m 0644 $(TMPFILES_D) $(DESTDIR)/usr/lib/tmpfiles.d
 
 $(TARBALL_NAME): $(DIST_FILES)
 	$(eval TEMP_DIR := $(shell mktemp -d -p . $(DIST_DIR_PREFIX)XXXXXXXXXX))
