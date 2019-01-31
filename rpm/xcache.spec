@@ -145,6 +145,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 - Config changes:
   - fix name of logging config and decrease verbosity
   - change default root dir from /stash to /mnt/stash
+  - various other tweaks for understandability
 
 * Mon Jan 14 2019 Brian Bockelman <brian.bockelman@cern.ch> - 1.0.0-1
 - Final release of XCache 1.0.0.
