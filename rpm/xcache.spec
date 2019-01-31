@@ -97,6 +97,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{python_sitelib}/xrootd_cache_stats.py*
 %{_unitdir}/xcache-reporter.service
 %{_unitdir}/xcache-reporter.timer
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/10-common-site-local.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-monitoring.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/90-xcache-logging.cfg
@@ -126,7 +127,6 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/40-osg-http.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-xcache.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-cache-authz.cfg
-%config(noreplace) %{_sysconfdir}/xrootd/config.d/10-cache-site-local.cfg
 %{_libexecdir}/%{name}/authfile-update
 %{_libexecdir}/%{name}/renew-proxy
 %{_unitdir}/xrootd-renew-proxy.service
