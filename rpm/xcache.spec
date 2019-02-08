@@ -40,6 +40,7 @@ Summary: The OSG Data Federation origin server
 
 Requires: %{name}
 Requires: wget
+Requires: xrootd-lcmaps >= 1.5.1
 
 Provides: stashcache-origin-server = %{name}-%{version}
 Obsoletes: stashcache-origin-server < 1.0.0
