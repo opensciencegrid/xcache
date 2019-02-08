@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.0.1
+Version:   1.0.2
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -148,6 +148,17 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %attr(0755, xrootd, xrootd) %dir /run/stash-cache-auth/
 
 %changelog
+* Thu Mar 14 2019 Mátyás Selmeci <matyas@cs.wisc.edu> - 1.0.2-1
+- Add missing xrootd-lcmaps dependency for the origin
+- Start and stop xrootd and cmsd together for the origin (SOFTWARE-3544)
+- Drop workaround for LIGO not being part of the OSG Data Federation (SOFTWARE-3507)
+- Start proxy renewal script for both unauth and auth cache and origin instances;
+  only mandatory for auth cache
+- Fix permissions in tmpfiles.d config for cache
+- Add vo-client and voms-clients-cpp dependency
+- Proxy renewal script now uses voms-proxy-init instead of grid-proxy-init
+- "sitename" xrootd config variable in 10-common-site-local.cfg renamed to "resourcename"
+
 * Wed Jan 30 2019 Mátyás Selmeci <matyas@cs.wisc.edu> - 1.0.1-1
 - Config changes:
   - fix name of logging config and decrease verbosity
