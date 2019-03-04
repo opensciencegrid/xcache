@@ -14,11 +14,13 @@ BuildRequires: systemd
 # Necessary for daemon to report back to the OSG Collector.
 Requires: condor-python
 Requires: python-xrootd
+Requires: voms-clients-cpp
 
 # We utilize a configuration directive (`continue`) introduced in XRootD 4.9.
 Requires: xrootd-server >= 1:4.9.0
 
 Requires: grid-certificates >= 7
+Requires: vo-client
 Requires: fetch-crl
 
 Provides: stashcache-daemon = %{name}-%{version}
@@ -28,11 +30,11 @@ Obsoletes: stashcache-daemon < 1.0.0
 %{summary}
 
 %post
-%systemd_post xcache-reporter.service xcache-reporter.timer
+%systemd_post xcache-reporter.service xcache-reporter.timer xrootd-renew-proxy.service xrootd-renew-proxy.timer
 %preun
-%systemd_preun xcache-reporter.service xcache-reporter.timer
+%systemd_preun xcache-reporter.service xcache-reporter.timer xrootd-renew-proxy.service xrootd-renew-proxy.timer
 %postun
-%systemd_postun_with_restart xcache-reporter.service xcache-reporter.timer
+%systemd_postun_with_restart xcache-reporter.service xcache-reporter.timer xrootd-renew-proxy.service xrootd-renew-proxy.timer
 
 ########################################
 %package -n stash-origin
@@ -62,7 +64,6 @@ Summary: The OSG data federation cache server
 Requires: %{name}
 Requires: wget
 Requires: xrootd-lcmaps >= 1.5.1
-Requires: globus-proxy-utils
 
 Provides: stashcache-cache-server = %{name}-%{version}
 Provides: stashcache-cache-server-auth = %{name}-%{version}
@@ -73,11 +74,11 @@ Obsoletes: stashcache-cache-server-auth < 1.0.0
 %{summary}
 
 %post -n stash-cache
-%systemd_post xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer xrootd@stash-cache-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
+%systemd_post xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer xrootd@stash-cache-auth.service
 %preun -n stash-cache
-%systemd_preun xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer xrootd@stash-cache-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
+%systemd_preun xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer xrootd@stash-cache-auth.service
 %postun -n stash-cache
-%systemd_postun_with_restart xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer xrootd@stash-cache-auth.service xrootd-renew-proxy.service xrootd-renew-proxy.timer
+%systemd_postun_with_restart xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer xrootd@stash-cache-auth.service
 
 %prep
 %setup -n %{name}-%{version} -q
@@ -95,9 +96,12 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 
 %files
 %{_libexecdir}/%{name}/xcache-reporter
+%{_libexecdir}/%{name}/renew-proxy
 %{python_sitelib}/xrootd_cache_stats.py*
 %{_unitdir}/xcache-reporter.service
 %{_unitdir}/xcache-reporter.timer
+%{_unitdir}/xrootd-renew-proxy.service
+%{_unitdir}/xrootd-renew-proxy.timer
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/10-common-site-local.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-monitoring.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-paths.cfg
@@ -132,9 +136,6 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/50-stash-cache-authz.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-cache-paths.cfg
 %{_libexecdir}/%{name}/authfile-update
-%{_libexecdir}/%{name}/renew-proxy
-%{_unitdir}/xrootd-renew-proxy.service
-%{_unitdir}/xrootd-renew-proxy.timer
 %{_unitdir}/stash-cache-authfile.service
 %{_unitdir}/stash-cache-authfile.timer
 %{_unitdir}/xrootd@stash-cache.service.d/10-stash-cache-overrides.conf

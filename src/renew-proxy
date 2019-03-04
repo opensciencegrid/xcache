@@ -3,9 +3,10 @@
 HOSTCERT=/etc/grid-security/xrd/xrdcert.pem
 HOSTKEY=/etc/grid-security/xrd/xrdkey.pem
 PROXYFILE=/run/stash-cache-auth/x509_proxy
-/bin/grid-proxy-init -cert "$HOSTCERT" \
+/usr/bin/voms-proxy-init -cert "$HOSTCERT" \
                      -key "$HOSTKEY" \
                      -out "${PROXYFILE}.tmp" \
                      -valid 48:00 \
+                     "$@" \
   &&
 mv "${PROXYFILE}.tmp" "${PROXYFILE}"
