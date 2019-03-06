@@ -110,6 +110,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config(noreplace) %{_sysconfdir}/xrootd/digauth.cfg
 %attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
 %attr(0755, xrootd, xrootd) %dir /run/xcache-auth
+%{_tmpfilesdir}/xcache.conf
 
 %files -n stash-origin
 %config %{_sysconfdir}/xrootd/xrootd-stash-origin.cfg
