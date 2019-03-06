@@ -30,7 +30,8 @@ SYSTEMD_UNITS := $(wildcard configs/stash-cache/systemd/*) \
                  $(wildcard configs/stash-origin/systemd/*)
 
 TMPFILES_D := configs/stash-cache/tmpfiles/stash-cache.conf \
-              configs/stash-origin/tmpfiles/stash-origin.conf
+              configs/stash-origin/tmpfiles/stash-origin.conf \
+              configs/xcache/tmpfiles/xcache.conf
 
 INSTALL_XROOTD_DIR := etc/xrootd
 INSTALL_SYSTEMD_UNITDIR := usr/lib/systemd/system
