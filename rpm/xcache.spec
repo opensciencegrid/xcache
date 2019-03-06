@@ -103,11 +103,13 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/xrootd-renew-proxy.service
 %{_unitdir}/xrootd-renew-proxy.timer
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/10-common-site-local.cfg
+%config %{_sysconfdir}/xrootd/config.d/40-osg-auth.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-monitoring.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/90-xcache-logging.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/digauth.cfg
 %attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
+%attr(0755, xrootd, xrootd) %dir /run/xcache-auth
 
 %files -n stash-origin
 %config %{_sysconfdir}/xrootd/xrootd-stash-origin.cfg

@@ -30,7 +30,8 @@ SYSTEMD_UNITS := $(wildcard configs/stash-cache/systemd/*) \
                  $(wildcard configs/stash-origin/systemd/*)
 
 TMPFILES_D := configs/stash-cache/tmpfiles/stash-cache.conf \
-              configs/stash-origin/tmpfiles/stash-origin.conf
+              configs/stash-origin/tmpfiles/stash-origin.conf \
+              configs/xcache/tmpfiles/xcache.conf
 
 INSTALL_XROOTD_DIR := etc/xrootd
 INSTALL_SYSTEMD_UNITDIR := usr/lib/systemd/system
@@ -105,6 +106,7 @@ install:
 	mkdir -p $(DESTDIR)/run/stash-cache-auth
 	mkdir -p $(DESTDIR)/run/stash-origin
 	mkdir -p $(DESTDIR)/run/stash-origin-auth
+	mkdir -p $(DESTDIR)/run/xcache-auth
 	mkdir -p $(DESTDIR)/usr/lib/tmpfiles.d
 	install -p -m 0644 $(TMPFILES_D) $(DESTDIR)/usr/lib/tmpfiles.d
 
