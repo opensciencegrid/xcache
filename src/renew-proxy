@@ -2,7 +2,7 @@
 
 HOSTCERT=/etc/grid-security/xrd/xrdcert.pem
 HOSTKEY=/etc/grid-security/xrd/xrdkey.pem
-PROXYFILE=/run/stash-cache-auth/x509_proxy
+PROXYFILE=/run/xcache-auth/x509_proxy
 /usr/bin/voms-proxy-init -cert "$HOSTCERT" \
                      -key "$HOSTKEY" \
                      -out "${PROXYFILE}.tmp" \
