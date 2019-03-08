@@ -40,7 +40,7 @@ Obsoletes: stashcache-daemon < 1.0.0
 %package -n stash-origin
 Summary: The OSG Data Federation origin server
 
-Requires: %{name}
+Requires: %{name} = %{version}
 Requires: wget
 Requires: xrootd-lcmaps >= 1.5.1
 
@@ -61,7 +61,7 @@ Obsoletes: stashcache-origin-server < 1.0.0
 %package -n stash-cache
 Summary: The OSG data federation cache server
 
-Requires: %{name}
+Requires: %{name} = %{version}
 Requires: wget
 Requires: xrootd-lcmaps >= 1.5.1
 
