@@ -1,10 +1,11 @@
 [Unit]
 Description=Report XCache usage stats periodically
+After=network.target
 
 [Timer]
-OnBootSec=5m
-OnUnitActiveSec=10m
-RandomizedDelaySec=3m
+OnBootSec=5min
+OnUnitActiveSec=10min
+RandomizedDelaySec=3min
 Unit=xcache-reporter.service
 
 [Install]

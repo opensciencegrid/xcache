@@ -1,10 +1,11 @@
 [Unit]
 Description=StashCache Authfile generator
+After=network.target
 
 [Timer]
-OnBootSec=15m
-OnUnitActiveSec=15m
-RandomizedDelaySec=3m
+OnBootSec=15min
+OnUnitActiveSec=15min
+RandomizedDelaySec=3min
 Unit=stash-cache-authfile.service
 
 [Install]
