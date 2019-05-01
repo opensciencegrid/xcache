@@ -3,9 +3,9 @@ Description=Origin Authfile generator
 After=network.target
 
 [Timer]
-OnBootSec=15m
-OnUnitActiveSec=15m
-RandomizedDelaySec=3m
+OnBootSec=15min
+OnUnitActiveSec=15min
+RandomizedDelaySec=3min
 Unit=stash-origin-authfile.service
 
 [Install]
