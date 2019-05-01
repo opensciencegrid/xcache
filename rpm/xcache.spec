@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.0.3
+Version:   1.0.4
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -148,6 +148,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %attr(0755, xrootd, xrootd) %dir /run/stash-cache-auth/
 
 %changelog
+* Wed May 01 2019 Mátyás Selmeci <matyas@cs.wisc.edu> - 1.0.4-1
+- Start services after network is up (SOFTWARE-3681)
+
 * Mon Apr 08 2019 Mátyás Selmeci <matyas@cs.wisc.edu> - 1.0.3-1
 - Fix *-overrides.conf syntax
 
