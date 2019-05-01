@@ -1,6 +1,6 @@
 [Unit]
 Description=Renew proxy every day at midnight
-After=network.target
+After=network-online.target
 
 [Timer]
 OnCalendar=*-*-* 00:00:00

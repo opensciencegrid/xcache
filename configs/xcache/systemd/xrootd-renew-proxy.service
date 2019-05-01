@@ -1,6 +1,6 @@
 [Unit]
 Description=Generate fresh xrootd proxy
-After=network.target
+After=network-online.target
 
 # Have systemd require the existence of these files;
 # if they aren't present, this service will fail with
