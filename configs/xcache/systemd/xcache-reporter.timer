@@ -1,6 +1,6 @@
 [Unit]
 Description=Report XCache usage stats periodically
-After=network.target
+After=network-online.target
 
 [Timer]
 OnBootSec=5min

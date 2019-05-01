@@ -1,7 +1,7 @@
 [Unit]
 Description=Report XCache usage stats
 Wants=fetch-crl-cron.service
-After=network.target
+After=network-online.target
 
 [Service]
 User=root
