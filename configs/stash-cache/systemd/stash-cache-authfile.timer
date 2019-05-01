@@ -1,5 +1,6 @@
 [Unit]
 Description=StashCache Authfile generator
+After=network.target
 
 [Timer]
 OnBootSec=15m

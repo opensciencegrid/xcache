@@ -1,5 +1,6 @@
 [Unit]
 Description=Report XCache usage stats periodically
+After=network.target
 
 [Timer]
 OnBootSec=5m
