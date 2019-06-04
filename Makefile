@@ -114,6 +114,9 @@ install:
 	mkdir -p $(DESTDIR)/run/xcache-auth
 	mkdir -p $(DESTDIR)/usr/lib/tmpfiles.d
 	install -p -m 0644 $(TMPFILES_D) $(DESTDIR)/usr/lib/tmpfiles.d
+	# common xcache files
+	install -p -m 0644 configs/common-cache/config.d/40-osg-caching-plugin.cfg $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d
+	install -p -m 0644 cp configs/common-cache/config.d/40-osg-caching-plugin.cfg $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d/40-atlas-caching-plugin.cfg
 
 $(TARBALL_NAME): $(DIST_FILES)
 	$(eval TEMP_DIR := $(shell mktemp -d -p . $(DIST_DIR_PREFIX)XXXXXXXXXX))

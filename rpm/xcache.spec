@@ -170,7 +170,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %files -n atlas-xcache
 %config %{_sysconfdir}/xrootd/xrootd-atlas-xcache.cfg
 %{_unitdir}/xrootd@atlas-xcache.service.d/10-atlas-xcache-overrides.conf
-%config %{_sysconfdir}/xrootd/config.d/40-atlas-xcache-plugins.cfg
+%config %{_sysconfdir}/xrootd/config.d/40-atlas-caching-plugin.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-atlas-xcache-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/91-atlas-xcache-logging.cfg
 
