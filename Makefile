@@ -17,11 +17,13 @@ LIBEXEC_FILES := src/xcache-reporter \
                  src/authfile-update \
                  src/renew-proxy
 INSTALL_LIBEXEC_DIR := usr/libexec/xcache
-XROOTD_CONFIG := $(wildcard configs/stash-cache/xrootd/*) \
+XROOTD_CONFIG := $(wildcard configs/atlas-xcache/xrootd/*) \
+		 $(wildcard configs/stash-cache/xrootd/*) \
                  $(wildcard configs/xcache/xrootd/*) \
                  $(wildcard configs/stash-origin/xrootd/*)
 
-XROOTD_CONFIGD := $(wildcard configs/stash-cache/config.d/*) \
+XROOTD_CONFIGD := $(wildcard configs/atlas-xcache/config.d/*) \
+                  $(wildcard configs/stash-cache/config.d/*) \
                   $(wildcard configs/xcache/config.d/*) \
                   $(wildcard configs/stash-origin/config.d/*)
 
@@ -87,12 +89,12 @@ install:
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)
 	install -p -m 0644 $(SYSTEMD_UNITS) $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)
 	# systemd unit overrides
-	# cache
+	# stash-cache
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache.service.d
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache-auth.service.d
 	install -p -m 0644 configs/stash-cache/overrides/10-stash-cache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache.service.d/
 	install -p -m 0644 configs/stash-cache/overrides/10-stash-cache-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache-auth.service.d/
-	# origin
+	# stash-origin
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin.service.d
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin-auth.service.d
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/cmsd@stash-origin.service.d
@@ -101,6 +103,9 @@ install:
 	install -p -m 0644 configs/stash-origin/overrides/xrootd/10-stash-origin-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin-auth.service.d/
 	install -p -m 0644 configs/stash-origin/overrides/cmsd/10-stash-origin-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/cmsd@stash-origin.service.d/
 	install -p -m 0644 configs/stash-origin/overrides/cmsd/10-stash-origin-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/cmsd@stash-origin-auth.service.d/
+	# atlas-xcache
+	mkdir -p mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@atlas-xcache.service.d
+	install -p -m 0644 configs/atlas-xcache/overrides/xrootd/10-atlas-xcache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@atlas-xcache.service.d/
 	# systemd tempfiles
 	mkdir -p $(DESTDIR)/run/stash-cache
 	mkdir -p $(DESTDIR)/run/stash-cache-auth
