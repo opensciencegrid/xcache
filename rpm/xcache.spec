@@ -80,6 +80,24 @@ Obsoletes: stashcache-cache-server-auth < 1.0.0
 %postun -n stash-cache
 %systemd_postun_with_restart xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer xrootd@stash-cache-auth.service
 
+########################################
+%package -n atlas-xcache
+Summary: The OSG data federation cache server
+
+Requires: %{name} = %{version}
+Requires: wget
+Requires: xrootd-lcmaps >= 1.5.1
+
+%description -n atlas-xcache
+%{summary}
+
+%post -n atlas-xcache
+%systemd_post xrootd@atlas-xcache.service
+%preun -n atlas-xcache
+%systemd_preun xrootd@atlas-xcache.service
+%postun -n atlas-xcache
+%systemd_postun_with_restart xrootd@atlas-xcache.service
+
 %prep
 %setup -n %{name}-%{version} -q
 
@@ -146,6 +164,13 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_tmpfilesdir}/stash-cache.conf
 %attr(0755, xrootd, xrootd) %dir /run/stash-cache/
 %attr(0755, xrootd, xrootd) %dir /run/stash-cache-auth/
+
+%files -n atlas-xcache
+%config %{_sysconfdir}/xrootd/xrootd-atlas-xcache.cfg
+%{_unitdir}/xrootd@atlas-xcache.service.d/10-atlas-xcache-overrides.conf
+%config %{_sysconfdir}/xrootd/config.d/40-atlas-caching-plugin.cfg
+%config %{_sysconfdir}/xrootd/config.d/50-atlas-xcache-paths.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/90-atlas-disks.cfg
 
 %changelog
 * Wed May 01 2019 Mátyás Selmeci <matyas@cs.wisc.edu> - 1.0.5-1
