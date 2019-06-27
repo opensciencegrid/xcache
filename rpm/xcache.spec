@@ -40,7 +40,6 @@ Obsoletes: stashcache-daemon < 1.0.0
 %package -n stash-origin
 Summary: The OSG Data Federation origin server
 
-Requires: %{name} = %{version}
 Requires: wget
 Requires: xrootd-lcmaps >= 1.5.1
 
