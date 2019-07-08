@@ -134,9 +134,11 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %files -n stash-origin
 %config %{_sysconfdir}/xrootd/xrootd-stash-origin.cfg
 %config %{_sysconfdir}/xrootd/xrootd-stash-origin-auth.cfg
+%config %{_sysconfdir}/xrootd/config.d/40-osg-monitoring.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-origin-authz.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-origin-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/10-origin-site-local.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/90-stash-origin-logging.cfg
 %{_libexecdir}/%{name}/authfile-update
 %{_unitdir}/stash-origin-authfile.service
 %{_unitdir}/stash-origin-authfile.timer
