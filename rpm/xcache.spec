@@ -119,11 +119,13 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/xcache-reporter.timer
 %{_unitdir}/xrootd-renew-proxy.service
 %{_unitdir}/xrootd-renew-proxy.timer
+%config %{_sysconfdir}/xrootd/xrootd-xcache.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/10-common-site-local.cfg
-%config %{_sysconfdir}/xrootd/config.d/40-osg-auth.cfg
+%config %{_sysconfdir}/xrootd/config.d/40-xcache-auth.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-monitoring.cfg
-%config %{_sysconfdir}/xrootd/config.d/40-osg-paths.cfg
-%config(noreplace) %{_sysconfdir}/xrootd/config.d/90-xcache-logging.cfg
+%config %{_sysconfdir}/xrootd/config.d/40-xcache-paths.cfg
+%config %{_sysconfdir}/xrootd/config.d/50-xcache-logging.cfg
+%config %{_sysconfdir}/xrootd/config.d/50-xcache-plugin.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/digauth.cfg
 %attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
 %attr(0755, xrootd, xrootd) %dir /run/xcache-auth
@@ -152,9 +154,10 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/xrootd-stash-cache.cfg
 %config %{_sysconfdir}/xrootd/xrootd-stash-cache-auth.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-http.cfg
-%config %{_sysconfdir}/xrootd/config.d/40-osg-caching-plugin.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-cache-authz.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-cache-paths.cfg
+%config %{_sysconfdir}/xrootd/config.d/50-stash-cache-proxy.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/90-stash-cache-logging.cfg
 %{_libexecdir}/%{name}/authfile-update
 %{_unitdir}/stash-cache-authfile.service
 %{_unitdir}/stash-cache-authfile.timer
@@ -167,9 +170,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %files -n atlas-xcache
 %config %{_sysconfdir}/xrootd/xrootd-atlas-xcache.cfg
 %{_unitdir}/xrootd@atlas-xcache.service.d/10-atlas-xcache-overrides.conf
-%config %{_sysconfdir}/xrootd/config.d/40-atlas-caching-plugin.cfg
+%config %{_sysconfdir}/xrootd/config.d/40-atlas-xcache-proxy.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-atlas-xcache-paths.cfg
-%config(noreplace) %{_sysconfdir}/xrootd/config.d/90-atlas-disks.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/90-atlas-xcache-disks.cfg
 
 %changelog
 * Wed May 01 2019 Mátyás Selmeci <matyas@cs.wisc.edu> - 1.0.5-1
