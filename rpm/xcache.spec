@@ -98,6 +98,23 @@ Requires: xrootd-lcmaps >= 1.5.1
 %postun -n atlas-xcache
 %systemd_postun_with_restart xrootd@atlas-xcache.service
 
+########################################
+%package -n cms-xcache
+Summary: The CMS data federation cache server
+
+Requires: %{name} = %{version}
+Requires: wget
+
+%description -n cms-xcache
+%{summary}
+
+%post -n cms-xcache
+%systemd_post xrootd@cms-xcache.service cmsd@cms-xcache.service
+%preun -n cms-xcache
+%systemd_preun xrootd@cms-xcache.service cmsd@cms-xcache.service
+%postun -n cms-xcache
+%systemd_postun_with_restart xrootd@cms-xcache.service cmsd@cms-xcache.service
+
 %prep
 %setup -n %{name}-%{version} -q
 
@@ -172,6 +189,16 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/50-atlas-xcache-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/90-atlas-xcache-disks.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/95-atlas-xcache-logging.cfg
+
+%files -n cms-xcache
+%config %{_sysconfdir}/xrootd/xrootd-cms-xcache.cfg
+%{_unitdir}/xrootd@cms-xcache.service.d/10-cms-xcache-overrides.conf
+%{_unitdir}/cmsd@cms-xcache.service.d/10-cms-xcache-overrides.conf
+%config %{_sysconfdir}/xrootd/config.d/40-cms-xcache-plugin.cfg
+%config %{_sysconfdir}/xrootd/config.d/50-cms-xcache-authz.cfg
+%config %{_sysconfdir}/xrootd/config.d/50-cms-xcache-paths.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/90-cms-xcache-disks.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/95-cms-xcache-logging.cfg
 
 %changelog
 * Wed May 01 2019 Mátyás Selmeci <matyas@cs.wisc.edu> - 1.0.5-1
