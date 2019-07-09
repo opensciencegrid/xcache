@@ -168,9 +168,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %files -n atlas-xcache
 %config %{_sysconfdir}/xrootd/xrootd-atlas-xcache.cfg
 %{_unitdir}/xrootd@atlas-xcache.service.d/10-atlas-xcache-overrides.conf
-%config %{_sysconfdir}/xrootd/config.d/40-atlas-caching-plugin.cfg
+%config %{_sysconfdir}/xrootd/config.d/40-atlas-xcache-plugin.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-atlas-xcache-paths.cfg
-%config(noreplace) %{_sysconfdir}/xrootd/config.d/90-atlas-disks.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/90-atlas-xcache-disks.cfg
 
 %changelog
 * Wed May 01 2019 Mátyás Selmeci <matyas@cs.wisc.edu> - 1.0.5-1
