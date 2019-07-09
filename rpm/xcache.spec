@@ -86,7 +86,6 @@ Summary: The ATLAS data federation cache server
 
 Requires: %{name} = %{version}
 Requires: wget
-Requires: xrootd-lcmaps >= 1.5.1
 
 %description -n atlas-xcache
 %{summary}
