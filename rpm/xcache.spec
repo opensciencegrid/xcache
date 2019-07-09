@@ -153,7 +153,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/xrootd-stash-cache.cfg
 %config %{_sysconfdir}/xrootd/xrootd-stash-cache-auth.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-http.cfg
-%config %{_sysconfdir}/xrootd/config.d/40-osg-caching-plugin.cfg
+%config %{_sysconfdir}/xrootd/config.d/40-stash-cache-plugin.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-cache-authz.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-cache-paths.cfg
 %{_libexecdir}/%{name}/authfile-update
