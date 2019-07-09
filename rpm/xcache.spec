@@ -82,7 +82,7 @@ Obsoletes: stashcache-cache-server-auth < 1.0.0
 
 ########################################
 %package -n atlas-xcache
-Summary: The OSG data federation cache server
+Summary: The ATLAS data federation cache server
 
 Requires: %{name} = %{version}
 Requires: wget
