@@ -197,6 +197,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/50-cms-xcache-authz.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-cms-xcache-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/90-cms-xcache-disks.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/90-cms-xcache-local-redirector.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/95-cms-xcache-logging.cfg
 
 %changelog
