@@ -124,6 +124,8 @@ install:
 	# common xcache files
 	install -p -m 0644 configs/stash-cache/config.d/40-stash-cache-plugin.cfg $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d/40-atlas-xcache-plugin.cfg
 	install -p -m 0644 configs/stash-cache/config.d/40-stash-cache-plugin.cfg $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d/40-cms-xcache-plugin.cfg
+	install -p -m 0644 configs/stash-cache/config.d/90-stash-cache-disks.cfg $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d/90-atlas-xcache-disks.cfg
+	install -p -m 0644 configs/stash-cache/config.d/90-stash-cache-disks.cfg $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d/90-atlas-xcache-disks.cfg
 
 $(TARBALL_NAME): $(DIST_FILES)
 	$(eval TEMP_DIR := $(shell mktemp -d -p . $(DIST_DIR_PREFIX)XXXXXXXXXX))
