@@ -82,11 +82,10 @@ Obsoletes: stashcache-cache-server-auth < 1.0.0
 
 ########################################
 %package -n atlas-xcache
-Summary: The OSG data federation cache server
+Summary: The ATLAS data federation cache server
 
 Requires: %{name} = %{version}
 Requires: wget
-Requires: xrootd-lcmaps >= 1.5.1
 
 %description -n atlas-xcache
 %{summary}
@@ -97,6 +96,23 @@ Requires: xrootd-lcmaps >= 1.5.1
 %systemd_preun xrootd@atlas-xcache.service
 %postun -n atlas-xcache
 %systemd_postun_with_restart xrootd@atlas-xcache.service
+
+########################################
+%package -n cms-xcache
+Summary: The CMS data federation cache server
+
+Requires: %{name} = %{version}
+Requires: wget
+
+%description -n cms-xcache
+%{summary}
+
+%post -n cms-xcache
+%systemd_post xrootd@cms-xcache.service cmsd@cms-xcache.service
+%preun -n cms-xcache
+%systemd_preun xrootd@cms-xcache.service cmsd@cms-xcache.service
+%postun -n cms-xcache
+%systemd_postun_with_restart xrootd@cms-xcache.service cmsd@cms-xcache.service
 
 %prep
 %setup -n %{name}-%{version} -q
@@ -153,7 +169,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/xrootd-stash-cache.cfg
 %config %{_sysconfdir}/xrootd/xrootd-stash-cache-auth.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-osg-http.cfg
-%config %{_sysconfdir}/xrootd/config.d/40-osg-caching-plugin.cfg
+%config %{_sysconfdir}/xrootd/config.d/40-stash-cache-plugin.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-cache-authz.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-cache-paths.cfg
 %{_libexecdir}/%{name}/authfile-update
@@ -168,9 +184,21 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %files -n atlas-xcache
 %config %{_sysconfdir}/xrootd/xrootd-atlas-xcache.cfg
 %{_unitdir}/xrootd@atlas-xcache.service.d/10-atlas-xcache-overrides.conf
-%config %{_sysconfdir}/xrootd/config.d/40-atlas-caching-plugin.cfg
+%config %{_sysconfdir}/xrootd/config.d/40-atlas-xcache-plugin.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-atlas-xcache-paths.cfg
-%config(noreplace) %{_sysconfdir}/xrootd/config.d/90-atlas-disks.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/90-atlas-xcache-disks.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/95-atlas-xcache-logging.cfg
+
+%files -n cms-xcache
+%config %{_sysconfdir}/xrootd/xrootd-cms-xcache.cfg
+%{_unitdir}/xrootd@cms-xcache.service.d/10-cms-xcache-overrides.conf
+%{_unitdir}/cmsd@cms-xcache.service.d/10-cms-xcache-overrides.conf
+%config %{_sysconfdir}/xrootd/config.d/40-cms-xcache-plugin.cfg
+%config %{_sysconfdir}/xrootd/config.d/50-cms-xcache-authz.cfg
+%config %{_sysconfdir}/xrootd/config.d/50-cms-xcache-paths.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/90-cms-xcache-disks.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/90-cms-xcache-local-redirector.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/95-cms-xcache-logging.cfg
 
 %changelog
 * Wed May 01 2019 Mátyás Selmeci <matyas@cs.wisc.edu> - 1.0.5-1

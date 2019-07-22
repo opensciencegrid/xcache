@@ -18,11 +18,13 @@ LIBEXEC_FILES := src/xcache-reporter \
                  src/renew-proxy
 INSTALL_LIBEXEC_DIR := usr/libexec/xcache
 XROOTD_CONFIG := $(wildcard configs/atlas-xcache/xrootd/*) \
+		 $(wildcard configs/cms-xcache/xrootd/*) \
 		 $(wildcard configs/stash-cache/xrootd/*) \
                  $(wildcard configs/xcache/xrootd/*) \
                  $(wildcard configs/stash-origin/xrootd/*)
 
 XROOTD_CONFIGD := $(wildcard configs/atlas-xcache/config.d/*) \
+                  $(wildcard configs/cms-xcache/config.d/*) \
                   $(wildcard configs/stash-cache/config.d/*) \
                   $(wildcard configs/xcache/config.d/*) \
                   $(wildcard configs/stash-origin/config.d/*)
@@ -106,6 +108,11 @@ install:
 	# atlas-xcache
 	mkdir -p mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@atlas-xcache.service.d
 	install -p -m 0644 configs/atlas-xcache/overrides/10-atlas-xcache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@atlas-xcache.service.d/
+	# cms-xcache
+	mkdir -p mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@cms-xcache.service.d
+	mkdir -p mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/cmsd@cms-xcache.service.d
+	install -p -m 0644 configs/cms-xcache/overrides/xrootd/10-cms-xcache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@cms-xcache.service.d/
+	install -p -m 0644 configs/cms-xcache/overrides/cmsd/10-cms-xcache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/cmsd@cms-xcache.service.d/
 	# systemd tempfiles
 	mkdir -p $(DESTDIR)/run/stash-cache
 	mkdir -p $(DESTDIR)/run/stash-cache-auth
@@ -115,8 +122,8 @@ install:
 	mkdir -p $(DESTDIR)/usr/lib/tmpfiles.d
 	install -p -m 0644 $(TMPFILES_D) $(DESTDIR)/usr/lib/tmpfiles.d
 	# common xcache files
-	install -p -m 0644 configs/common-cache/config.d/40-osg-caching-plugin.cfg $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d
-	install -p -m 0644 configs/common-cache/config.d/40-osg-caching-plugin.cfg $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d/40-atlas-caching-plugin.cfg
+	install -p -m 0644 configs/stash-cache/config.d/40-stash-cache-plugin.cfg $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d/40-atlas-xcache-plugin.cfg
+	install -p -m 0644 configs/stash-cache/config.d/40-stash-cache-plugin.cfg $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d/40-cms-xcache-plugin.cfg
 
 $(TARBALL_NAME): $(DIST_FILES)
 	$(eval TEMP_DIR := $(shell mktemp -d -p . $(DIST_DIR_PREFIX)XXXXXXXXXX))
