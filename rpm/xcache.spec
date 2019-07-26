@@ -172,6 +172,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/40-stash-cache-plugin.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-cache-authz.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-cache-paths.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/90-stash-cache-disks.cfg
 %{_libexecdir}/%{name}/authfile-update
 %{_unitdir}/stash-cache-authfile.service
 %{_unitdir}/stash-cache-authfile.timer
