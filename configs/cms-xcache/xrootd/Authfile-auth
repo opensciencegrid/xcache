@@ -1,0 +1,4 @@
+t readcmsdata /store/ lr
+u cmsprod readcmsdata
+u cmsphedex readcmsdata
+u cmsuser readcmsdata

@@ -103,10 +103,13 @@ Summary: The CMS data federation cache server
 
 Requires: %{name} = %{version}
 Requires: wget
-
+Requires: xrootd-lcmaps >= 1.5.1
 %description -n cms-xcache
 %{summary}
-
+%pre -n cms-xcache
+useradd cmsuser
+useradd cmsphedex
+useradd -r cmsprod
 %post -n cms-xcache
 %systemd_post xrootd@cms-xcache.service cmsd@cms-xcache.service
 %preun -n cms-xcache
