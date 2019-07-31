@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.0.6
-Release:   1%{?dist}
+Version:   1.1.0
+Release:   0.1%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -202,8 +202,8 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/95-cms-xcache-logging.cfg
 
 %changelog
-* Wed Jul 31 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.0.6-1
-- Adding authenticataion for CMS cache
+* Wed Jul 31 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.1.0-0.1
+- Add ATLAS and CMS XCache (SOFTWARE-3583, SOFTWARE-3584)
 
 * Wed May 01 2019 Mátyás Selmeci <matyas@cs.wisc.edu> - 1.0.5-1
 - Start services after network is up (SOFTWARE-3681)
