@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.0.5
+Version:   1.0.6
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -106,10 +106,6 @@ Requires: wget
 Requires: xrootd-lcmaps >= 1.5.1
 %description -n cms-xcache
 %{summary}
-%pre -n cms-xcache
-for u in cmsuser cmsphedex cmsprox; do
-  useradd -M -U $u >/dev/null 2>&1 || :
-done
 %post -n cms-xcache
 %systemd_post xrootd@cms-xcache.service cmsd@cms-xcache.service
 %preun -n cms-xcache
@@ -196,7 +192,6 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %files -n cms-xcache
 %config %{_sysconfdir}/xrootd/xrootd-cms-xcache.cfg
 %config %{_sysconfdir}/xrootd/Authfile-cms-xcache
-%config %{_sysconfdir}/xrootd/lcmaps-cms-xcache.cfg
 %{_unitdir}/xrootd@cms-xcache.service.d/10-cms-xcache-overrides.conf
 %{_unitdir}/cmsd@cms-xcache.service.d/10-cms-xcache-overrides.conf
 %config %{_sysconfdir}/xrootd/config.d/40-cms-xcache-plugin.cfg
@@ -207,6 +202,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/95-cms-xcache-logging.cfg
 
 %changelog
+* Wed Jul 31 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.0.6-1
+- Adding authenticataion for CMS cache
+
 * Wed May 01 2019 Mátyás Selmeci <matyas@cs.wisc.edu> - 1.0.5-1
 - Start services after network is up (SOFTWARE-3681)
 
