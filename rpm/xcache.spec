@@ -196,6 +196,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %files -n cms-xcache
 %config %{_sysconfdir}/xrootd/xrootd-cms-xcache.cfg
 %config %{_sysconfdir}/xrootd/Authfile-cms-xcache
+%config %{_sysconfdir}/xrootd/lcmaps-cms-xcache.cfg
 %{_unitdir}/xrootd@cms-xcache.service.d/10-cms-xcache-overrides.conf
 %{_unitdir}/cmsd@cms-xcache.service.d/10-cms-xcache-overrides.conf
 %config %{_sysconfdir}/xrootd/config.d/40-cms-xcache-plugin.cfg
