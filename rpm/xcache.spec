@@ -107,9 +107,9 @@ Requires: xrootd-lcmaps >= 1.5.1
 %description -n cms-xcache
 %{summary}
 %pre -n cms-xcache
-useradd cmsuser
-useradd cmsphedex
-useradd -r cmsprod
+for u in cmsuser cmsphedex cmsprox; do
+  useradd -M -U $u >/dev/null 2>&1 || :
+done
 %post -n cms-xcache
 %systemd_post xrootd@cms-xcache.service cmsd@cms-xcache.service
 %preun -n cms-xcache
@@ -195,6 +195,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 
 %files -n cms-xcache
 %config %{_sysconfdir}/xrootd/xrootd-cms-xcache.cfg
+%config %{_sysconfdir}/xrootd/Authfile-cms-xcache
 %{_unitdir}/xrootd@cms-xcache.service.d/10-cms-xcache-overrides.conf
 %{_unitdir}/cmsd@cms-xcache.service.d/10-cms-xcache-overrides.conf
 %config %{_sysconfdir}/xrootd/config.d/40-cms-xcache-plugin.cfg
