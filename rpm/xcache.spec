@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.0.5
-Release:   1%{?dist}
+Version:   1.1.0
+Release:   0.1%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -103,10 +103,9 @@ Summary: The CMS data federation cache server
 
 Requires: %{name} = %{version}
 Requires: wget
-
+Requires: xrootd-lcmaps >= 1.5.1
 %description -n cms-xcache
 %{summary}
-
 %post -n cms-xcache
 %systemd_post xrootd@cms-xcache.service cmsd@cms-xcache.service
 %preun -n cms-xcache
@@ -192,6 +191,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 
 %files -n cms-xcache
 %config %{_sysconfdir}/xrootd/xrootd-cms-xcache.cfg
+%config %{_sysconfdir}/xrootd/Authfile-cms-xcache
 %{_unitdir}/xrootd@cms-xcache.service.d/10-cms-xcache-overrides.conf
 %{_unitdir}/cmsd@cms-xcache.service.d/10-cms-xcache-overrides.conf
 %config %{_sysconfdir}/xrootd/config.d/40-cms-xcache-plugin.cfg
@@ -202,6 +202,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/95-cms-xcache-logging.cfg
 
 %changelog
+* Wed Jul 31 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.1.0-0.1
+- Add ATLAS and CMS XCache (SOFTWARE-3583, SOFTWARE-3584)
+
 * Wed May 01 2019 Mátyás Selmeci <matyas@cs.wisc.edu> - 1.0.5-1
 - Start services after network is up (SOFTWARE-3681)
 
