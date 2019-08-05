@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.1.0
+Version:   1.1.1
 Release:   0.1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -194,6 +194,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/Authfile-cms-xcache
 %{_unitdir}/xrootd@cms-xcache.service.d/10-cms-xcache-overrides.conf
 %{_unitdir}/cmsd@cms-xcache.service.d/10-cms-xcache-overrides.conf
+%{_unitdir}/xrootd-renew-proxy.service/10-cms-refresh-proxy-overrides.conf
 %config %{_sysconfdir}/xrootd/config.d/40-cms-xcache-plugin.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-cms-xcache-authz.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-cms-xcache-paths.cfg
@@ -202,6 +203,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/95-cms-xcache-logging.cfg
 
 %changelog
+* Mon Aug 5 2109 Edgar Fajardo <emfajard@ucsd.edu> - 1.1.1-0.1
+- Adding overides for the proxy generation
+
 * Wed Jul 31 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.1.0-0.1
 - Add ATLAS and CMS XCache (SOFTWARE-3583, SOFTWARE-3584)
 
