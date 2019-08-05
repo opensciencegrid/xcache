@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
 Version:   1.1.0
-Release:   0.1%{?dist}
+Release:   0.3%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -86,6 +86,7 @@ Summary: The ATLAS data federation cache server
 
 Requires: %{name} = %{version}
 Requires: wget
+Requires: xrootd-rucioN2N-for-Xcache
 
 %description -n atlas-xcache
 %{summary}
@@ -184,6 +185,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %files -n atlas-xcache
 %config %{_sysconfdir}/xrootd/xrootd-atlas-xcache.cfg
 %{_unitdir}/xrootd@atlas-xcache.service.d/10-atlas-xcache-overrides.conf
+%{_unitdir}/xrootd-renew-proxy.service.d/10-atlas-refresh-proxy-overrides.conf
 %config %{_sysconfdir}/xrootd/config.d/40-atlas-xcache-plugin.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-atlas-xcache-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/90-atlas-xcache-disks.cfg
@@ -194,6 +196,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/Authfile-cms-xcache
 %{_unitdir}/xrootd@cms-xcache.service.d/10-cms-xcache-overrides.conf
 %{_unitdir}/cmsd@cms-xcache.service.d/10-cms-xcache-overrides.conf
+%{_unitdir}/xrootd-renew-proxy.service.d/10-cms-refresh-proxy-overrides.conf
 %config %{_sysconfdir}/xrootd/config.d/40-cms-xcache-plugin.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-cms-xcache-authz.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-cms-xcache-paths.cfg
@@ -202,6 +205,13 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/95-cms-xcache-logging.cfg
 
 %changelog
+* Mon Aug 5 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.1.0-0.3
+- Adding ATLAS and CMS overides for the proxy generation
+- Adding RucioN2N config for ATLAS Xcache (SOFTWARE-3784)
+
+* Fri Aug 2 2019 Brian Lin <blin@cs.wisc.edu> - 1.1.0-0.2
+- Changing auths options for lcmaps
+
 * Wed Jul 31 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.1.0-0.1
 - Add ATLAS and CMS XCache (SOFTWARE-3583, SOFTWARE-3584)
 
