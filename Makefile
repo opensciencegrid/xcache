@@ -112,7 +112,6 @@ install:
 	# cms-xcache
 	mkdir -p mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@cms-xcache.service.d
 	mkdir -p mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/cmsd@cms-xcache.service.d
-	mkdir -p mkdir
 	install -p -m 0644 configs/cms-xcache/overrides/xrootd/10-cms-xcache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@cms-xcache.service.d/
 	install -p -m 0644 configs/cms-xcache/overrides/cmsd/10-cms-xcache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/cmsd@cms-xcache.service.d/
 	install -p -m 0644 configs/cms-xcache/overrides/systemd/10-cms-refresh-proxy-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd-renew-proxy.service/
