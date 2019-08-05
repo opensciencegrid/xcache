@@ -205,7 +205,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 
 %changelog
 * Mon Aug 5 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.1.0-0.3
-- Adding overides for the proxy generation
+- Adding ATLAS and CMS overides for the proxy generation
 
 * Fri Aug 2 2019 Brian Lin <blin@cs.wisc.edu> - 1.1.0-0.2
 - Changing auths options for lcmaps
