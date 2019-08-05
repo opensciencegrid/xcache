@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
 Version:   1.1.0
-Release:   0.4%{?dist}
+Release:   0.3%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -205,11 +205,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/95-cms-xcache-logging.cfg
 
 %changelog
-* Mon Aug 5 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.1.0-0.4
-- Adding RucioN2N config for ATLAS Xcache (SOFTWARE-3784)
-
 * Mon Aug 5 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.1.0-0.3
 - Adding ATLAS and CMS overides for the proxy generation
+- Adding RucioN2N config for ATLAS Xcache (SOFTWARE-3784)
 
 * Fri Aug 2 2019 Brian Lin <blin@cs.wisc.edu> - 1.1.0-0.2
 - Changing auths options for lcmaps
