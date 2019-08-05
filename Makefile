@@ -109,6 +109,7 @@ install:
 	# atlas-xcache
 	mkdir -p mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@atlas-xcache.service.d
 	install -p -m 0644 configs/atlas-xcache/overrides/10-atlas-xcache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@atlas-xcache.service.d/
+	install -p -m 0644 configs/atlas-xcache/overrides/xrootd-renew-proxy/10-atlas-refresh-proxy-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd-renew-proxy.service.d/
 	# cms-xcache
 	mkdir -p mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@cms-xcache.service.d
 	mkdir -p mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/cmsd@cms-xcache.service.d
