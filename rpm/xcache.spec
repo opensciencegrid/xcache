@@ -206,7 +206,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 
 %changelog
 * Wed Aug 7 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.1.0-0.4
-- Changing order of lcmpas configuration for CMS
+- Changing order of LCMAPS configuration files for CMS
 - Fixing bug on refresh-proxy call for CMS and ATLAS proxies
 
 * Mon Aug 5 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.1.0-0.3
