@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
 Version:   1.1.0
-Release:   0.3%{?dist}
+Release:   0.4%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -197,14 +197,18 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/xrootd@cms-xcache.service.d/10-cms-xcache-overrides.conf
 %{_unitdir}/cmsd@cms-xcache.service.d/10-cms-xcache-overrides.conf
 %{_unitdir}/xrootd-renew-proxy.service.d/10-cms-refresh-proxy-overrides.conf
+%config %{_sysconfdir}/xrootd/config.d/30-cms-xcache-authz.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-cms-xcache-plugin.cfg
-%config %{_sysconfdir}/xrootd/config.d/50-cms-xcache-authz.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-cms-xcache-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/90-cms-xcache-disks.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/90-cms-xcache-local-redirector.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/95-cms-xcache-logging.cfg
 
 %changelog
+* Wed Aug 7 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.1.0-0.4
+- Changing order of LCMAPS configuration files for CMS
+- Fixing bug on refresh-proxy call for CMS and ATLAS proxies
+
 * Mon Aug 5 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.1.0-0.3
 - Adding ATLAS and CMS overides for the proxy generation
 - Adding RucioN2N config for ATLAS Xcache (SOFTWARE-3784)
