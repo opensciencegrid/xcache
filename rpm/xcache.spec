@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
 Version:   1.1.0
-Release:   0.4%{?dist}
+Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -18,6 +18,9 @@ Requires: voms-clients-cpp
 
 # We utilize a configuration directive (`continue`) introduced in XRootD 4.9.
 Requires: xrootd-server >= 1:4.9.0
+
+# Use common OSG XRootD configuration
+Requires: osg-xrootd
 
 Requires: grid-certificates >= 7
 Requires: vo-client
@@ -136,10 +139,6 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/xcache-reporter.timer
 %{_unitdir}/xrootd-renew-proxy.service
 %{_unitdir}/xrootd-renew-proxy.timer
-%config(noreplace) %{_sysconfdir}/xrootd/config.d/10-common-site-local.cfg
-%config %{_sysconfdir}/xrootd/config.d/40-osg-auth.cfg
-%config %{_sysconfdir}/xrootd/config.d/40-osg-monitoring.cfg
-%config %{_sysconfdir}/xrootd/config.d/40-osg-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/90-xcache-logging.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/digauth.cfg
 %attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
@@ -168,7 +167,6 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config(noreplace) %{_sysconfdir}/xrootd/xcache-robots.txt
 %config %{_sysconfdir}/xrootd/xrootd-stash-cache.cfg
 %config %{_sysconfdir}/xrootd/xrootd-stash-cache-auth.cfg
-%config %{_sysconfdir}/xrootd/config.d/40-osg-http.cfg
 %config %{_sysconfdir}/xrootd/config.d/40-stash-cache-plugin.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-cache-authz.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-stash-cache-paths.cfg
@@ -205,6 +203,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/95-cms-xcache-logging.cfg
 
 %changelog
+* Mon Aug 19 2019 Brian Lin <blin@cs.wisc.edu> - 1.1.0-1
+- Use osg-xrootd (SOFTWARE-3558)
+
 * Wed Aug 7 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.1.0-0.4
 - Changing order of LCMAPS configuration files for CMS
 - Fixing bug on refresh-proxy call for CMS and ATLAS proxies
