@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.1.0
+Version:   1.1.1
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -203,6 +203,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/95-cms-xcache-logging.cfg
 
 %changelog
+* Mon Aug 19 2019 Brian Lin <blin@cs.wisc.edu> - 1.1.1-1
+- Restore StashCache HTTP port to 8000
+
 * Mon Aug 19 2019 Brian Lin <blin@cs.wisc.edu> - 1.1.0-1
 - Use osg-xrootd (SOFTWARE-3558)
 
