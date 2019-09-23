@@ -21,8 +21,8 @@ XROOTD_CONFIG := $(wildcard configs/atlas-xcache/xrootd/*) \
 		 $(wildcard configs/cms-xcache/xrootd/*) \
 		 $(wildcard configs/stash-cache/xrootd/*) \
                  $(wildcard configs/xcache/xrootd/*) \
-		 $(wildcard configs/xcache-redir/xrootd/*) \ 
-                 $(wildcard configs/stash-origin/xrootd/*) \
+		 $(wildcard configs/xcache-redir/xrootd/*) \
+		 $(wildcard configs/stash-origin/xrootd/*)
 
 
 XROOTD_CONFIGD := $(wildcard configs/atlas-xcache/config.d/*) \
