@@ -125,7 +125,7 @@ install:
 	mkdir -p $(DESTDIR)/run/stash-origin
 	mkdir -p $(DESTDIR)/run/stash-origin-auth
 	mkdir -p $(DESTDIR)/run/xcache-auth
-        mkdir -p $(DESTDIR)/run/xcache-redir
+	mkdir -p $(DESTDIR)/run/xcache-redir
 	mkdir -p $(DESTDIR)/usr/lib/tmpfiles.d
 	install -p -m 0644 $(TMPFILES_D) $(DESTDIR)/usr/lib/tmpfiles.d
 
