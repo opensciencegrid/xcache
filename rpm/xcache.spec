@@ -220,7 +220,6 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/xrootd-xcache-redir.cfg
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tunning.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/04-debug-tunning.cfg
-%config %{_sysconfdir}/xrootd/config.d/50-cms-xcache-paths.cfg
 
 %changelog
 * Mon Sep 23 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.2.1-1
