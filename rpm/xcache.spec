@@ -153,7 +153,6 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/xrootd-renew-proxy.service
 %{_unitdir}/xrootd-renew-proxy.timer
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/90-xcache-logging.cfg
-%config(noreplace) %{_sysconfdir}/xrootd/config.d/04-debug-tuning.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/digauth.cfg
 %attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
 %attr(0755, xrootd, xrootd) %dir /run/xcache-auth
