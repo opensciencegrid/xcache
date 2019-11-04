@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.2.1
+Version:   1.2.0
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -117,7 +117,7 @@ Requires: xrootd-lcmaps >= 1.5.1
 %postun -n cms-xcache
 %systemd_postun_with_restart xrootd@cms-xcache.service cmsd@cms-xcache.service
 
-%package -n xcache-redir
+%package -n xcache-redirector
 Summary: The XCache redirector
 
 Requires: %{name} = %{version}
@@ -153,6 +153,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/xrootd-renew-proxy.service
 %{_unitdir}/xrootd-renew-proxy.timer
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/90-xcache-logging.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/config.d/04-debug-tuning.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/digauth.cfg
 %attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
 %attr(0755, xrootd, xrootd) %dir /run/xcache-auth
@@ -216,10 +217,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/95-cms-xcache-logging.cfg
 
 
-%files -n xcache-redir
+%files -n xcache-redirector
 %config %{_sysconfdir}/xrootd/xrootd-xcache-redir.cfg
-%config %{_sysconfdir}/xrootd/config.d/03-redir-tunning.cfg
-%config(noreplace) %{_sysconfdir}/xrootd/config.d/04-debug-tunning.cfg
+%config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
 * Mon Sep 23 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.2.1-1
