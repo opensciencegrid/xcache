@@ -121,13 +121,13 @@ Requires: xrootd-lcmaps >= 1.5.1
 Summary: The XCache redirector
 
 Requires: %{name} = %{version}
-%description -n xcache-redir
+%description -n xcache-redirector
 %{summary}
-%post -n xcache-redir
+%post -n xcache-redirector
 %systemd_post xrootd@xcache-redir.service cmsd@xcache-redir.service
-%preun -n xcache-redir
+%preun -n xcache-redirector
 %systemd_preun xrootd@xcache-redir.service cmsd@xcache-redir.service
-%postun -n xcache-redir
+%postun -n xcache-redirector
 %systemd_postun_with_restart xrootd@xcache-redir.service cmsd@xcache-redir.service 
 
 %prep
