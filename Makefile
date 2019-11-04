@@ -6,7 +6,7 @@
 # ------------------------------------------------------------------------------
 
 PACKAGE := xcache
-VERSION := 1.1.0
+VERSION := 1.2.0
 
 
 # ------------------------------------------------------------------------------
@@ -20,13 +20,16 @@ INSTALL_LIBEXEC_DIR := usr/libexec/xcache
 XROOTD_CONFIG := $(wildcard configs/atlas-xcache/xrootd/*) \
 		 $(wildcard configs/cms-xcache/xrootd/*) \
 		 $(wildcard configs/stash-cache/xrootd/*) \
-                 $(wildcard configs/xcache/xrootd/*) \
-                 $(wildcard configs/stash-origin/xrootd/*)
+		 $(wildcard configs/xcache/xrootd/*) \
+		 $(wildcard configs/xcache-redir/xrootd/*) \
+		$(wildcard configs/stash-origin/xrootd/*)
+
 
 XROOTD_CONFIGD := $(wildcard configs/atlas-xcache/config.d/*) \
                   $(wildcard configs/cms-xcache/config.d/*) \
                   $(wildcard configs/stash-cache/config.d/*) \
                   $(wildcard configs/xcache/config.d/*) \
+                  $(wildcard configs/xcache-redir/config.d/*) \
                   $(wildcard configs/stash-origin/config.d/*)
 
 SYSTEMD_UNITS := $(wildcard configs/stash-cache/systemd/*) \
@@ -122,6 +125,7 @@ install:
 	mkdir -p $(DESTDIR)/run/stash-origin
 	mkdir -p $(DESTDIR)/run/stash-origin-auth
 	mkdir -p $(DESTDIR)/run/xcache-auth
+	mkdir -p $(DESTDIR)/run/xcache-redir
 	mkdir -p $(DESTDIR)/usr/lib/tmpfiles.d
 	install -p -m 0644 $(TMPFILES_D) $(DESTDIR)/usr/lib/tmpfiles.d
 

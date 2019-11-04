@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.1.1
+Version:   1.2.0
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -117,6 +117,19 @@ Requires: xrootd-lcmaps >= 1.5.1
 %postun -n cms-xcache
 %systemd_postun_with_restart xrootd@cms-xcache.service cmsd@cms-xcache.service
 
+%package -n xcache-redirector
+Summary: The XCache redirector
+
+Requires: %{name} = %{version}
+%description -n xcache-redirector
+%{summary}
+%post -n xcache-redirector
+%systemd_post xrootd@xcache-redir.service cmsd@xcache-redir.service
+%preun -n xcache-redirector
+%systemd_preun xrootd@xcache-redir.service cmsd@xcache-redir.service
+%postun -n xcache-redirector
+%systemd_postun_with_restart xrootd@xcache-redir.service cmsd@xcache-redir.service 
+
 %prep
 %setup -n %{name}-%{version} -q
 
@@ -203,7 +216,15 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/90-cms-xcache-local-redirector.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/95-cms-xcache-logging.cfg
 
+
+%files -n xcache-redirector
+%config %{_sysconfdir}/xrootd/xrootd-xcache-redir.cfg
+%config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
+
 %changelog
+* Mon Sep 23 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.2.0-1
+- Adding the subpackage for XCache redirector
+
 * Mon Aug 19 2019 Brian Lin <blin@cs.wisc.edu> - 1.1.1-1
 - Restore StashCache HTTP port to 8000
 
