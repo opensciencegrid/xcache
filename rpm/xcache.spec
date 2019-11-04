@@ -33,6 +33,7 @@ Obsoletes: stashcache-daemon < 1.0.0
 %{summary}
 
 %post
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
 %systemd_post xcache-reporter.service xcache-reporter.timer xrootd-renew-proxy.service xrootd-renew-proxy.timer
 %preun
 %systemd_preun xcache-reporter.service xcache-reporter.timer xrootd-renew-proxy.service xrootd-renew-proxy.timer
@@ -54,6 +55,7 @@ Obsoletes: stashcache-origin-server < 1.0.0
 %{summary}
 
 %post -n stash-origin
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
 %systemd_post xrootd@stash-origin.service cmsd@stash-origin.service
 %preun -n stash-origin
 %systemd_preun xrootd@stash-origin.service cmsd@stash-origin.service
@@ -77,6 +79,7 @@ Obsoletes: stashcache-cache-server-auth < 1.0.0
 %{summary}
 
 %post -n stash-cache
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
 %systemd_post xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer xrootd@stash-cache-auth.service
 %preun -n stash-cache
 %systemd_preun xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer xrootd@stash-cache-auth.service
@@ -95,6 +98,7 @@ Requires: xrootd-rucioN2N-for-Xcache
 %{summary}
 
 %post -n atlas-xcache
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
 %systemd_post xrootd@atlas-xcache.service
 %preun -n atlas-xcache
 %systemd_preun xrootd@atlas-xcache.service
@@ -111,6 +115,7 @@ Requires: xrootd-lcmaps >= 1.5.1
 %description -n cms-xcache
 %{summary}
 %post -n cms-xcache
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
 %systemd_post xrootd@cms-xcache.service cmsd@cms-xcache.service
 %preun -n cms-xcache
 %systemd_preun xrootd@cms-xcache.service cmsd@cms-xcache.service
@@ -124,6 +129,7 @@ Requires: %{name} = %{version}
 %description -n xcache-redirector
 %{summary}
 %post -n xcache-redirector
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
 %systemd_post xrootd@xcache-redir.service cmsd@xcache-redir.service
 %preun -n xcache-redirector
 %systemd_preun xrootd@xcache-redir.service cmsd@xcache-redir.service
