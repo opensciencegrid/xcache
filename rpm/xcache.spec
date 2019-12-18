@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.2.0
+Version:   1.2.1
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -228,6 +228,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Wed Dec 18 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.2.1-1
+- Fixed bug in which cmsd filesystem was configured to be the cache (SOFTWARE-3952)
+
 * Mon Sep 23 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.2.0-1
 - Adding the subpackage for XCache redirector
 
