@@ -34,7 +34,8 @@ XROOTD_CONFIGD := $(wildcard configs/atlas-xcache/config.d/*) \
 
 SYSTEMD_UNITS := $(wildcard configs/stash-cache/systemd/*) \
                  $(wildcard configs/xcache/systemd/*) \
-                 $(wildcard configs/stash-origin/systemd/*)
+                 $(wildcard configs/stash-origin/systemd/*) \
+                 $(wildcard configs/xcache-consistency-check/systemd/*)
 
 TMPFILES_D := configs/stash-cache/tmpfiles/stash-cache.conf \
               configs/stash-origin/tmpfiles/stash-origin.conf \
@@ -90,6 +91,15 @@ install:
 	ln -srf $(DESTDIR)/$(INSTALL_XROOTD_DIR)/xrootd-stash-origin.cfg $(DESTDIR)/$(INSTALL_XROOTD_DIR)/xrootd-stash-origin-auth.cfg
 	mkdir -p $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d
 	install -p -m 0644 $(XROOTD_CONFIGD) $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d
+	# XCache Consistency Check
+	mkdir -p $(DESTDIR)/bin
+	mkdir -p $(DESTDIR)/etc/logrotate.d
+	mkdir -p $(DESTDIR)/etc/xcache-consistency-check
+	mkdir -p $(DESTDIR)/var/lib/xcache-consistency-check
+	mkdir -p $(DESTDIR)/var/log/xcache-consistency-check
+	install -p -m 0644 src/xcache-consistency-check $(DESTDIR)/bin/xcache-consistency-check
+	install -p -m 0644 configs/xcache-consistency-check/logrotate/xcache-consistency-check $(DESTDIR)/etc/logrotate.d/xcache-consistency-check
+	install -p -m 0644 configs/xcache-consistency-check/xcache-consistency-check/default.cfg $(DESTDIR)/etc/xcache-consistency-check/default.cfg
 	# systemd unit files
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)
 	install -p -m 0644 $(SYSTEMD_UNITS) $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)

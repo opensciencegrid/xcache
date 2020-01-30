@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.2.1
+Version:   1.3.0
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -39,6 +39,31 @@ Obsoletes: stashcache-daemon < 1.0.0
 %systemd_preun xcache-reporter.service xcache-reporter.timer xrootd-renew-proxy.service xrootd-renew-proxy.timer
 %postun
 %systemd_postun_with_restart xcache-reporter.service xcache-reporter.timer xrootd-renew-proxy.service xrootd-renew-proxy.timer
+
+########################################
+%package -n xcache-consistency-check
+Summary: Consistency check for root files
+
+Requires: xz
+Requires: python-pip
+Requires: xrootd-server
+
+%description -n xcache-consistency-check
+%{summary}
+
+%post -n xcache-consistency-check
+pip install --upgrade pip
+pip install pyliblzma
+pip install uproot
+pip install xxhash
+pip install lz4
+
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+%systemd_post xcache-consistency-check.service xcache-consistency-check.timer
+%preun -n xcache-consistency-check
+%systemd_preun xcache-consistency-check.service xcache-consistency-check.timer
+%postun -n xcache-consistency-check
+%systemd_postun_with_restart xcache-consistency-check.service xcache-consistency-check.timer
 
 ########################################
 %package -n stash-origin
@@ -165,6 +190,15 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %attr(0755, xrootd, xrootd) %dir /run/xcache-auth
 %{_tmpfilesdir}/xcache.conf
 
+%files -n xcache-consistency-check
+%attr(0755, xrootd, xrootd) /bin/xcache-consistency-check
+%dir %attr(0755, xrootd, xrootd) /var/log/xcache-consistency-check
+%dir %attr(0755, xrootd, xrootd) /var/lib/xcache-consistency-check
+%{_unitdir}/xcache-consistency-check.service
+%{_unitdir}/xcache-consistency-check.timer
+%config %{_sysconfdir}/xcache-consistency-check/default.cfg
+%config %{_sysconfdir}/logrotate.d/xcache-consistency-check
+
 %files -n stash-origin
 %config %{_sysconfdir}/xrootd/xrootd-stash-origin.cfg
 %config %{_sysconfdir}/xrootd/xrootd-stash-origin-auth.cfg
@@ -228,6 +262,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Mon Jan 27 2020 Diego Davila <didavila@ucsd.edu> - 1.3.0-1
+- Adding subpackage for consistency check (SOFTWARE-3976)
+
 * Wed Dec 18 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.2.1-1
 - Fixed bug in which cmsd filesystem was configured to be the cache (SOFTWARE-3952)
 

@@ -1,0 +1,7 @@
+/var/log/xcache-consistency-check/* {
+    daily
+    rotate 5
+    size=10M
+    compress
+    delaycompress
+}

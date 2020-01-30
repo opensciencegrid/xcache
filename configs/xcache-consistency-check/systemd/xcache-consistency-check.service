@@ -1,0 +1,11 @@
+[Unit]
+Description=Xcache consistency check
+
+[Service]
+User=root
+Group=root
+Type=simple
+ExecStart=/bin/xcache-consistency-check --config /etc/xcache-consistency-check/default.cfg
+
+[Install]
+WantedBy=multi-user.target
