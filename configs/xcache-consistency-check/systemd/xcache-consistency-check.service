@@ -1,5 +1,5 @@
 [Unit]
-Description=Xcache consistency check
+Description=XCache consistency check
 
 [Service]
 User=xrootd
