@@ -191,7 +191,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_tmpfilesdir}/xcache.conf
 
 %files -n xcache-consistency-check
-%attr(0755, xrootd, xrootd) /bin/xcache-consistency-check
+%attr(0755, xrootd, xrootd) %{_bindir}/xcache-consistency-check
 %dir %attr(0755, xrootd, xrootd) /var/log/xcache-consistency-check
 %dir %attr(0755, xrootd, xrootd) /var/lib/xcache-consistency-check
 %{_unitdir}/xcache-consistency-check.service
@@ -406,4 +406,3 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 
 * Wed Apr 22 2015 Mátyás Selmeci <matyas@cs.wisc.edu> 0.1-1.osg
 - Created metapackages with stub config files
-
