@@ -196,7 +196,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %dir %attr(0755, xrootd, xrootd) /var/lib/xcache-consistency-check
 %{_unitdir}/xcache-consistency-check.service
 %{_unitdir}/xcache-consistency-check.timer
-%config %{_sysconfdir}/xcache-consistency-check/default.cfg
+%config(noreplace) %{_sysconfdir}/xrootd/xcache-consistency-check.cfg
 %config %{_sysconfdir}/logrotate.d/xcache-consistency-check
 
 %files -n stash-origin
