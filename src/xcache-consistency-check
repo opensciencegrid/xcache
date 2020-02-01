@@ -14,7 +14,6 @@ from multiprocessing import Process, Value, Lock
 import sqlite3
 from sqlite3 import Error
 import time
-
 def get_byte_ranges(byte_map_lines, blocksize):
 
     xcounter = xcounter_aux =pcounter = pcounter_aux =0
@@ -441,6 +440,40 @@ def get_file_from_db(conn, root_filename):
         ret = (rows[0])
     return ret
 
+# When the configuration parameter 'path' is set to auto, we will try to set it to xrootd;s configuration parameter
+# 'oss.localroot'
+def find_path():
+    path = None
+    # First get the configuration file being used by xrootd
+    out = subprocess.Popen(['ps', '-u','xrootd', '-o', 'command='], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stdout, stderr = out.communicate()
+    if stderr is None:
+        log.debug("Getting xrootd config file from ps")
+    else:
+        log.error("Something went wrong when executing ps")
+
+    command_chunks = stdout.split()
+
+    for chunk in command_chunks:
+        if "/etc" in chunk:
+            xrootd_config_file = chunk
+
+    log.debug("found xrootd configuration file:"+ xrootd_config_file)
+
+    #Then use the xrootd config file to find the 'oss.localroot' parameter
+    out = subprocess.Popen(['cconfig', '-c', xrootd_config_file], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stdout, stderr = out.communicate()
+    if stderr is None:
+        log.debug("Parsing cconfig output to get 'oss.localroot'")
+    else:
+        log.error("Something went wrong when executing cconfig -c "+ xrootd_config_file)
+
+    for line in stdout.split('\n'):
+        if "oss.localroot" in line:
+            path= line[1]
+
+    return path
+
 
 # Argument parsing
 def parseargs():
@@ -496,6 +529,7 @@ def set_configuration():
     # Step 1. Set defaults:
     args = dict()
     # Disable the execution by default (for the time being)
+    args['path']                    = "auto"
     args['db']                      = "/var/lib/xcache_consistency_check/db.sql"
     args['num_procs']               = 1
     args['last_check_threshold']    = 86400
@@ -545,6 +579,8 @@ def set_configuration():
     if(cmdline_args.dry_run):
         args['dry_run']     = cmdline_args.dry_run
 
+    #TODO:
+    # following prints have to go to stderr and make sure they appear on jornalctl
     # Step 5. Verify required conditions
     if 'path' not in args and not 'rootfile' in args:
            print("ERROR: Either --path or --rootfile need to be defined")
@@ -579,6 +615,13 @@ def main():
     #----- Setup the logger and the log level ------------------------------------
     logging.basicConfig(filename=args['logfile'], level=log_lvl, format='%(asctime)s  %(levelname)s - %(message)s', datefmt='%Y%m%d %H:%M:%S')
     #-----------------------------------------------------------------------------
+
+    # If path is set to 'auto' try to find the path to the rootfiles
+    if args['path']=="auto":
+        args['path'] = find_path()
+    if args['path'] == None:
+        log.error("Cannot find 'path' automatically, please set it either on the configuration file or as an argument on the commandline")
+        exit(1)
 
     # Print the arguments to debug log
     log.info("*******************************************")

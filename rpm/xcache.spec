@@ -45,18 +45,12 @@ Obsoletes: stashcache-daemon < 1.0.0
 Summary: Consistency check for root files
 
 Requires: xz
-Requires: python-pip
 Requires: xrootd-server
 
 %description -n xcache-consistency-check
 %{summary}
 
 %post -n xcache-consistency-check
-pip install --upgrade pip
-pip install pyliblzma
-pip install uproot
-pip install xxhash
-pip install lz4
 
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 %systemd_post xcache-consistency-check.service xcache-consistency-check.timer
@@ -192,12 +186,10 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 
 %files -n xcache-consistency-check
 %attr(0755, xrootd, xrootd) %{_bindir}/xcache-consistency-check
-%dir %attr(0755, xrootd, xrootd) /var/log/xcache-consistency-check
 %dir %attr(0755, xrootd, xrootd) /var/lib/xcache-consistency-check
 %{_unitdir}/xcache-consistency-check.service
 %{_unitdir}/xcache-consistency-check.timer
 %config(noreplace) %{_sysconfdir}/xrootd/xcache-consistency-check.cfg
-%config %{_sysconfdir}/logrotate.d/xcache-consistency-check
 
 %files -n stash-origin
 %config %{_sysconfdir}/xrootd/xrootd-stash-origin.cfg

@@ -5,7 +5,7 @@ Description=XCache consistency check
 User=xrootd
 Group=xrootd
 Type=simple
-ExecStart=/bin/xcache-consistency-check --config /etc/xcache-consistency-check/default.cfg
+ExecStart=/bin/xcache-consistency-check --config /etc/xrootd/xcache-consistency-check.cfg
 
 [Install]
 WantedBy=multi-user.target
