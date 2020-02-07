@@ -43,6 +43,8 @@ Obsoletes: stashcache-daemon < 1.0.0
 ########################################
 %package -n xcache-consistency-check
 Summary: Consistency check for root files
+AutoReq: no
+%global __provides_exclude ^libgfortran.*\\.so.*$|^libopenblasp.*\\.so.*$
 
 Requires: xz
 Requires: xrootd-server
@@ -164,6 +166,12 @@ echo "*** This version does not build on EL 6 ***"
 exit 1
 %endif
 mkdir -p %{buildroot}%{_sysconfdir}/xrootd
+mkdir -p %{buildroot}/usr/lib/xcache-consistency-check
+pip2 install -I python-deps/uproot-3.11.2-py2.py3-none-any.whl --root %{buildroot}/usr/lib/xcache-consistency-check
+pip2 install -I python-deps/xxhash-1.4.3-cp27-cp27mu-manylinux2010_x86_64.whl --root %{buildroot}/usr/lib/xcache-consistency-check
+pip2 install -I python-deps/lz4-2.2.1-cp27-cp27mu-manylinux1_x86_64.whl  --root %{buildroot}/usr/lib/xcache-consistency-check
+pip2 install -I python-deps/pyliblzma-0.5.3.tar.bz2  --root %{buildroot}/usr/lib/xcache-consistency-check
+
 make install DESTDIR=%{buildroot}
 
 # Create xrootd certificate directory
@@ -190,6 +198,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/xcache-consistency-check.service
 %{_unitdir}/xcache-consistency-check.timer
 %config(noreplace) %{_sysconfdir}/xrootd/xcache-consistency-check.cfg
+/usr/lib/xcache-consistency-check/*
 
 %files -n stash-origin
 %config %{_sysconfdir}/xrootd/xrootd-stash-origin.cfg
