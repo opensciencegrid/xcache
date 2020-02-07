@@ -5,7 +5,6 @@ Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
-BuildArch: noarch
 Source0:   %{name}-%{version}.tar.gz
 
 BuildRequires: systemd
