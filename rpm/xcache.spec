@@ -42,6 +42,8 @@ Obsoletes: stashcache-daemon < 1.0.0
 ########################################
 %package -n xcache-consistency-check
 BuildRequires: python-pip
+BuildRequires: python-devel
+BuildRequires: xz-devel
 Summary: Consistency check for root files
 AutoReq: no
 %global __provides_exclude ^libgfortran.*\\.so.*$|^libopenblasp.*\\.so.*$
