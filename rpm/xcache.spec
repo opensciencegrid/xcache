@@ -169,7 +169,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/xrootd
 mkdir -p %{buildroot}/usr/lib/xcache-consistency-check
 pip2 install -I python-deps/numpy-1.16.6-cp27-cp27mu-manylinux1_x86_64.whl --root %{buildroot}/usr/lib/xcache-consistency-check
 pip2 install -I python-deps/cachetools-3.1.1-py2.py3-none-any.whl --root %{buildroot}/usr/lib/xcache-consistency-check
-pip2 install -I python-deps/awkward-0.12.20-py2.py3-none-any.whl --root %{buildroot}/usr/lib/xcache-consistency-check
+pip2 install -I --no-deps python-deps/awkward-0.12.20-py2.py3-none-any.whl --root %{buildroot}/usr/lib/xcache-consistency-check
 pip2 install -I python-deps/uproot_methods-0.7.3-py2.py3-none-any.whl --root %{buildroot}/usr/lib/xcache-consistency-check
 pip2 install -I python-deps/uproot-3.11.2-py2.py3-none-any.whl --root %{buildroot}/usr/lib/xcache-consistency-check
 pip2 install -I python-deps/xxhash-1.4.3-cp27-cp27mu-manylinux2010_x86_64.whl --root %{buildroot}/usr/lib/xcache-consistency-check
