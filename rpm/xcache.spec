@@ -167,14 +167,14 @@ exit 1
 %endif
 mkdir -p %{buildroot}%{_sysconfdir}/xrootd
 mkdir -p %{buildroot}/usr/lib/xcache-consistency-check
-pip2 install -I --no-deps ppython-deps/numpy-1.16.6-cp27-cp27mu-manylinux1_x86_64.whl --root %{buildroot}/usr/lib/xcache-consistency-check
-pip2 install -I --no-deps ppython-deps/cachetools-3.1.1-py2.py3-none-any.whl --root %{buildroot}/usr/lib/xcache-consistency-check
+pip2 install -I --no-deps python-deps/numpy-1.16.6-cp27-cp27mu-manylinux1_x86_64.whl --root %{buildroot}/usr/lib/xcache-consistency-check
+pip2 install -I --no-deps python-deps/cachetools-3.1.1-py2.py3-none-any.whl --root %{buildroot}/usr/lib/xcache-consistency-check
 pip2 install -I --no-deps python-deps/awkward-0.12.20-py2.py3-none-any.whl --root %{buildroot}/usr/lib/xcache-consistency-check
-pip2 install -I --no-deps ppython-deps/uproot_methods-0.7.3-py2.py3-none-any.whl --root %{buildroot}/usr/lib/xcache-consistency-check
-pip2 install -I --no-deps ppython-deps/uproot-3.11.2-py2.py3-none-any.whl --root %{buildroot}/usr/lib/xcache-consistency-check
-pip2 install -I --no-deps ppython-deps/xxhash-1.4.3-cp27-cp27mu-manylinux2010_x86_64.whl --root %{buildroot}/usr/lib/xcache-consistency-check
-pip2 install -I --no-deps ppython-deps/lz4-2.2.1-cp27-cp27mu-manylinux1_x86_64.whl  --root %{buildroot}/usr/lib/xcache-consistency-check
-pip2 install -I --no-deps ppython-deps/pyliblzma-0.5.3.tar.bz2  --root %{buildroot}/usr/lib/xcache-consistency-check
+pip2 install -I --no-deps python-deps/uproot_methods-0.7.3-py2.py3-none-any.whl --root %{buildroot}/usr/lib/xcache-consistency-check
+pip2 install -I --no-deps python-deps/uproot-3.11.2-py2.py3-none-any.whl --root %{buildroot}/usr/lib/xcache-consistency-check
+pip2 install -I --no-deps python-deps/xxhash-1.4.3-cp27-cp27mu-manylinux2010_x86_64.whl --root %{buildroot}/usr/lib/xcache-consistency-check
+pip2 install -I --no-deps python-deps/lz4-2.2.1-cp27-cp27mu-manylinux1_x86_64.whl  --root %{buildroot}/usr/lib/xcache-consistency-check
+pip2 install -I --no-deps python-deps/pyliblzma-0.5.3.tar.bz2  --root %{buildroot}/usr/lib/xcache-consistency-check
 
 make install DESTDIR=%{buildroot}
 
