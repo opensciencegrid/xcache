@@ -452,28 +452,41 @@ def find_path():
     else:
         log.error("Something went wrong when executing ps")
 
-    command_chunks = stdout.split()
+    xrootd_p = None
+    for p in stdout.split('\n'):
+        splitted = p.split()
+        if len(splitted) >0 and "xrootd" in splitted[0]:
+            xrootd_p = p
+            break
 
-    for chunk in command_chunks:
-        if "/etc" in chunk:
-            xrootd_config_file = chunk
+    xrootd_config_file = None
+    if xrootd_p is not None:
+        command_chunks = xrootd_p.split()
+        for chunk in command_chunks:
+            if "/etc" in chunk:
+                xrootd_config_file = chunk
 
-    log.debug("found xrootd configuration file:"+ xrootd_config_file)
+        if xrootd_p is not None:
+            log.info("found xrootd configuration file:"+ xrootd_config_file)
 
-    #Then use the xrootd config file to find the 'oss.localroot' parameter
-    out = subprocess.Popen(['cconfig', '-c', xrootd_config_file], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    stdout, stderr = out.communicate()
-    if stderr is None:
-        log.debug("Parsing cconfig output to get 'oss.localroot'")
+            #Then use the xrootd config file to find the 'oss.localroot' parameter
+            out = subprocess.Popen(['cconfig', '-c', xrootd_config_file], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            stdout, stderr = out.communicate()
+            if stderr is None:
+                log.debug("Parsing cconfig output to get 'oss.localroot'")
+            else:
+                log.error("Something went wrong when executing cconfig -c "+ xrootd_config_file)
+
+            for line in stdout.split('\n'):
+                if "oss.localroot" in line:
+                    if len(line.split()) > 0:
+                        path= line.split()[1]
+        else:
+            log.error("Cannot find the config files used by the xrootd running process")
     else:
-        log.error("Something went wrong when executing cconfig -c "+ xrootd_config_file)
-
-    for line in stdout.split('\n'):
-        if "oss.localroot" in line:
-            path= line[1]
+        log.error("Cannot find a running xrootd process from which obtain the configuration file used")
 
     return path
-
 
 # Argument parsing
 def parseargs():
@@ -617,6 +630,9 @@ def main():
     #-----------------------------------------------------------------------------
 
     # If path is set to 'auto' try to find the path to the rootfiles
+    log.info("*******************************************")
+    log.info("**** Xcache consistency check starting ****")
+    log.info("*******************************************")
     if args['path']=="auto":
         args['path'] = find_path()
     if args['path'] == None:
@@ -624,9 +640,6 @@ def main():
         exit(1)
 
     # Print the arguments to debug log
-    log.info("*******************************************")
-    log.info("**** Xcache consistency check starting ****")
-    log.info("*******************************************")
     log.info("********* Configuration parametes *********")
     for key in args.keys():
         log.info(key+" : "+str(args[key]))
