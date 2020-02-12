@@ -6,6 +6,15 @@ License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
 Source0:   %{name}-%{version}.tar.gz
+Source1:   numpy-1.16.6-cp27-cp27mu-manylinux1_x86_64.whl
+Source2:   cachetools-3.1.1-py2.py3-none-any.whl
+Source3:   awkward-0.12.20-py2.py3-none-any.whl
+Source4:   uproot_methods-0.7.3-py2.py3-none-any.whl
+Source5:   uproot-3.11.2-py2.py3-none-any.whl
+Source6:   xxhash-1.4.3-cp27-cp27mu-manylinux1_x86_64.whl
+Source7:   lz4-2.2.1-cp27-cp27mu-manylinux1_x86_64.whl
+Source8:   pyliblzma-0.5.3.tar.bz2
+
 
 BuildRequires: systemd
 %{?systemd_requires}
@@ -169,14 +178,10 @@ exit 1
 %endif
 mkdir -p %{buildroot}%{_sysconfdir}/xrootd
 mkdir -p %{buildroot}/usr/lib/xcache-consistency-check
-pip2 install -I --no-deps python-deps/numpy-1.16.6-cp27-cp27mu-manylinux1_x86_64.whl --root %{buildroot}/usr/lib/xcache-consistency-check
-pip2 install -I --no-deps python-deps/cachetools-3.1.1-py2.py3-none-any.whl --root %{buildroot}/usr/lib/xcache-consistency-check
-pip2 install -I --no-deps python-deps/awkward-0.12.20-py2.py3-none-any.whl --root %{buildroot}/usr/lib/xcache-consistency-check
-pip2 install -I --no-deps python-deps/uproot_methods-0.7.3-py2.py3-none-any.whl --root %{buildroot}/usr/lib/xcache-consistency-check
-pip2 install -I --no-deps python-deps/uproot-3.11.2-py2.py3-none-any.whl --root %{buildroot}/usr/lib/xcache-consistency-check
-pip2 install -I --no-deps python-deps/xxhash-1.4.3-cp27-cp27mu-manylinux1_x86_64.whl --root %{buildroot}/usr/lib/xcache-consistency-check
-pip2 install -I --no-deps python-deps/lz4-2.2.1-cp27-cp27mu-manylinux1_x86_64.whl  --root %{buildroot}/usr/lib/xcache-consistency-check
-pip2 install -I --no-deps python-deps/pyliblzma-0.5.3.tar.bz2  --root %{buildroot}/usr/lib/xcache-consistency-check
+for whl in %{SOURCE1} %{SOURCE2} %{SOURCE3} %{SOURCE4} %{SOURCE5} %{SOURCE6} %{SOURCE7} %{SOURCE8} 
+do
+    pip2 install -I --no-deps "$whl" --root %{buildroot}/usr/lib/xcache-consistency-check
+done
 
 make install DESTDIR=%{buildroot}
 
