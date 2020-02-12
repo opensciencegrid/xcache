@@ -17,7 +17,7 @@ before_install:
   - sudo docker pull opensciencegrid/osg-build
 
 script:
-  - mkdir /tmp/python-deps
-  - wget https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/numpy-1.16.6-cp27-cp27mu-manylinux1_x86_64.whl -O /tmp/python-deps/numpy-1.16.6-cp27-cp27mu-manylinux1_x86_64.whl
-  - docker run -v $(pwd):/$REPO_NAME -e REPO_NAME=$REPO_NAME --cap-add=SYS_ADMIN --volume /tmp/python-deps:/u/rpmbuild/SOURCES opensciencegrid/osg-build build-from-github
+  - mkdir upstream
+  - wget https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/numpy-1.16.6-cp27-cp27mu-manylinux1_x86_64.whl -O upstream/numpy-1.16.6-cp27-cp27mu-manylinux1_x86_64.whl
+  - docker run -v $(pwd):/$REPO_NAME -e REPO_NAME=$REPO_NAME --cap-add=SYS_ADMIN opensciencegrid/osg-build build-from-github
 
