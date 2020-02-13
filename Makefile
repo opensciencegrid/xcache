@@ -94,7 +94,7 @@ install:
 	# XCache Consistency Check
 	mkdir -p $(DESTDIR)/usr/bin
 	mkdir -p $(DESTDIR)/var/lib/xcache-consistency-check
-	install -p -m 0644 src/xcache-consistency-check $(DESTDIR)/usr/bin/xcache-consistency-check
+	install -p -m 0755 src/xcache-consistency-check $(DESTDIR)/usr/bin/xcache-consistency-check
 	install -p -m 0644 configs/xcache-consistency-check/xrootd/xcache-consistency-check.cfg $(DESTDIR)/etc/xrootd/xcache-consistency-check.cfg
 	# systemd unit files
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)
@@ -159,4 +159,3 @@ endif
 
 check:
 	pylint -E $(LIBEXEC_FILES) $(PYTHON_LIB)
-
