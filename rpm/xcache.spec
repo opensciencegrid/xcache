@@ -6,14 +6,14 @@ License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
 Source0:   %{name}-%{version}.tar.gz
-Source1:   numpy-1.16.6-cp27-cp27mu-manylinux1_x86_64.whl
-Source2:   cachetools-3.1.1-py2.py3-none-any.whl
-Source3:   awkward-0.12.20-py2.py3-none-any.whl
-Source4:   uproot_methods-0.7.3-py2.py3-none-any.whl
-Source5:   uproot-3.11.2-py2.py3-none-any.whl
-Source6:   xxhash-1.4.3-cp27-cp27mu-manylinux1_x86_64.whl
-Source7:   lz4-2.2.1-cp27-cp27mu-manylinux1_x86_64.whl
-Source8:   pyliblzma-0.5.3.tar.bz2
+Source1:   https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/numpy-1.16.6-cp27-cp27mu-manylinux1_x86_64.whl
+Source2:   https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/cachetools-3.1.1-py2.py3-none-any.whl
+Source3:   https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/awkward-0.12.20-py2.py3-none-any.whl
+Source4:   https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/uproot_methods-0.7.3-py2.py3-none-any.whl
+Source5:   https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/uproot-3.11.2-py2.py3-none-any.whl
+Source6:   https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/xxhash-1.4.3-cp27-cp27mu-manylinux1_x86_64.whl
+Source7:   https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/lz4-2.2.1-cp27-cp27mu-manylinux1_x86_64.whl
+Source8:   https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/pyliblzma-0.5.3.tar.bz2
 
 
 BuildRequires: systemd
