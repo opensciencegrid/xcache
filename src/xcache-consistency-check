@@ -5,6 +5,7 @@ import glob
 import argparse
 import ConfigParser
 import logging
+import logging.handlers
 import uproot
 import subprocess
 import zlib
@@ -626,7 +627,11 @@ def main():
         log_lvl = logging.INFO
 
     #----- Setup the logger and the log level ------------------------------------
-    logging.basicConfig(filename=args['logfile'], level=log_lvl, format='%(asctime)s  %(levelname)s - %(message)s', datefmt='%Y%m%d %H:%M:%S')
+    log_handler = logging.handlers.WatchedFileHandler(args['logfile'])
+    formatter = logging.Formatter('%(asctime)s %(levelname)s - %(message)s','%Y%m%d %H:%M:%S')
+    log_handler.setFormatter(formatter)
+    log.addHandler(log_handler)
+    log.setLevel(log_lvl)
     #-----------------------------------------------------------------------------
 
     # If path is set to 'auto' try to find the path to the rootfiles
@@ -780,6 +785,7 @@ def main():
 
             max_counter +=1
 
-log = logging.getLogger(__name__)
+# Make 'log' global
+log = logging.getLogger()
 if __name__ == "__main__":
     main()
