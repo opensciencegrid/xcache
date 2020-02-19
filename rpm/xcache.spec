@@ -1,12 +1,20 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.2.1
+Version:   1.3.0
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
-BuildArch: noarch
 Source0:   %{name}-%{version}.tar.gz
+Source1:   https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/numpy-1.16.6-cp27-cp27mu-manylinux1_x86_64.whl
+Source2:   https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/cachetools-3.1.1-py2.py3-none-any.whl
+Source3:   https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/awkward-0.12.20-py2.py3-none-any.whl
+Source4:   https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/uproot_methods-0.7.3-py2.py3-none-any.whl
+Source5:   https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/uproot-3.11.2-py2.py3-none-any.whl
+Source6:   https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/xxhash-1.4.3-cp27-cp27mu-manylinux1_x86_64.whl
+Source7:   https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/lz4-2.2.1-cp27-cp27mu-manylinux1_x86_64.whl
+Source8:   https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/pyliblzma-0.5.3.tar.bz2
+
 
 BuildRequires: systemd
 %{?systemd_requires}
@@ -39,6 +47,30 @@ Obsoletes: stashcache-daemon < 1.0.0
 %systemd_preun xcache-reporter.service xcache-reporter.timer xrootd-renew-proxy.service xrootd-renew-proxy.timer
 %postun
 %systemd_postun_with_restart xcache-reporter.service xcache-reporter.timer xrootd-renew-proxy.service xrootd-renew-proxy.timer
+
+########################################
+%package -n xcache-consistency-check
+BuildRequires: python-pip
+BuildRequires: python-devel
+BuildRequires: xz-devel
+Summary: Consistency check for root files
+AutoReq: no
+%global __provides_exclude ^libgfortran.*\\.so.*$|^libopenblasp.*\\.so.*$
+
+Requires: xz
+Requires: xrootd-server
+
+%description -n xcache-consistency-check
+%{summary}
+
+%post -n xcache-consistency-check
+
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+%systemd_post xcache-consistency-check.service xcache-consistency-check.timer
+%preun -n xcache-consistency-check
+%systemd_preun xcache-consistency-check.service xcache-consistency-check.timer
+%postun -n xcache-consistency-check
+%systemd_postun_with_restart xcache-consistency-check.service xcache-consistency-check.timer
 
 ########################################
 %package -n stash-origin
@@ -145,6 +177,12 @@ echo "*** This version does not build on EL 6 ***"
 exit 1
 %endif
 mkdir -p %{buildroot}%{_sysconfdir}/xrootd
+mkdir -p %{buildroot}/usr/lib/xcache-consistency-check
+for whl in %{SOURCE1} %{SOURCE2} %{SOURCE3} %{SOURCE4} %{SOURCE5} %{SOURCE6} %{SOURCE7} %{SOURCE8} 
+do
+    pip2 install -I --no-deps "$whl" --root %{buildroot}/usr/lib/xcache-consistency-check
+done
+
 make install DESTDIR=%{buildroot}
 
 # Create xrootd certificate directory
@@ -164,6 +202,14 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %attr(-, xrootd, xrootd) %{_sysconfdir}/grid-security/xrd
 %attr(0755, xrootd, xrootd) %dir /run/xcache-auth
 %{_tmpfilesdir}/xcache.conf
+
+%files -n xcache-consistency-check
+%attr(0755, xrootd, xrootd) %{_bindir}/xcache-consistency-check
+%dir %attr(0755, xrootd, xrootd) /var/lib/xcache-consistency-check
+%{_unitdir}/xcache-consistency-check.service
+%{_unitdir}/xcache-consistency-check.timer
+%config(noreplace) %{_sysconfdir}/xrootd/xcache-consistency-check.cfg
+/usr/lib/xcache-consistency-check/*
 
 %files -n stash-origin
 %config %{_sysconfdir}/xrootd/xrootd-stash-origin.cfg
@@ -228,6 +274,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Mon Jan 27 2020 Diego Davila <didavila@ucsd.edu> - 1.3.0-1
+- Adding subpackage for consistency check (SOFTWARE-3976)
+
 * Wed Dec 18 2019 Edgar Fajardo <emfajard@ucsd.edu> - 1.2.1-1
 - Fixed bug in which cmsd filesystem was configured to be the cache (SOFTWARE-3952)
 
@@ -369,4 +418,3 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 
 * Wed Apr 22 2015 Mátyás Selmeci <matyas@cs.wisc.edu> 0.1-1.osg
 - Created metapackages with stub config files
-

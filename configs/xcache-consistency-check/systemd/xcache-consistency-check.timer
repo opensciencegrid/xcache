@@ -1,0 +1,10 @@
+[Unit]
+Description=Analyze XCache root files periodically
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=24h
+Unit=xcache-consistency-check.service
+
+[Install]
+WantedBy=timers.target
