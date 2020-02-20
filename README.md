@@ -20,3 +20,16 @@ The OSG packaging features:
 - Configurations for both running an origin and running a cache.
 - Integrated authentication and authorization for caches.
 - Usage monitoring integrated with OSG's monitoring services.
+
+## XCache Consistency Check
+
+This is an **experimental** tool used to look for corrupted **root** files within an XCache server.
+Only enable this service if you know what you are doing.
+
+Before enabling the service, plese take a look to the configuration file located at: `/etc/xrrotd/xcache-consistency-check.cfg`
+
+To enable this service execute:
+
+```
+systemctl start xcache-consistency-check.timer
+```
