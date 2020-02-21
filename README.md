@@ -23,7 +23,7 @@ The OSG packaging features:
 
 ## XCache Consistency Check
 
-This is an **experimental** tool used to look for corrupted **root** files within an XCache server.
+This is an **experimental** tool used to look for corrupted **ROOT** files within an XCache server.
 Only enable this service if you know what you are doing.
 
 Before enabling the service, plese take a look to the configuration file located at: `/etc/xrootd/xcache-consistency-check.cfg`
