@@ -33,7 +33,6 @@ Requires: osg-xrootd
 Requires: grid-certificates >= 7
 Requires: vo-client
 Requires: fetch-crl
-Requires: xrootd-scitokens
 
 Provides: stashcache-daemon = %{name}-%{version}
 Obsoletes: stashcache-daemon < 1.0.0
