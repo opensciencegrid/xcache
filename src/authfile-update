@@ -55,7 +55,7 @@ elif [[ $1 == --origin ]]; then
     ret=$(( $ret | $? ))
     fetch "${TOPOLOGY}/stashcache/origin-authfile-public?fqdn=${ORIGIN_FQDN}" /run/stash-origin/Authfile
     ret=$(( $ret | $? ))
-    fetch "${TOPOLOGY}/stashcache/scitokens?origin_fqdn=${CACHE_FQDN}"        /run/stash-origin-auth/scitokens.conf
+    fetch "${TOPOLOGY}/stashcache/scitokens?origin_fqdn=${ORIGIN_FQDN}"        /run/stash-origin-auth/scitokens.conf
     ret=$(( $ret | $? ))
     exit $ret
 else
