@@ -15,6 +15,7 @@ from multiprocessing import Process, Value, Lock
 import sqlite3
 from sqlite3 import Error
 import time
+
 def get_byte_ranges(byte_map_lines, blocksize):
 
     xcounter = xcounter_aux =pcounter = pcounter_aux =0
@@ -359,8 +360,9 @@ def create_table(conn, create_table_sql):
         c = conn.cursor()
         c.execute(create_table_sql)
     except Error as e:
-        log.error("Cannot create database table. Error message: "+str(e))
+        log.error("Cannot create database table, verify you have write access on database file. Error message: "+str(e))
         log.error(create_table_sql)
+        exit(1)
 
 
 def create_connection(db_file):
@@ -369,8 +371,8 @@ def create_connection(db_file):
         conn = sqlite3.connect(db_file)
         return conn
     except Error as e:
-        log.error("Cannot create database connection. Error message: "+str(e))
-
+        log.error("Cannot create database connection, verify you have write access on database file. Error message: "+str(e))
+        exit(1)
     return conn
 
 
@@ -503,7 +505,7 @@ def parseargs():
                          help="Path to the files to store the logs")
 
     parser.add_argument("--path", dest="path",
-                         help="Path to the files to analyze, for a single file use --rootfile (default: /xcache-root)")
+                         help="Path to the files to analyze, for a single file use --rootfile")
 
     parser.add_argument("--rootfile", dest="rootfile",
                          help=".root filename to be analyzed, if this is a partial file a .cinfo file with the same \
@@ -542,8 +544,8 @@ def set_configuration():
 
     # Step 1. Set defaults:
     args = dict()
-    # Disable the execution by default (for the time being)
-    args['path']                    = "auto"
+    args['path']                    = None
+    args['rootfile']                = None
     args['db']                      = "/var/lib/xcache_consistency_check/db.sql"
     args['num_procs']               = 1
     args['last_check_threshold']    = 86400
@@ -626,25 +628,31 @@ def main():
     else:
         log_lvl = logging.INFO
 
+    log_format = '%(asctime)s %(levelname)s - %(message)s'
+    log_format_time = '%Y%m%d %H:%M:%S'
     #----- Setup the logger and the log level ------------------------------------
-    log_handler = logging.handlers.WatchedFileHandler(args['logfile'])
-    formatter = logging.Formatter('%(asctime)s %(levelname)s - %(message)s','%Y%m%d %H:%M:%S')
-    log_handler.setFormatter(formatter)
-    log.addHandler(log_handler)
-    log.setLevel(log_lvl)
+    if(args['logfile'] is not None):
+        log_handler = logging.handlers.WatchedFileHandler(args['logfile'])
+        formatter = logging.Formatter(log_format, log_format_time)
+        log_handler.setFormatter(formatter)
+        log.addHandler(log_handler)
+        log.setLevel(log_lvl)
+    else:
+        logging.basicConfig(filename=args['logfile'], level=log_lvl, format=log_format, datefmt=log_format_time)
     #-----------------------------------------------------------------------------
 
-    # If path is set to 'auto' try to find the path to the rootfiles
     log.info("*******************************************")
     log.info("**** Xcache consistency check starting ****")
     log.info("*******************************************")
-    if args['path']=="auto":
-        args['path'] = find_path()
-    if args['path'] == None:
-        log.error("Cannot find 'path' automatically, please set it either on the configuration file or as an argument on the commandline")
-        exit(1)
 
-    # Print the arguments to debug log
+    # If path is set to 'auto' try to find the path to the rootfiles
+    if args['rootfile'] == None and args['path']=="auto":
+        args['path'] = find_path()
+        if args['path'] == None:
+            log.error("Cannot find 'path' automatically, please set it either on the configuration file or as an argument on the commandline")
+            exit(1)
+
+    # Print the arguments
     log.info("********* Configuration parametes *********")
     for key in args.keys():
         log.info(key+" : "+str(args[key]))
@@ -662,8 +670,8 @@ def main():
     # validate that the path exist
     assume_full_file = args['full_file']
 
-    # If path is not defined that means we are analizing a single root file
-    if not 'path' in args:
+    # If path is None, that means we are analizing a single root file
+    if args['path'] is None:
         rootfile = args['rootfile']
         log.debug("path is not defined, analyzing single file: "+rootfile)
         only_filename_root  = os.path.basename(rootfile)
@@ -730,7 +738,7 @@ def main():
                             #remove_file(filename)
                     # If file has changed but we have checked this file recently, then we skip the check
                     elif ts - db_last_check_ts <= args['last_check_threshold']:
-                        log.debug("file %s, has changed since last analisis but last check is more recent than the threshold, skipping", root_filename)
+                        log.info("file %s, has changed since last analisis but last check is more recent than the threshold, skipping", root_filename)
                         continue
                     else:
                         log.debug("file %s, has changed since last analisis and last check less recent that the threshold")
