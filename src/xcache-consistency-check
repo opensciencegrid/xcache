@@ -709,10 +709,10 @@ def main():
             if assume_full_file == True or os.path.isfile(cinfo_filename):
             #if assume_full_file == True or root_file+".cinfo" in cinfo_files_dict:
                 log.info("Analyzing file: "+ root_file)
-                # The file could have disappeared from th emoment we listed it, and until
+                # The file could have disappeared from the moment we listed it, and until
                 # the moment it's its turn to be analyzed so let's check that it's still there
                 if not os.path.isfile(root_filename):
-                    log.info("File: "+ root_filename+" does not longer exist, skipping..")
+                    log.info("File: "+ root_file+" does not longer exist, skipping..")
                     continue
                 ### Step 1.0 Do I need to fully analyze this file or only verify the checksum?
                 db_file_id = None
@@ -725,23 +725,28 @@ def main():
                 # hasn't change since the last analisis, so we just need to verify the checksums.
                 ts = int(time.time())
                 if db_file_id is not None:
-                    if last_modification_date == db_last_modification_date:
+                    # If we have checked this file recently (less than 'last_check_threshold' secs ago), then we skip the check
+                    if ts - db_last_check_ts <= args['last_check_threshold']:
+                        log.info("file %s, was analyzed less than 'last_check_threshold' seconds ago, skipping", root_file)
+                        continue
+                    # If the current last-modification-date and the last-modification-date stored in the db is the same
+                    # that means that the file hasn't changed (no new blocks have been downloaded) since the last check
+                    # so we can perform a quick comparison of checkusms
+                    elif last_modification_date == db_last_modification_date:
                         curr_checksum = calculate_checksum(root_filename)
                         if db_checksum == curr_checksum:
-                            log.info("OK file's checksum:  %s", root_filename)
+                            log.info("OK file's checksum:  %s", root_file)
                             continue
-                        # There are no new blocks added to the file but the file has changed
+                        # There are no new blocks added to the file but somhow the file has changed
                         # that means the file is corrupted
                         else:
                             log.info("CORRUPTED file's checksum:  %s, db:%s, curr:%s", root_filename, db_checksum, curr_checksum)
                             # TODO:
                             #remove_file(filename)
-                    # If file has changed but we have checked this file recently, then we skip the check
-                    elif ts - db_last_check_ts <= args['last_check_threshold']:
-                        log.info("file %s, has changed since last analisis but last check is more recent than the threshold, skipping", root_filename)
-                        continue
                     else:
-                        log.debug("file %s, has changed since last analisis and last check less recent that the threshold")
+                        # We need to re-analyze this file, since it has changed and last check was more than 'last_check_threshold'
+                        # seconds ago.
+                        log.debug("file %s, has changed since last analysis and last check was more that 'last_check_treshold' seconds ago", root_filename)
                 else:
                     log.debug("file %s, not in the DB", root_filename)
 
