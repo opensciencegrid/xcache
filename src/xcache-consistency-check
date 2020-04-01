@@ -731,7 +731,7 @@ def main():
                 db_file_id = None
                 # Get file's last modification date
                 last_modification_date = int(os.path.getmtime(root_filename))
-                db_file_id, db_last_check_ts, db_last_modification_date, db_checksum = get_file_from_db(conn, root_file)
+                db_file_id, db_last_check_ts, db_last_modification_date, db_checksum = get_file_from_db(conn, root_filename)
 
                 # if the file is in the DB and the last modification date registerd in the db
                 # is the same as the current one, it means that the file
@@ -750,7 +750,7 @@ def main():
                         if db_checksum == curr_checksum:
                             log.info("OK file's checksum:  %s", root_file)
                             # update last modification date of the file's record  to 'ts'
-                            update_lmd(conn, root_file, ts)
+                            update_lmd(conn, root_filename, ts)
                             continue
                         # There are no new blocks added to the file but somhow the file has changed
                         # that means the file is corrupted
@@ -804,9 +804,9 @@ def main():
                     log.info("OK file:  %s", root_filename)
                     file_checksum = calculate_checksum(root_filename)
                     if db_file_id == None:
-                        insert_in_db(conn, root_file, ts, last_modification_date, file_checksum)
+                        insert_in_db(conn, root_filename, ts, last_modification_date, file_checksum)
                     else:
-                        update_db(conn, root_file, ts, last_modification_date, file_checksum)
+                        update_db(conn, root_filename, ts, last_modification_date, file_checksum)
 
             else:
                 log.error("Cannot find a corresponding .cinfo file for root file:  %s", root_filename)
