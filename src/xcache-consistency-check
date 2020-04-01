@@ -411,6 +411,19 @@ def insert_in_db(conn, root_filename, ts, last_modification_date, file_checksum)
         cur.execute(sql, record)
     log.debug("inserted record: "+str(cur.lastrowid))
 
+# When a file hasn't changed but a quick checksum comparison has been done, we need to update the 'last_modification_date'
+# of the file's record
+def update_lmd(conn, root_filename, ts):
+    sql = ''' UPDATE files
+                SET last_check_ts = ?
+                WHERE filename = ?'''
+
+    record =(ts, root_filename)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(sql, record)
+    log.debug("updated record's lmd: "+root_filename)
+
 # When a file has changed (new blocks have been downloaded) its record needs to be updated
 def update_db(conn, root_filename, ts, last_modification_date, file_checksum):
     sql = ''' UPDATE files
@@ -736,6 +749,8 @@ def main():
                         curr_checksum = calculate_checksum(root_filename)
                         if db_checksum == curr_checksum:
                             log.info("OK file's checksum:  %s", root_file)
+                            # update last modification date of the file's record  to 'ts'
+                            update_lmd(conn, root_file, ts)
                             continue
                         # There are no new blocks added to the file but somhow the file has changed
                         # that means the file is corrupted
