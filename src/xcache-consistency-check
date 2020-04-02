@@ -456,6 +456,54 @@ def get_file_from_db(conn, root_filename):
         ret = (rows[0])
     return ret
 
+# Removes a record from the database, it is used when a file is found to be corrupted and removed from the chache
+def remove_from_db(conn, root_filename):
+    sql = ''' DELETE FROM files
+                WHERE filename = ?'''
+
+    record =(root_filename,)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(sql, record)
+    log.debug("file removed from db: "+root_filename)
+
+
+def safe_remove(filename):
+    try:
+        os.remove(filename)
+    except Exception, e:
+        log.error("Something went wrong when trying to remove: "+filename+"\n Exception message is:  "+str(e))
+
+
+# Removes a file from the cache, it is used when a file is found to be corrupted
+def remove_file(filename):
+
+    # Check that the file still exists:
+    if os.path.isfile(filename):
+        # Is this a symbolic link?
+        if os.path.islink(filename):
+            # Get and remove the real file
+            real_file = os.path.realpath(filename)
+            safe_remove(real_file)
+        # Remove the symbolic link (or the real file in case of above's IF is false)
+        safe_remove(filename)
+    else:
+        log.error("cannot find file to remove: "+filename)
+
+    # Is there a cinfo file associated?
+    cinfo_filename = filename+".cinfo"
+    if os.path.isfile(cinfo_filename):
+        # Is this a symbolic link?
+        if os.path.islink(cinfo_filename):
+            # Get and remove the real file
+            real_cinfo = os.path.realpath(cinfo_filename)
+            safe_remove(real_cinfo)
+        # Remove the symbolic link (or the real file in case of above's IF is false)
+        safe_remove(cinfo_filename)
+    else:
+        log.info("Could not find an associated cinfo file to remove from file: "+filename)
+
+
 # When the configuration parameter 'path' is set to auto, we will try to set it to xrootd;s configuration parameter
 # 'oss.localroot'
 def find_path():
@@ -546,6 +594,9 @@ def parseargs():
                          help="If a file has been checked within less than the number of seconds defined here, \
                              the check on this file will be skipped (default: 86400(24hrs)")
 
+    parser.add_argument("--dont-remove", dest="dont_remove", action="store_true", default=False,
+                         help="When set, corrupted files are only logged but not removed")
+
     args = parser.parse_args()
 
     return args
@@ -564,7 +615,9 @@ def set_configuration():
     args['last_check_threshold']    = 86400
     # When set to None, it logs to stdout
     args['logfile']                 = None
+    args['dont_remove']             = False
 
+    # The following params cannot be read from config file
     args['full_file']   = False
     args['max']         = -1
     args['debug']       = False
@@ -581,6 +634,7 @@ def set_configuration():
         args['num_procs']              = config.getint('Main', 'num_procs')
         args['last_check_threshold']   = config.getint('Main', 'last_check_threshold')
         args['logfile']                = config.get('Main', 'logfile')
+        args['dont_remove']            = config.getbool('Main', 'dont_remove')
     else:
         log.info("no config file provided")
 
@@ -595,6 +649,8 @@ def set_configuration():
        args['num_procs'] = cmdline_args.num_procs
     if(cmdline_args.last_check_threshold):
        args['last_check_threshold'] = cmdline_args.last_check_threshold
+    if(cmdline_args.dont_remove):
+       args['dont_remove'] = cmdline_args.dont_remove
 
     # Step 4. Get the arguments not allowed in the config file from the command line arguments
     if(cmdline_args.rootfile):
@@ -756,8 +812,12 @@ def main():
                         # that means the file is corrupted
                         else:
                             log.info("CORRUPTED file's checksum:  %s, db:%s, curr:%s", root_filename, db_checksum, curr_checksum)
-                            # TODO:
-                            #remove_file(filename)
+                            if args['dont_remove']:
+                                log.info("File will not be removed, --dont-remove is set to True")
+                            else:
+                                log.info("Removing file: %s", root_filename)
+                                remove_file(root_filename)
+                                remove_from_db(conn, root_filename)
                     else:
                         # We need to re-analyze this file, since it has changed and last check was more than 'last_check_threshold'
                         # seconds ago.
@@ -799,7 +859,12 @@ def main():
 
                 if corrupted_flag.value ==True:
                     log.info("CORRUPTED file:  %s", root_filename)
-                    #remove_file(root_filename)
+                    if args['dont_remove']: 
+                        log.info("File will not be removed, --dont-remove is set to True")
+                    else:
+                        log.info("Removing file: %s", root_filename)
+                        remove_file(root_filename)
+                        remove_from_db(conn, root_filename)
                 else:
                     log.info("OK file:  %s", root_filename)
                     file_checksum = calculate_checksum(root_filename)
