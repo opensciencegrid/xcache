@@ -627,16 +627,28 @@ def set_configuration():
     config = ConfigParser.ConfigParser(args)
     config_file = cmdline_args.config_file
     if(config_file):
-        log.info("configuration file: "+config_file)
+        print("configuration file: "+config_file)
         config.read(config_file)
-        args['path']                   = config.get('Main', 'path')
-        args['db']                     = config.get('Main', 'db')
-        args['num_procs']              = config.getint('Main', 'num_procs')
-        args['last_check_threshold']   = config.getint('Main', 'last_check_threshold')
-        args['logfile']                = config.get('Main', 'logfile')
-        args['dont_remove']            = config.getbool('Main', 'dont_remove')
+        args['path']                   = config.get('Main', 'path', args)
+        args['db']                     = config.get('Main', 'db', args)
+        args['logfile']                = config.get('Main', 'logfile', args)
+
+        # Only 'config.get' allows to provide a default, 'getint' and 'getboolean' don't
+        # so let's prevent crashing because some attributes aren't defined in the config file
+        try:
+            args['num_procs']              = config.getint('Main', 'num_procs')
+        except:
+            pass
+        try:
+            args['last_check_threshold']   = config.getint('Main', 'last_check_threshold')
+        except:
+            pass
+        try:
+            args['dont_remove']            = config.getboolean('Main', 'dont_remove')
+        except:
+            pass
     else:
-        log.info("no config file provided")
+        print("no config file provided")
 
     # Step 3. Overwrite with command line arguments
     if(cmdline_args.path):
@@ -664,10 +676,21 @@ def set_configuration():
     if(cmdline_args.dry_run):
         args['dry_run']     = cmdline_args.dry_run
 
+    # Transform relative paths to absolute ones
+    if args['path'] is not None and args['path'] != "auto":
+        relative_path = args['path']
+        args['path'] = os.path.abspath(relative_path)
+        print("Transforming relative path: "+relative_path+" to absolute: "+args['path'])
+
+    if args['rootfile'] is not None:
+        relative_path = args['rootfile']
+        args['rootfile'] = os.path.abspath(relative_path)
+        print("Transforming relative rootfile: "+relative_path+" to absolute: "+args['rootfile'])
+
     #TODO:
     # following prints have to go to stderr and make sure they appear on jornalctl
     # Step 5. Verify required conditions
-    if 'path' not in args and not 'rootfile' in args:
+    if args['path'] is None and args['rootfile'] is None:
            print("ERROR: Either --path or --rootfile need to be defined")
            exit(1)
     # If --path is not defined then --rootfile it is
