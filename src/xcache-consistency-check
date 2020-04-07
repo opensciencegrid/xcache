@@ -411,9 +411,9 @@ def insert_in_db(conn, root_filename, ts, last_modification_date, file_checksum)
         cur.execute(sql, record)
     log.debug("inserted record: "+str(cur.lastrowid))
 
-# When a file hasn't changed but a quick checksum comparison has been done, we need to update the 'last_modification_date'
+# When a file hasn't changed but a quick checksum comparison has been done, we need to update the 'last_check_ts'
 # of the file's record
-def update_lmd(conn, root_filename, ts):
+def update_last_check_ts(conn, root_filename, ts):
     sql = ''' UPDATE files
                 SET last_check_ts = ?
                 WHERE filename = ?'''
@@ -422,7 +422,7 @@ def update_lmd(conn, root_filename, ts):
     with conn:
         cur = conn.cursor()
         cur.execute(sql, record)
-    log.debug("updated record's lmd: "+root_filename)
+    log.debug("updated record's last check ts: "+root_filename)
 
 # When a file has changed (new blocks have been downloaded) its record needs to be updated
 def update_db(conn, root_filename, ts, last_modification_date, file_checksum):
@@ -828,10 +828,10 @@ def main():
                         curr_checksum = calculate_checksum(root_filename)
                         if db_checksum == curr_checksum:
                             log.info("OK file's checksum:  %s", root_file)
-                            # update last modification date of the file's record  to 'ts'
-                            update_lmd(conn, root_filename, ts)
+                            # update last check timestamp of the file's record  to 'ts'
+                            update_last_check_ts(conn, root_filename, ts)
                             continue
-                        # There are no new blocks added to the file but somhow the file has changed
+                        # There are no new blocks added to the file but somehow the file has changed
                         # that means the file is corrupted
                         else:
                             log.info("CORRUPTED file's checksum:  %s, db:%s, curr:%s", root_filename, db_checksum, curr_checksum)
