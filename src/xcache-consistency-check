@@ -153,7 +153,7 @@ def get_xrdpfc_print_ouput(filename):
         out = subprocess.Popen(['xrdpfc_print', '-v', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     except Exception, e:
         log.error("An exception was raised when trying to execute 'xrdpfc_print', exiting...")
-        exit(1)
+        sys.exit(1)
     stdout, stderr = out.communicate()
     if stderr is None:
         log.debug("Parsing cinfo file: %s", filename)
@@ -362,7 +362,7 @@ def create_table(conn, create_table_sql):
     except Error as e:
         log.error("Cannot create database table, verify you have write access on database file. Error message: "+str(e))
         log.error(create_table_sql)
-        exit(1)
+        sys.exit(1)
 
 
 def create_connection(db_file):
@@ -372,7 +372,7 @@ def create_connection(db_file):
         return conn
     except Error as e:
         log.error("Cannot create database connection, verify you have write access on database file. Error message: "+str(e))
-        exit(1)
+        sys.exit(1)
     return conn
 
 
@@ -692,13 +692,13 @@ def set_configuration():
     # Step 5. Verify required conditions
     if args['path'] is None and args['rootfile'] is None:
            print("ERROR: Either --path or --rootfile need to be defined")
-           exit(1)
+           sys.exit(1)
     # If --path is not defined then --rootfile it is
     if 'path' not in args:
         # Check that the  root file exist
         if os.path.isfile(args['rootfile']) == False:
             print("ERROR: --rootfile: "+args['rootfile']+" does not exist")
-            exit(1)
+            sys.exit(1)
     #TODO:
     # DB is set
     # We can write where the DB is supposed to be stored
@@ -742,7 +742,7 @@ def main():
         args['path'] = find_path()
         if args['path'] == None:
             log.error("Cannot find 'path' automatically, please set it either on the configuration file or as an argument on the commandline")
-            exit(1)
+            sys.exit(1)
 
     # Print the arguments
     log.info("********* Configuration parametes *********")
