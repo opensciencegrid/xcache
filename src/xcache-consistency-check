@@ -601,23 +601,37 @@ def parseargs():
 
     return args
 
-def set_configuration():
+def validate_path(path, parameter_name):
+    if path:
+        if not os.path.exists(path):
+            print("ERROR configuration parameter '"+parameter_name+"' expects a valid path")
+            sys.exit(1)
 
+def validate_positive_integer(var, parameter_name):
+    if var < 1:
+       print("ERROR configuration parameter '"+parameter_name+"' expects a positive integer")
+       sys.exit(1)
+
+def set_configuration():
     # Read command line arguments
     cmdline_args = parseargs()
 
     # Step 1. Set defaults:
+    # We need to set everything as a string so that the interpolation works in the case
+    # that a config file is provided. When no config file is provided, we need to change
+    # for the correct data type manually.
     args = dict()
-    args['path']                    = None
-    args['rootfile']                = None
+    args['path']                    = ""
+    args['rootfile']                = ""
     args['db']                      = "/var/lib/xcache_consistency_check/db.sql"
-    args['num_procs']               = 1
-    args['last_check_threshold']    = 86400
+    args['num_procs']               = "1"
+    args['last_check_threshold']    = "86400"
     # When set to None, it logs to stdout
-    args['logfile']                 = None
-    args['dont_remove']             = False
+    args['logfile']                 = ""
+    args['dont_remove']             = "False"
 
-    # The following params cannot be read from config file
+    # The following params cannot be read from config file so we don't care about
+    # interpolation issues and thus we can define the desired data types
     args['full_file']   = False
     args['max']         = -1
     args['debug']       = False
@@ -629,25 +643,33 @@ def set_configuration():
     if(config_file):
         print("configuration file: "+config_file)
         config.read(config_file)
-        args['path']                   = config.get('Main', 'path', args)
-        args['db']                     = config.get('Main', 'db', args)
-        args['logfile']                = config.get('Main', 'logfile', args)
-
-        # Only 'config.get' allows to provide a default, 'getint' and 'getboolean' don't
-        # so let's prevent crashing because some attributes aren't defined in the config file
+        args['path']                   = config.get('Main', 'path').replace('"','')
+        args['db']                     = config.get('Main', 'db').replace('"','')
+        args['logfile']                = config.get('Main', 'logfile').replace('"','')
         try:
             args['num_procs']              = config.getint('Main', 'num_procs')
         except:
-            pass
+            print("ERROR configuration parameter 'num_procs' expects a positive integer")
+            sys.exit(1)
         try:
             args['last_check_threshold']   = config.getint('Main', 'last_check_threshold')
         except:
-            pass
+            print("ERROR configuration parameter 'last_check_threshold' expects a positive integer")
+            sys.exit(1)
         try:
             args['dont_remove']            = config.getboolean('Main', 'dont_remove')
         except:
-            pass
+            print("ERROR configuration parameter 'dont_remove' expects a boolean")
+            sys.exit(1)
     else:
+        # We need to convert strings into the desired data types since that didn't
+        # happened above because no config file was provided
+        args['num_procs']               = int(args['num_procs'])
+        args['last_check_threshold']    = int(args['last_check_threshold'])
+        if args['dont_remove'].lower() == "false":
+            args['dont_remove'] = False
+        else:
+            args['dont_remove'] = True
         print("no config file provided")
 
     # Step 3. Overwrite with command line arguments
@@ -676,27 +698,35 @@ def set_configuration():
     if(cmdline_args.dry_run):
         args['dry_run']     = cmdline_args.dry_run
 
-    # Transform relative paths to absolute ones
-    if args['path'] is not None and args['path'] != "auto":
+    # Step 5. Extra validation for some special arguments
+    args['path']=="auto" or validate_path(args['path'], "path")
+    validate_path(args['logfile'], "logfile")
+    validate_path(args['db'], "db")
+    validate_path(args['rootfile'], "rootfile")
+    validate_positive_integer(args['num_procs'], "num_procs")
+    validate_positive_integer(args['last_check_threshold'], "last_check_threshold")
+
+    # Step 6. Transform relative paths to absolute ones
+    if args['path']  and args['path'] != "auto":
         relative_path = args['path']
         args['path'] = os.path.abspath(relative_path)
         print("Transforming relative path: "+relative_path+" to absolute: "+args['path'])
 
-    if args['rootfile'] is not None:
+    if args['rootfile']:
         relative_path = args['rootfile']
         args['rootfile'] = os.path.abspath(relative_path)
         print("Transforming relative rootfile: "+relative_path+" to absolute: "+args['rootfile'])
 
     #TODO:
     # following prints have to go to stderr and make sure they appear on jornalctl
-    # Step 5. Verify required conditions
-    if args['path'] is None and args['rootfile'] is None:
+    # Step 7. Verify required conditions
+    if not args['path'] and not args['rootfile']:
            print("ERROR: Either --path or --rootfile need to be defined")
            sys.exit(1)
     # If --path is not defined then --rootfile it is
-    if 'path' not in args:
-        # Check that the  root file exist
-        if os.path.isfile(args['rootfile']) == False:
+    if not args['path']:
+        # Check that the rootfile is not empty and that the file exist
+        if not os.path.isfile(args['rootfile']):
             print("ERROR: --rootfile: "+args['rootfile']+" does not exist")
             sys.exit(1)
     #TODO:
@@ -723,7 +753,7 @@ def main():
     log_format = '%(asctime)s %(levelname)s - %(message)s'
     log_format_time = '%Y%m%d %H:%M:%S'
     #----- Setup the logger and the log level ------------------------------------
-    if(args['logfile'] is not None):
+    if args['logfile']:
         log_handler = logging.handlers.WatchedFileHandler(args['logfile'])
         formatter = logging.Formatter(log_format, log_format_time)
         log_handler.setFormatter(formatter)
@@ -738,7 +768,7 @@ def main():
     log.info("*******************************************")
 
     # If path is set to 'auto' try to find the path to the rootfiles
-    if args['rootfile'] == None and args['path']=="auto":
+    if not args['rootfile'] and args['path']=="auto":
         args['path'] = find_path()
         if args['path'] == None:
             log.error("Cannot find 'path' automatically, please set it either on the configuration file or as an argument on the commandline")
@@ -747,7 +777,7 @@ def main():
     # Print the arguments
     log.info("********* Configuration parametes *********")
     for key in args.keys():
-        log.info(key+" : "+str(args[key]))
+        log.info(key+" : "+str(args[key])+" type: "+str(type(args[key])))
     log.info("*******************************************")
 
 
@@ -762,8 +792,8 @@ def main():
     # validate that the path exist
     assume_full_file = args['full_file']
 
-    # If path is None, that means we are analizing a single root file
-    if args['path'] is None:
+    # If args['path'] is empty, that means we are analizing a single root file
+    if not args['path']:
         rootfile = args['rootfile']
         log.debug("path is not defined, analyzing single file: "+rootfile)
         only_filename_root  = os.path.basename(rootfile)
