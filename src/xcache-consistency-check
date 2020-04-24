@@ -478,27 +478,34 @@ def safe_remove(filename):
 # Removes a file from the cache, it is used when a file is found to be corrupted
 def remove_file(filename):
 
+    cinfo_filename = filename+".cinfo"
     # Check that the file still exists:
     if os.path.isfile(filename):
-        # Is this a symbolic link?
-        if os.path.islink(filename):
-            # Get and remove the real file
-            real_file = os.path.realpath(filename)
-            safe_remove(real_file)
-        # Remove the symbolic link (or the real file in case of above's IF is false)
+        # In case of a chain of symbolic links e.g. a -> b -> c
+        # Remove all links
+        while os.path.islink(filename):
+            # Get symlink target
+            aux = os.path.dirname(filename)+"/"
+            aux += os.readlink(filename)
+            safe_remove(filename)
+            filename = aux
+        # Remove the real file)
         safe_remove(filename)
     else:
         log.error("cannot find file to remove: "+filename)
 
     # Is there a cinfo file associated?
-    cinfo_filename = filename+".cinfo"
     if os.path.isfile(cinfo_filename):
         # Is this a symbolic link?
-        if os.path.islink(cinfo_filename):
-            # Get and remove the real file
-            real_cinfo = os.path.realpath(cinfo_filename)
-            safe_remove(real_cinfo)
-        # Remove the symbolic link (or the real file in case of above's IF is false)
+        # In case of a chain of symbolic links e.g. a -> b -> c
+        # Remove all links
+        while os.path.islink(cinfo_filename):
+            # Get symlink target
+            aux = os.path.dirname(cinfo_filename)+"/"
+            aux += os.readlink(cinfo_filename)
+            safe_remove(cinfo_filename)
+            filename = aux
+        # Remove the real file
         safe_remove(cinfo_filename)
     else:
         log.info("Could not find an associated cinfo file to remove from file: "+filename)
@@ -603,7 +610,7 @@ def parseargs():
 
 def validate_path(path, parameter_name):
     if path:
-        if not os.path.exists(path):
+        if not os.path.exists(os.path.dirname(path)):
             print("ERROR configuration parameter '"+parameter_name+"' expects a valid path")
             sys.exit(1)
 
