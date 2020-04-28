@@ -15,6 +15,7 @@ from multiprocessing import Process, Value, Lock
 import sqlite3
 from sqlite3 import Error
 import time
+import re
 
 def get_byte_ranges(byte_map_lines, blocksize):
 
@@ -468,16 +469,30 @@ def remove_from_db(conn, root_filename):
     log.debug("file removed from db: "+root_filename)
 
 
-def safe_remove(filename):
-    try:
-        os.remove(filename)
-    except Exception, e:
-        log.error("Something went wrong when trying to remove: "+filename+"\n Exception message is:  "+str(e))
+def safe_remove(filename, allowed_paths):
+    if allowed_paths:
+        # This has the list of allowed paths to remove from
+        # only files within these paths can be removed
+        list_of_allowed_paths = allowed_paths.split(",")
+        for path in list_of_allowed_paths:
+            pattern = path+"+"
+            if re.match(pattern, filename):
+                try:
+                    os.remove(filename)
+                except Exception, e:
+                    log.error("Something went wrong when trying to remove: "+filename+"\n Exception message is:  "+str(e))
+            else:
+                log.warning("Attempt to remove file in forbiden path:"+filename)
+    else:
+    # Removing for anywhere is allowed
+        try:
+            os.remove(filename)
+        except Exception, e:
+            log.error("Something went wrong when trying to remove: "+filename+"\n Exception message is:  "+str(e))
 
 
 # Removes a file from the cache, it is used when a file is found to be corrupted
-def remove_file(filename):
-
+def remove_file(filename, allowed_paths):
     cinfo_filename = filename+".cinfo"
     # Check that the file still exists:
     if os.path.isfile(filename):
@@ -487,10 +502,10 @@ def remove_file(filename):
             # Get symlink target
             aux = os.path.dirname(filename)+"/"
             aux += os.readlink(filename)
-            safe_remove(filename)
+            safe_remove(filename,allowed_paths)
             filename = aux
         # Remove the real file)
-        safe_remove(filename)
+        safe_remove(filename,allowed_paths)
     else:
         log.error("cannot find file to remove: "+filename)
 
@@ -503,10 +518,10 @@ def remove_file(filename):
             # Get symlink target
             aux = os.path.dirname(cinfo_filename)+"/"
             aux += os.readlink(cinfo_filename)
-            safe_remove(cinfo_filename)
+            safe_remove(filename,allowed_paths)
             filename = aux
         # Remove the real file
-        safe_remove(cinfo_filename)
+        safe_remove(filename,allowed_paths)
     else:
         log.info("Could not find an associated cinfo file to remove from file: "+filename)
 
@@ -636,6 +651,10 @@ def set_configuration():
     # When set to None, it logs to stdout
     args['logfile']                 = ""
     args['dont_remove']             = "False"
+    # Allow to remove corrupted files that are in this list of directories
+    # This can only be configured via configuration file. If empty, it will
+    # allow to remove from anywhere
+    args['remove_only_from']        = ""
 
     # The following params cannot be read from config file so we don't care about
     # interpolation issues and thus we can define the desired data types
@@ -653,6 +672,7 @@ def set_configuration():
         args['path']                   = config.get('Main', 'path').replace('"','')
         args['db']                     = config.get('Main', 'db').replace('"','')
         args['logfile']                = config.get('Main', 'logfile').replace('"','')
+        args['remove_only_from']       = config.get('Main', 'remove_only_from').replace('"','')
         try:
             args['num_procs']              = config.getint('Main', 'num_procs')
         except:
@@ -706,7 +726,17 @@ def set_configuration():
         args['dry_run']     = cmdline_args.dry_run
 
     # Step 5. Extra validation for some special arguments
-    args['path']=="auto" or validate_path(args['path'], "path")
+    if args['path'] is not "auto":
+        validate_path(args['path'], "path")
+
+    # Make sure that all remove_only_from paths finish with "/"
+    for remove_path in args['remove_only_from'].split(","):
+        if remove_path[:-1] != "/":
+            remove_path +="/"
+        remove_path_final+=remove_path+","
+        # ddavila: the path(s) might not exist until the cache starts fetching files
+        # validate_path(remove_path, "remove_only_from")
+
     validate_path(args['logfile'], "logfile")
     validate_path(args['db'], "db")
     validate_path(args['rootfile'], "rootfile")
@@ -784,7 +814,8 @@ def main():
     # Print the arguments
     log.info("********* Configuration parametes *********")
     for key in args.keys():
-        log.info(key+" : "+str(args[key])+" type: "+str(type(args[key])))
+        #log.info(key+" : "+str(args[key])+" type: "+str(type(args[key])))
+        log.info(key+" : "+str(args[key]))
     log.info("*******************************************")
 
 
@@ -876,7 +907,7 @@ def main():
                                 log.info("File will not be removed, --dont-remove is set to True")
                             else:
                                 log.info("Removing file: %s", root_filename)
-                                remove_file(root_filename)
+                                remove_file(root_filename, args['remove_only_from'])
                                 remove_from_db(conn, root_filename)
                     else:
                         # We need to re-analyze this file, since it has changed and last check was more than 'last_check_threshold'
@@ -923,7 +954,7 @@ def main():
                         log.info("File will not be removed, --dont-remove is set to True")
                     else:
                         log.info("Removing file: %s", root_filename)
-                        remove_file(root_filename)
+                        remove_file(root_filename, args['remove_only_from'])
                         remove_from_db(conn, root_filename)
                 else:
                     log.info("OK file:  %s", root_filename)
