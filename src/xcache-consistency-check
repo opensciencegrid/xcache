@@ -16,6 +16,7 @@ import sqlite3
 from sqlite3 import Error
 import time
 import re
+import pdb
 
 def get_byte_ranges(byte_map_lines, blocksize):
 
@@ -166,6 +167,7 @@ def get_xrdpfc_print_ouput(filename):
 # Return a list of files, with a given @extension, found under @path
 def list_files_recursively(path, extension):
     files_dict = dict()
+    #pdb.set_trace()
     for x in os.walk(path):
         for file_with_path in glob.glob(os.path.join(x[0], "*"+extension)):
             only_filename = os.path.basename(file_with_path)
@@ -518,6 +520,10 @@ def remove_file(filename, allowed_paths, is_full_file):
             if stop == 0:
                 # Remove the real file
                 safe_remove(filename,allowed_paths, False)
+        elif os.path.islink(filename):
+            # This is the case of a broken link
+            log.info("file to remove is actually a broken symlink: "+filename)
+            safe_remove(filename, allowed_paths, True)
         else:
             log.error("cannot find file to remove: "+filename)
 
@@ -904,10 +910,6 @@ def main():
 
 
     #------ Find file(s)  ---------------------------------------------------------
-    #TODO
-    # validate that the path exist
-    assume_full_file = args['full_file']
-
     # If args['path'] is empty, that means we are analizing a single root file
     if not args['path']:
         rootfile = args['rootfile']
@@ -929,8 +931,8 @@ def main():
             # Verify that there is a corresponfing .cinfo file
             root_filename  = root_files_dict[root_file]
             cinfo_filename = root_filename+".cinfo"
-            if os.path.isfile(cinfo_filename):
-                log.info("Analyzing file: "+ root_file)
+            if args['full_file'] or os.path.isfile(cinfo_filename):
+                log.info("Analyzing file: "+ root_filename)
             else:
                 log.error("Cannot find a corresponding .cinfo file for root file:  %s", root_filename)
             max_counter +=1
@@ -941,11 +943,11 @@ def main():
         for root_file in root_files_dict:
             if args['max'] > 0 and max_counter >= args['max']:
                 break
-            # Verify that there is a corresponfing .cinfo file
+            # Verify that there is a corresponfing .cinfo file or that we can assume the file is full
+            # so that we don't need a .cinfo file
             root_filename  = root_files_dict[root_file]
             cinfo_filename = root_filename+".cinfo"
-            if assume_full_file == True or os.path.isfile(cinfo_filename):
-            #if assume_full_file == True or root_file+".cinfo" in cinfo_files_dict:
+            if args['full_file'] == True or os.path.isfile(cinfo_filename):
                 log.info("Analyzing file: "+ root_file)
                 # The file could have disappeared from the moment we listed it, and until
                 # the moment it's its turn to be analyzed so let's check that it's still there
@@ -997,7 +999,7 @@ def main():
 
                 # Step 1.1 Calculate the byte ranges on the file unless the file is to be assumed
                 # fully downloaded (see option --full-file)
-                if assume_full_file == True:
+                if args['full_file'] == True:
                     is_full_file = True
                     byte_ranges = None
                 else:
