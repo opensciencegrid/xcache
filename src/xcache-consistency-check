@@ -922,7 +922,8 @@ def main():
     if not args['path']:
         rootfile = args['rootfile']
         log.debug("path is not defined, analyzing single file: "+rootfile)
-        root_filepath[rootfile]
+        filepath_list = []
+        filepath_list.append(rootfile)
     else:
         filepath_list  = list_files_recursively(args['path'], ".root")
         log.info("found: "+str(len(filepath_list))+" .root files in: "+args['path'])
