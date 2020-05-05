@@ -613,7 +613,7 @@ def get_pfc_spaces_from_xrootd_config_file(xrootd_config_file):
                 # no break intentionally, it could be more than one
                 # we want them all
             else:
-                log.error("pfc.spaces do not have the expected format: pfc.spaces data metadata")
+                log.error("oss.space does not have the expected format: oss.space data|metadata path")
 
     #Transform set to string of comma separated paths
     string_of_paths=""
