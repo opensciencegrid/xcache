@@ -547,10 +547,21 @@ def find_xrootd_config_file():
 
     xrootd_config_file = ""
     if xrootd_p is not None:
+        # Look for the config file passed to xrootd, as either "-c foo.cfg"
+        # (two parts) or "-cfoo.cfg" (one part).
+        # Return the first match.
+
         command_chunks = xrootd_p.split()
+        dash_c = False
         for chunk in command_chunks:
-            if "/etc" in chunk:
+            if dash_c:
                 xrootd_config_file = chunk
+                break
+            if chunk == "-c":
+                dash_c = True
+            elif chunk[0:2] == "-c":
+                xrootd_config_file = chunk[2:]
+                break
 
         if xrootd_config_file:
             log.info("found xrootd configuration file:"+ xrootd_config_file)
