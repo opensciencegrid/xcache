@@ -166,14 +166,12 @@ def get_xrdpfc_print_ouput(filename):
 
 # Return a list of files, with a given @extension, found under @path
 def list_files_recursively(path, extension):
-    files_dict = dict()
-    #pdb.set_trace()
+    filepath_list = []
     for x in os.walk(path):
-        for file_with_path in glob.glob(os.path.join(x[0], "*"+extension)):
-            only_filename = os.path.basename(file_with_path)
-            files_dict[only_filename] = file_with_path
+        for filepath in glob.glob(os.path.join(x[0], "*"+extension)):
+            filepath_list.append(filepath)
 
-    return files_dict
+    return filepath_list
 
 
 def basket_in_file(range_list, basket_start, basket_length):
@@ -404,11 +402,11 @@ def calculate_checksum(filename):
     checksum = str(xxhash.xxh64(file_bytes).intdigest())
     return checksum
 
-def insert_in_db(conn, root_filename, ts, last_modification_date, file_checksum):
+def insert_in_db(conn, root_filepath, ts, last_modification_date, file_checksum):
     sql = ''' INSERT INTO files(filename, last_check_ts, last_modification_date, checksum)
               VALUES(?,?,?,?) '''
 
-    record =(root_filename, ts, last_modification_date, file_checksum)
+    record =(root_filepath, ts, last_modification_date, file_checksum)
     with conn:
         cur = conn.cursor()
         cur.execute(sql, record)
@@ -416,43 +414,43 @@ def insert_in_db(conn, root_filename, ts, last_modification_date, file_checksum)
 
 # When a file hasn't changed but a quick checksum comparison has been done, we need to update the 'last_check_ts'
 # of the file's record
-def update_last_check_ts(conn, root_filename, ts):
+def update_last_check_ts(conn, root_filepath, ts):
     sql = ''' UPDATE files
                 SET last_check_ts = ?
                 WHERE filename = ?'''
 
-    record =(ts, root_filename)
+    record =(ts, root_filepath)
     with conn:
         cur = conn.cursor()
         cur.execute(sql, record)
-    log.debug("updated record's last check ts: "+root_filename)
+    log.debug("updated record's last check ts: "+root_filepath)
 
 # When a file has changed (new blocks have been downloaded) its record needs to be updated
-def update_db(conn, root_filename, ts, last_modification_date, file_checksum):
+def update_db(conn, root_filepath, ts, last_modification_date, file_checksum):
     sql = ''' UPDATE files
                 SET last_check_ts = ?,
                     last_modification_date = ?,
                     checksum = ?
                 WHERE filename = ?'''
 
-    record =(ts, last_modification_date, file_checksum, root_filename)
+    record =(ts, last_modification_date, file_checksum, root_filepath)
     with conn:
         cur = conn.cursor()
         cur.execute(sql, record)
-    log.debug("updated record: "+root_filename)
+    log.debug("updated record: "+root_filepath)
 
 
 
-def get_file_from_db(conn, root_filename):
+def get_file_from_db(conn, root_filepath):
     sql = ''' SELECT id, last_check_ts, last_modification_date, checksum
               FROM files
               WHERE filename =?'''
 
     cur = conn.cursor()
-    cur.execute(sql, (root_filename,))
+    cur.execute(sql, (root_filepath,))
     rows = cur.fetchall()
     if len(rows) > 1:
-        log.error("Duplicated file in the DB: "+root_filename)
+        log.error("Duplicated file in the DB: "+root_filepath)
     if len(rows) == 0:
         ret = (None, -1, -1, -1)
     else:
@@ -460,15 +458,15 @@ def get_file_from_db(conn, root_filename):
     return ret
 
 # Removes a record from the database, it is used when a file is found to be corrupted and removed from the chache
-def remove_from_db(conn, root_filename):
+def remove_from_db(conn, root_filepath):
     sql = ''' DELETE FROM files
                 WHERE filename = ?'''
 
-    record =(root_filename,)
+    record =(root_filepath,)
     with conn:
         cur = conn.cursor()
         cur.execute(sql, record)
-    log.debug("file removed from db: "+root_filename)
+    log.debug("file removed from db: "+root_filepath)
 
 
 def safe_remove(filename, allowed_paths, is_symlink):
@@ -487,11 +485,11 @@ def safe_remove(filename, allowed_paths, is_symlink):
         # This has the list of allowed paths to remove from
         # only files within these paths can be removed
         list_of_allowed_paths = allowed_paths.split(",")
-	flag_matched = False
+    flag_matched = False
         for path in list_of_allowed_paths:
             pattern = path+"+"
             if re.match(pattern, filename):
-		flag_matched = True
+        flag_matched = True
                 actual_remove(filename)
                 break
         if not flag_matched:
@@ -529,8 +527,8 @@ def remove_file(filename, allowed_paths, is_full_file):
 
     remove_single(filename, allowed_paths)
     if not is_full_file:
-        cinfo_filename = filename+".cinfo"
-        remove_single(cinfo_filename, allowed_paths)
+        cinfo_filepath = filename+".cinfo"
+        remove_single(cinfo_filepath, allowed_paths)
 
 def find_xrootd_config_file():
     # First get the configuration file being used by xrootd
@@ -914,51 +912,48 @@ def main():
     if not args['path']:
         rootfile = args['rootfile']
         log.debug("path is not defined, analyzing single file: "+rootfile)
-        only_filename_root  = os.path.basename(rootfile)
-        root_files_dict = dict()
-        root_files_dict[only_filename_root] = rootfile
+        root_filepath[rootfile]
     else:
-        root_files_dict  = list_files_recursively(args['path'], ".root")
-        log.info("found: "+str(len(root_files_dict))+" .root files in: "+args['path'])
+        filepath_list  = list_files_recursively(args['path'], ".root")
+        log.info("found: "+str(len(filepath_list))+" .root files in: "+args['path'])
     max_counter = 0
 
 
     #------ Dry Run  --------------------------------------------------------------
     if args['dry_run'] == True:
-        for root_file in root_files_dict:
+        for root_filepath in filepath_list:
             if args['max'] > 0 and  max_counter >= args['max']:
                 break
             # Verify that there is a corresponfing .cinfo file
-            root_filename  = root_files_dict[root_file]
-            cinfo_filename = root_filename+".cinfo"
-            if args['full_file'] or os.path.isfile(cinfo_filename):
-                log.info("Analyzing file: "+ root_filename)
+            cinfo_filepath = root_filepath+".cinfo"
+            if args['full_file'] or os.path.isfile(cinfo_filepath):
+                log.info("Analyzing file: "+ root_filepath)
             else:
-                log.error("Cannot find a corresponding .cinfo file for root file:  %s", root_filename)
+                log.error("Cannot find a corresponding .cinfo file for root file:  %s", root_filepath)
             max_counter +=1
 
     #------ Real Run  -------------------------------------------------------------
     else:
         # For every root file
-        for root_file in root_files_dict:
+        for root_filepath in filepath_list:
             if args['max'] > 0 and max_counter >= args['max']:
                 break
             # Verify that there is a corresponfing .cinfo file or that we can assume the file is full
             # so that we don't need a .cinfo file
-            root_filename  = root_files_dict[root_file]
-            cinfo_filename = root_filename+".cinfo"
-            if args['full_file'] == True or os.path.isfile(cinfo_filename):
-                log.info("Analyzing file: "+ root_file)
+            root_filename  = os.path.basename(root_filepath)
+            cinfo_filepath = root_filepath+".cinfo"
+            if args['full_file'] == True or os.path.isfile(cinfo_filepath):
+                log.info("Analyzing file: "+ root_filename)
                 # The file could have disappeared from the moment we listed it, and until
                 # the moment it's its turn to be analyzed so let's check that it's still there
-                if not os.path.isfile(root_filename):
-                    log.info("File: "+ root_file+" does not longer exist, skipping..")
+                if not os.path.isfile(root_filepath):
+                    log.info("File: "+ root_filename+" does not longer exist, skipping..")
                     continue
                 ### Step 1.0 Do I need to fully analyze this file or only verify the checksum?
                 db_file_id = None
                 # Get file's last modification date
-                last_modification_date = int(os.path.getmtime(root_filename))
-                db_file_id, db_last_check_ts, db_last_modification_date, db_checksum = get_file_from_db(conn, root_filename)
+                last_modification_date = int(os.path.getmtime(root_filepath))
+                db_file_id, db_last_check_ts, db_last_modification_date, db_checksum = get_file_from_db(conn, root_filepath)
 
                 # if the file is in the DB and the last modification date registerd in the db
                 # is the same as the current one, it means that the file
@@ -967,35 +962,35 @@ def main():
                 if db_file_id is not None:
                     # If we have checked this file recently (less than 'last_check_threshold' secs ago), then we skip the check
                     if ts - db_last_check_ts <= args['last_check_threshold']:
-                        log.info("file %s, was analyzed less than 'last_check_threshold' seconds ago, skipping", root_file)
+                        log.info("file %s, was analyzed less than 'last_check_threshold' seconds ago, skipping", root_filename)
                         continue
                     # If the current last-modification-date and the last-modification-date stored in the db is the same
                     # that means that the file hasn't changed (no new blocks have been downloaded) since the last check
                     # so we can perform a quick comparison of checkusms
                     elif last_modification_date == db_last_modification_date:
-                        curr_checksum = calculate_checksum(root_filename)
+                        curr_checksum = calculate_checksum(root_filepath)
                         if db_checksum == curr_checksum:
-                            log.info("OK file's checksum:  %s", root_file)
+                            log.info("OK file's checksum:  %s", root_filename)
                             # update last check timestamp of the file's record  to 'ts'
-                            update_last_check_ts(conn, root_filename, ts)
+                            update_last_check_ts(conn, root_filepath, ts)
                             continue
                         # The modification date of the file hasn't changed  but somehow the file has
                         # that means the file is corrupted
                         else:
-                            log.info("CORRUPTED file's checksum:  %s, db:%s, curr:%s", root_filename, db_checksum, curr_checksum)
+                            log.info("CORRUPTED file's checksum:  %s, db:%s, curr:%s", root_filepath, db_checksum, curr_checksum)
                             if args['dont_remove']:
                                 log.info("File will not be removed, --dont-remove is set to True")
                             else:
-                                log.info("Will attempt to remove file: %s", root_filename)
-                                remove_file(root_filename, args['remove_only_from'], args['full_file'])
-                                remove_from_db(conn, root_filename)
+                                log.info("Will attempt to remove file: %s", root_filepath)
+                                remove_file(root_filepath, args['remove_only_from'], args['full_file'])
+                                remove_from_db(conn, root_filepath)
                                 continue
                     else:
                         # We need to re-analyze this file, since it has changed and last check was more than 'last_check_threshold'
                         # seconds ago.
-                        log.debug("file %s, has changed since last analysis and last check was more that 'last_check_treshold' seconds ago", root_filename)
+                        log.debug("file %s, has changed since last analysis and last check was more that 'last_check_treshold' seconds ago", root_filepath)
                 else:
-                    log.debug("file %s, not in the DB", root_filename)
+                    log.debug("file %s, not in the DB", root_filepath)
 
                 # Step 1.1 Calculate the byte ranges on the file unless the file is to be assumed
                 # fully downloaded (see option --full-file)
@@ -1004,9 +999,9 @@ def main():
                     byte_ranges = None
                 else:
                     log.debug("Starting to parse cinfo file")
-                    is_full_file, byte_ranges = parse_cinfo(cinfo_filename)
+                    is_full_file, byte_ranges = parse_cinfo(cinfo_filepath)
                 # Step 2. Create a list of baskets in the file
-                list_of_baskets = get_list_of_baskets_in_file(root_filename, byte_ranges, is_full_file)
+                list_of_baskets = get_list_of_baskets_in_file(root_filepath, byte_ranges, is_full_file)
 
                 # Step 3. Look for a corrupted basket within the list
                 chunk = 10
@@ -1019,34 +1014,34 @@ def main():
                 num_workers = args['num_procs'] -1
                 process_list = []
                 for p in range(0, num_workers):
-                    p = Process(target=check_baskets, args=(list_of_baskets, basket_index, chunk, len(list_of_baskets), corrupted_flag, lock, root_filename))
+                    p = Process(target=check_baskets, args=(list_of_baskets, basket_index, chunk, len(list_of_baskets), corrupted_flag, lock, root_filepath))
                     p.start()
                     process_list.append(p)
 
                 # The parent process is also doing his part
-                check_baskets(list_of_baskets, basket_index, chunk, len(list_of_baskets), corrupted_flag, lock, root_filename)
+                check_baskets(list_of_baskets, basket_index, chunk, len(list_of_baskets), corrupted_flag, lock, root_filepath)
 
                 for p in process_list:
                     p.join()
 
                 if corrupted_flag.value ==True:
-                    log.info("CORRUPTED file:  %s", root_filename)
+                    log.info("CORRUPTED file:  %s", root_filepath)
                     if args['dont_remove']:
                         log.info("File will not be removed, --dont-remove is set to True")
                     else:
-                        log.info("Will attempt to remove file: %s", root_filename)
-                        remove_file(root_filename, args['remove_only_from'], args['full_file'])
-                        remove_from_db(conn, root_filename)
+                        log.info("Will attempt to remove file: %s", root_filepath)
+                        remove_file(root_filepath, args['remove_only_from'], args['full_file'])
+                        remove_from_db(conn, root_filepath)
                 else:
-                    log.info("OK file:  %s", root_filename)
-                    file_checksum = calculate_checksum(root_filename)
+                    log.info("OK file:  %s", root_filepath)
+                    file_checksum = calculate_checksum(root_filepath)
                     if db_file_id == None:
-                        insert_in_db(conn, root_filename, ts, last_modification_date, file_checksum)
+                        insert_in_db(conn, root_filepath, ts, last_modification_date, file_checksum)
                     else:
-                        update_db(conn, root_filename, ts, last_modification_date, file_checksum)
+                        update_db(conn, root_filepath, ts, last_modification_date, file_checksum)
 
             else:
-                log.error("Cannot find a corresponding .cinfo file for root file:  %s", root_filename)
+                log.error("Cannot find a corresponding .cinfo file for root file:  %s", root_filepath)
 
             max_counter +=1
 
