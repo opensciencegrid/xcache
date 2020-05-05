@@ -485,7 +485,7 @@ def safe_remove(filename, allowed_paths, is_symlink):
         # This has the list of allowed paths to remove from
         # only files within these paths can be removed
         list_of_allowed_paths = allowed_paths.split(",")
-    flag_matched = False
+        flag_matched = False
         for path in list_of_allowed_paths:
             pattern = path+"+"
             if re.match(pattern, filename):
