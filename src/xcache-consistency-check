@@ -487,8 +487,7 @@ def safe_remove(filename, allowed_paths, is_symlink):
         list_of_allowed_paths = allowed_paths.split(",")
         flag_matched = False
         for path in list_of_allowed_paths:
-            pattern = path+"+"
-            if re.match(pattern, filename):
+            if filename.startswith(path):
                 flag_matched = True
                 actual_remove(filename)
                 break
