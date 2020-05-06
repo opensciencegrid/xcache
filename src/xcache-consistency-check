@@ -15,6 +15,9 @@ from multiprocessing import Process, Value, Lock
 import sqlite3
 from sqlite3 import Error
 import time
+import re
+import pdb
+
 def get_byte_ranges(byte_map_lines, blocksize):
 
     xcounter = xcounter_aux =pcounter = pcounter_aux =0
@@ -66,6 +69,9 @@ def parse_cinfo(filename):
 
     # Process the cinfo file wih the command: xrdpfc_print
     lines = get_xrdpfc_print_ouput(filename)
+    if not lines:
+        log.error("Cannot get cinfo data from 'xrdpfc_print' command")
+        sys.exit(1)
 
     # Extract the block size from the output of "xrdpfc_print" command
     blocksize = get_block_size(lines)
@@ -152,24 +158,24 @@ def get_xrdpfc_print_ouput(filename):
         out = subprocess.Popen(['xrdpfc_print', '-v', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     except Exception, e:
         log.error("An exception was raised when trying to execute 'xrdpfc_print', exiting...")
-        exit(1)
+        sys.exit(1)
     stdout, stderr = out.communicate()
-    if stderr is None:
+    if out.returncode != 0:
+        log.error("Something went wrong when parsing cinfo file: %s", filename)
+    else:
         log.debug("Parsing cinfo file: %s", filename)
         lines = stdout.split("\n")
-    else:
-        log.error("Something went wrong when parsing cinfo file: %s", filename)
+
     return lines
 
 # Return a list of files, with a given @extension, found under @path
 def list_files_recursively(path, extension):
-    files_dict = dict()
+    filepath_list = []
     for x in os.walk(path):
-        for file_with_path in glob.glob(os.path.join(x[0], "*"+extension)):
-            only_filename = os.path.basename(file_with_path)
-            files_dict[only_filename] = file_with_path
+        for filepath in glob.glob(os.path.join(x[0], "*"+extension)):
+            filepath_list.append(filepath)
 
-    return files_dict
+    return filepath_list
 
 
 def basket_in_file(range_list, basket_start, basket_length):
@@ -359,8 +365,9 @@ def create_table(conn, create_table_sql):
         c = conn.cursor()
         c.execute(create_table_sql)
     except Error as e:
-        log.error("Cannot create database table. Error message: "+str(e))
+        log.error("Cannot create database table, verify you have write access on database file. Error message: "+str(e))
         log.error(create_table_sql)
+        sys.exit(1)
 
 
 def create_connection(db_file):
@@ -369,8 +376,8 @@ def create_connection(db_file):
         conn = sqlite3.connect(db_file)
         return conn
     except Error as e:
-        log.error("Cannot create database connection. Error message: "+str(e))
-
+        log.error("Cannot create database connection, verify you have write access on database file. Error message: "+str(e))
+        sys.exit(1)
     return conn
 
 
@@ -399,95 +406,243 @@ def calculate_checksum(filename):
     checksum = str(xxhash.xxh64(file_bytes).intdigest())
     return checksum
 
-def insert_in_db(conn, root_filename, ts, last_modification_date, file_checksum):
+def insert_in_db(conn, root_filepath, ts, last_modification_date, file_checksum):
     sql = ''' INSERT INTO files(filename, last_check_ts, last_modification_date, checksum)
               VALUES(?,?,?,?) '''
 
-    record =(root_filename, ts, last_modification_date, file_checksum)
+    record =(root_filepath, ts, last_modification_date, file_checksum)
     with conn:
         cur = conn.cursor()
         cur.execute(sql, record)
     log.debug("inserted record: "+str(cur.lastrowid))
 
+# When a file hasn't changed but a quick checksum comparison has been done, we need to update the 'last_check_ts'
+# of the file's record
+def update_last_check_ts(conn, root_filepath, ts):
+    sql = ''' UPDATE files
+                SET last_check_ts = ?
+                WHERE filename = ?'''
+
+    record =(ts, root_filepath)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(sql, record)
+    log.debug("updated record's last check ts: "+root_filepath)
+
 # When a file has changed (new blocks have been downloaded) its record needs to be updated
-def update_db(conn, root_filename, ts, last_modification_date, file_checksum):
+def update_db(conn, root_filepath, ts, last_modification_date, file_checksum):
     sql = ''' UPDATE files
                 SET last_check_ts = ?,
                     last_modification_date = ?,
                     checksum = ?
                 WHERE filename = ?'''
 
-    record =(ts, last_modification_date, file_checksum, root_filename)
+    record =(ts, last_modification_date, file_checksum, root_filepath)
     with conn:
         cur = conn.cursor()
         cur.execute(sql, record)
-    log.debug("updated record: "+root_filename)
+    log.debug("updated record: "+root_filepath)
 
 
 
-def get_file_from_db(conn, root_filename):
+def get_file_from_db(conn, root_filepath):
     sql = ''' SELECT id, last_check_ts, last_modification_date, checksum
               FROM files
               WHERE filename =?'''
 
     cur = conn.cursor()
-    cur.execute(sql, (root_filename,))
+    cur.execute(sql, (root_filepath,))
     rows = cur.fetchall()
     if len(rows) > 1:
-        log.error("Duplicated file in the DB: "+root_filename)
+        log.error("Duplicated file in the DB: "+root_filepath)
     if len(rows) == 0:
         ret = (None, -1, -1, -1)
     else:
         ret = (rows[0])
     return ret
 
-# When the configuration parameter 'path' is set to auto, we will try to set it to xrootd;s configuration parameter
-# 'oss.localroot'
-def find_path():
-    path = None
+# Removes a record from the database, it is used when a file is found to be corrupted and removed from the chache
+def remove_from_db(conn, root_filepath):
+    sql = ''' DELETE FROM files
+                WHERE filename = ?'''
+
+    record =(root_filepath,)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(sql, record)
+    log.debug("file removed from db: "+root_filepath)
+
+
+def safe_remove(filename, allowed_paths, is_symlink):
+    def actual_remove(filename):
+        try:
+            os.remove(filename)
+            if is_symlink:
+                log.info("Symlink removed: "+filename)
+            else:
+                log.info("File removed: "+filename)
+        except Exception, e:
+            log.error("Something went wrong when trying to remove: "+filename+"\n Exception message is:  "+str(e))
+
+    ret = 0
+    if allowed_paths:
+        # This has the list of allowed paths to remove from
+        # only files within these paths can be removed
+        list_of_allowed_paths = allowed_paths.split(",")
+        flag_matched = False
+        for path in list_of_allowed_paths:
+            if filename.startswith(path):
+                flag_matched = True
+                actual_remove(filename)
+                break
+        if not flag_matched:
+            log.warning("Attempt to remove file in forbidden path:"+filename)
+            ret = 1
+    else:
+        # Removing for anywhere is allowed
+        actual_remove(filename)
+
+    return ret
+
+# Removes a file from the cache, it is used when a file is found to be corrupted
+def remove_file(filename, allowed_paths, is_full_file):
+    def remove_single(filename, allowed_paths):
+        # Check that the file still exists:
+        if os.path.isfile(filename):
+            # In case of a chain of symbolic links e.g. a -> b -> c
+            # Remove all links
+            stop = 0
+            while os.path.islink(filename) and stop == 0:
+                # Get symlink target
+                #aux = os.path.dirname(filename)
+                aux = os.path.abspath(os.readlink(filename))
+                stop = safe_remove(filename,allowed_paths, True)
+                filename = aux
+            if stop == 0:
+                # Remove the real file
+                safe_remove(filename,allowed_paths, False)
+        elif os.path.islink(filename):
+            # This is the case of a broken link
+            log.info("file to remove is actually a broken symlink: "+filename)
+            safe_remove(filename, allowed_paths, True)
+        else:
+            log.error("cannot find file to remove: "+filename)
+
+    remove_single(filename, allowed_paths)
+    if not is_full_file:
+        cinfo_filepath = filename+".cinfo"
+        remove_single(cinfo_filepath, allowed_paths)
+
+def find_xrootd_config_file():
     # First get the configuration file being used by xrootd
     out = subprocess.Popen(['ps', '-u','xrootd', '-o', 'command='], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = out.communicate()
-    if stderr is None:
-        log.debug("Getting xrootd config file from ps")
-    else:
+
+    xrootd_config_file = ""
+    if out.returncode != 0:
         log.error("Something went wrong when executing ps")
-
-    xrootd_p = None
-    for p in stdout.split('\n'):
-        splitted = p.split()
-        if len(splitted) >0 and "xrootd" in splitted[0]:
-            xrootd_p = p
-            break
-
-    xrootd_config_file = None
-    if xrootd_p is not None:
-        command_chunks = xrootd_p.split()
-        for chunk in command_chunks:
-            if "/etc" in chunk:
-                xrootd_config_file = chunk
+    else:
+        log.debug("Getting xrootd config file from ps")
+        xrootd_p = None
+        for p in stdout.split('\n'):
+            splitted = p.split()
+            if len(splitted) >0 and "xrootd" in splitted[0]:
+                xrootd_p = p
+                break
 
         if xrootd_p is not None:
-            log.info("found xrootd configuration file:"+ xrootd_config_file)
+            # Look for the config file passed to xrootd, as either "-c foo.cfg"
+            # (two parts) or "-cfoo.cfg" (one part).
+            # Return the first match.
 
-            #Then use the xrootd config file to find the 'oss.localroot' parameter
-            out = subprocess.Popen(['cconfig', '-c', xrootd_config_file], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            stdout, stderr = out.communicate()
-            if stderr is None:
-                log.debug("Parsing cconfig output to get 'oss.localroot'")
+            command_chunks = xrootd_p.split()
+            dash_c = False
+            for chunk in command_chunks:
+                if dash_c:
+                    xrootd_config_file = chunk
+                    break
+                if chunk == "-c":
+                    dash_c = True
+                elif chunk[0:2] == "-c":
+                    xrootd_config_file = chunk[2:]
+                    break
+
+            if xrootd_config_file:
+                log.info("found xrootd configuration file:"+ xrootd_config_file)
             else:
-                log.error("Something went wrong when executing cconfig -c "+ xrootd_config_file)
-
-            for line in stdout.split('\n'):
-                if "oss.localroot" in line:
-                    if len(line.split()) > 0:
-                        path= line.split()[1]
+                log.error("Cannot find the config file used by the xrootd running process")
         else:
-            log.error("Cannot find the config files used by the xrootd running process")
-    else:
-        log.error("Cannot find a running xrootd process from which obtain the configuration file used")
+            log.error("Cannot find a running xrootd process from which obtain the configuration file used")
 
+    return xrootd_config_file
+
+
+# When the configuration parameter 'path' is set to auto, we will try to set it to xrootd's configuration parameter
+# 'oss.localroot'
+def get_localroot_from_xrootd_config_file(xrootd_config_file):
+    # Use xrootd config file to find the 'oss.localroot' parameter
+    out = subprocess.Popen(['cconfig', '-c', xrootd_config_file], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stdout, stderr = out.communicate()
+
+    path=""
+    if out.returncode !=0:
+        log.error("Something went wrong when executing cconfig -c "+ xrootd_config_file)
+    else:
+        log.debug("Parsing cconfig output to get 'oss.localroot'")
+
+        for line in stdout.split('\n'):
+            if "oss.localroot" in line:
+                if len(line.split()) > 0:
+                    path= line.split()[1]
+                    # no break intentionally, it could be more than one
+                    # we want to take the last one.
     return path
+
+def get_pfc_spaces_from_xrootd_config_file(xrootd_config_file):
+    # 1.  Use xrootd config file to find the 'pfc.spaces' parameter
+    out = subprocess.Popen(['cconfig', '-c', xrootd_config_file], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stdout, stderr = out.communicate()
+
+    pfc_spaces=""
+    if out.returncode != 0 :
+        log.error("Something went wrong when executing cconfig -c "+ xrootd_config_file)
+    else:
+        log.debug("Parsing cconfig output to get 'pfc.spaces'")
+        for line in stdout.split('\n'):
+            if "pfc.spaces" in line:
+                if len(line.split()) == 3:
+                    data= line.split()[1]
+                    meta= line.split()[2]
+                    # no break intentionally, it could be more than one
+                    # we want to take the last one.
+                else:
+                    log.error("pfc.spaces do not have the expected format: pfc.spaces data metadata")
+
+        # 2. for both data and meta look for all definitions of oss.space
+        set_of_paths=set()
+        for line in stdout.split('\n'):
+            if "oss.space "+data in line or "oss.space "+meta in line:
+                if len(line.split()) == 3:
+                    path= line.split()[2]
+                    set_of_paths.add(path)
+                    # no break intentionally, it could be more than one
+                    # we want them all
+                else:
+                    log.error("oss.space does not have the expected format: oss.space data|metadata path")
+
+        #Transform set to string of comma separated paths
+        string_of_paths=""
+        for path in set_of_paths:
+            # Make sure all paths ends with "/"
+            if path[-1] !=  "/":
+                path+="/"
+            string_of_paths+=path+","
+
+        # Remove last comma
+        pfc_spaces = string_of_paths[:-1]
+
+    return pfc_spaces
+
 
 # Argument parsing
 def parseargs():
@@ -503,7 +658,7 @@ def parseargs():
                          help="Path to the files to store the logs")
 
     parser.add_argument("--path", dest="path",
-                         help="Path to the files to analyze, for a single file use --rootfile (default: /xcache-root)")
+                         help="Path to the files to analyze, for a single file use --rootfile")
 
     parser.add_argument("--rootfile", dest="rootfile",
                          help=".root filename to be analyzed, if this is a partial file a .cinfo file with the same \
@@ -531,25 +686,48 @@ def parseargs():
                          help="If a file has been checked within less than the number of seconds defined here, \
                              the check on this file will be skipped (default: 86400(24hrs)")
 
+    parser.add_argument("--dont-remove", dest="dont_remove", action="store_true", default=False,
+                         help="When set, corrupted files are only logged but not removed")
+
     args = parser.parse_args()
 
     return args
 
-def set_configuration():
+def validate_path(path, parameter_name):
+    if path:
+        if not os.path.exists(os.path.dirname(path)):
+            print("ERROR configuration parameter '"+parameter_name+"' expects a valid path")
+            sys.exit(1)
 
+def validate_positive_integer(var, parameter_name):
+    if var < 1:
+       print("ERROR configuration parameter '"+parameter_name+"' expects a positive integer")
+       sys.exit(1)
+
+def set_configuration():
     # Read command line arguments
     cmdline_args = parseargs()
 
     # Step 1. Set defaults:
+    # We need to set everything as a string so that the interpolation works in the case
+    # that a config file is provided. When no config file is provided, we need to change
+    # for the correct data type manually.
     args = dict()
-    # Disable the execution by default (for the time being)
-    args['path']                    = "auto"
+    args['path']                    = ""
+    args['rootfile']                = ""
     args['db']                      = "/var/lib/xcache_consistency_check/db.sql"
-    args['num_procs']               = 1
-    args['last_check_threshold']    = 86400
+    args['num_procs']               = "1"
+    args['last_check_threshold']    = "86400"
     # When set to None, it logs to stdout
-    args['logfile']                 = None
+    args['logfile']                 = ""
+    args['dont_remove']             = "False"
+    # Allow to remove corrupted files that are in this list of directories
+    # This can only be configured via configuration file. If empty, it will
+    # allow to remove from anywhere
+    args['remove_only_from']        = ""
 
+    # The following params cannot be read from config file so we don't care about
+    # interpolation issues and thus we can define the desired data types
     args['full_file']   = False
     args['max']         = -1
     args['debug']       = False
@@ -559,15 +737,37 @@ def set_configuration():
     config = ConfigParser.ConfigParser(args)
     config_file = cmdline_args.config_file
     if(config_file):
-        log.info("configuration file: "+config_file)
+        print("configuration file: "+config_file)
         config.read(config_file)
-        args['path']                   = config.get('Main', 'path')
-        args['db']                     = config.get('Main', 'db')
-        args['num_procs']              = config.getint('Main', 'num_procs')
-        args['last_check_threshold']   = config.getint('Main', 'last_check_threshold')
-        args['logfile']                = config.get('Main', 'logfile')
+        args['path']                   = config.get('Main', 'path').replace('"','')
+        args['db']                     = config.get('Main', 'db').replace('"','')
+        args['logfile']                = config.get('Main', 'logfile').replace('"','')
+        args['remove_only_from']       = config.get('Main', 'remove_only_from').replace('"','')
+        try:
+            args['num_procs']              = config.getint('Main', 'num_procs')
+        except:
+            print("ERROR configuration parameter 'num_procs' expects a positive integer")
+            sys.exit(1)
+        try:
+            args['last_check_threshold']   = config.getint('Main', 'last_check_threshold')
+        except:
+            print("ERROR configuration parameter 'last_check_threshold' expects a positive integer")
+            sys.exit(1)
+        try:
+            args['dont_remove']            = config.getboolean('Main', 'dont_remove')
+        except:
+            print("ERROR configuration parameter 'dont_remove' expects a boolean")
+            sys.exit(1)
     else:
-        log.info("no config file provided")
+        # We need to convert strings into the desired data types since that didn't
+        # happened above because no config file was provided
+        args['num_procs']               = int(args['num_procs'])
+        args['last_check_threshold']    = int(args['last_check_threshold'])
+        if args['dont_remove'].lower() == "false":
+            args['dont_remove'] = False
+        else:
+            args['dont_remove'] = True
+        print("no config file provided")
 
     # Step 3. Overwrite with command line arguments
     if(cmdline_args.path):
@@ -580,6 +780,8 @@ def set_configuration():
        args['num_procs'] = cmdline_args.num_procs
     if(cmdline_args.last_check_threshold):
        args['last_check_threshold'] = cmdline_args.last_check_threshold
+    if(cmdline_args.dont_remove):
+       args['dont_remove'] = cmdline_args.dont_remove
 
     # Step 4. Get the arguments not allowed in the config file from the command line arguments
     if(cmdline_args.rootfile):
@@ -593,19 +795,42 @@ def set_configuration():
     if(cmdline_args.dry_run):
         args['dry_run']     = cmdline_args.dry_run
 
+    # Step 5. Extra validation for some special arguments
+    if args['path'] and args['path'] != "auto":
+        validate_path(args['path'], "path")
+
+    validate_path(args['logfile'], "logfile")
+    validate_path(args['db'], "db")
+    validate_path(args['rootfile'], "rootfile")
+    validate_positive_integer(args['num_procs'], "num_procs")
+    validate_positive_integer(args['last_check_threshold'], "last_check_threshold")
+
+    # Step 6. Transform relative paths to absolute ones
+    if args['path'] and args['path'] != "auto":
+        relative_path = args['path']
+        args['path'] = os.path.abspath(relative_path)+"/"
+        print("Transforming relative path: "+relative_path+" to absolute: "+args['path'])
+
+    if args['rootfile']:
+        relative_path = args['rootfile']
+        args['rootfile'] = os.path.abspath(relative_path)
+        print("Transforming relative rootfile: "+relative_path+" to absolute: "+args['rootfile'])
+
     #TODO:
     # following prints have to go to stderr and make sure they appear on jornalctl
-    # Step 5. Verify required conditions
-    if 'path' not in args and not 'rootfile' in args:
+    # Step 7. Verify required conditions
+
+    if not args['path'] and not args['rootfile']:
            print("ERROR: Either --path or --rootfile need to be defined")
-           exit(1)
+           sys.exit(1)
     # If --path is not defined then --rootfile it is
-    if 'path' not in args:
-        # Check that the  root file exist
-        if os.path.isfile(args['rootfile']) == False:
+    if not args['path']:
+        # Check that the rootfile is not empty and that the file exist
+        if not os.path.isfile(args['rootfile']):
             print("ERROR: --rootfile: "+args['rootfile']+" does not exist")
-            exit(1)
+            sys.exit(1)
     #TODO:
+    # remove_from and dont_remove are mutually ex
     # DB is set
     # We can write where the DB is supposed to be stored
     # We can write where logs are supposed to be stored
@@ -626,27 +851,78 @@ def main():
     else:
         log_lvl = logging.INFO
 
+    log_format = '%(asctime)s %(levelname)s - %(message)s'
+    log_format_time = '%Y%m%d %H:%M:%S'
     #----- Setup the logger and the log level ------------------------------------
-    log_handler = logging.handlers.WatchedFileHandler(args['logfile'])
-    formatter = logging.Formatter('%(asctime)s %(levelname)s - %(message)s','%Y%m%d %H:%M:%S')
-    log_handler.setFormatter(formatter)
-    log.addHandler(log_handler)
-    log.setLevel(log_lvl)
+    if args['logfile']:
+        log_handler = logging.handlers.WatchedFileHandler(args['logfile'])
+        formatter = logging.Formatter(log_format, log_format_time)
+        log_handler.setFormatter(formatter)
+        log.addHandler(log_handler)
+        log.setLevel(log_lvl)
+    else:
+        logging.basicConfig(filename=args['logfile'], level=log_lvl, format=log_format, datefmt=log_format_time)
     #-----------------------------------------------------------------------------
 
-    # If path is set to 'auto' try to find the path to the rootfiles
     log.info("*******************************************")
     log.info("**** Xcache consistency check starting ****")
     log.info("*******************************************")
-    if args['path']=="auto":
-        args['path'] = find_path()
-    if args['path'] == None:
-        log.error("Cannot find 'path' automatically, please set it either on the configuration file or as an argument on the commandline")
-        exit(1)
 
-    # Print the arguments to debug log
+    # If both path and rootfile are set, disable 'path'
+    if args['path'] and args['rootfile']:
+       args['path'] = ""
+       log.warning("Both 'path' and 'rootfile' are set, disabling 'path'")
+
+    xrootd_config_file=""
+    # If path is set to 'auto' try to find the path to the rootfiles
+    if not args['rootfile'] and args['path'] == "auto":
+        xrootd_config_file = find_xrootd_config_file()
+        if not find_xrootd_config_file:
+            log.error("Cannot get XRootD's configuration file from 'ps', is XRootD running?")
+            sys.exit(1)
+        localroot = get_localroot_from_xrootd_config_file(xrootd_config_file)
+        if not localroot:
+            log.error("Cannot get 'localroot' from XRootD's configuration file")
+            sys.exit(1)
+        if localroot[-1] != "/":
+            localroot+="/"
+        args['path'] = localroot
+
+    # Figure out 'remove_only_from' and make sure all paths end with "/"
+    if args['remove_only_from']:
+        if args['remove_only_from'] == "auto":
+            if not xrootd_config_file:
+                xrootd_config_file = find_xrootd_config_file()
+                if not xrootd_config_file:
+                    log.error("Cannot get XRootD's configuration file from 'ps', is XRootD running?")
+                    sys.exit(1)
+            remove_paths = get_pfc_spaces_from_xrootd_config_file(xrootd_config_file)
+            if not xrootd_config_file:
+                log.error("Cannot get 'pfc_spacest' from XRootD's configuration file")
+                sys.exit(1)
+        else:
+            remove_paths=""
+            for remove_path in args['remove_only_from'].split(","):
+                if remove_path[-1] != "/":
+                    remove_path +="/"
+                remove_paths+=remove_path+","
+            # Remove last comma
+            remove_paths = remove_paths[:-1]
+
+        # Always put either 'path' or 'rootfile' in the list
+        if args['path']:
+            remove_paths+=","+args['path']
+        else:
+            remove_paths+=","+os.path.dirname(args['rootfile'])+"/"
+        args['remove_only_from']=remove_paths
+
+    else:
+        log.debug("remove_only_from is not set")
+
+    # Print the arguments
     log.info("********* Configuration parametes *********")
     for key in args.keys():
+        #log.info(key+" : "+str(args[key])+" type: "+str(type(args[key])))
         log.info(key+" : "+str(args[key]))
     log.info("*******************************************")
 
@@ -658,95 +934,101 @@ def main():
 
 
     #------ Find file(s)  ---------------------------------------------------------
-    #TODO
-    # validate that the path exist
-    assume_full_file = args['full_file']
-
-    # If path is not defined that means we are analizing a single root file
-    if not 'path' in args:
+    # If args['path'] is empty, that means we are analizing a single root file
+    if not args['path']:
         rootfile = args['rootfile']
         log.debug("path is not defined, analyzing single file: "+rootfile)
-        only_filename_root  = os.path.basename(rootfile)
-        root_files_dict = dict()
-        root_files_dict[only_filename_root] = rootfile
+        filepath_list = []
+        filepath_list.append(rootfile)
     else:
-        root_files_dict  = list_files_recursively(args['path'], ".root")
-        log.info("found: "+str(len(root_files_dict))+" .root files in: "+args['path'])
+        filepath_list  = list_files_recursively(args['path'], ".root")
+        log.info("found: "+str(len(filepath_list))+" .root files in: "+args['path'])
     max_counter = 0
 
 
     #------ Dry Run  --------------------------------------------------------------
     if args['dry_run'] == True:
-        for root_file in root_files_dict:
+        for root_filepath in filepath_list:
             if args['max'] > 0 and  max_counter >= args['max']:
                 break
             # Verify that there is a corresponfing .cinfo file
-            root_filename  = root_files_dict[root_file]
-            cinfo_filename = root_filename+".cinfo"
-            if os.path.isfile(cinfo_filename):
-                log.info("Analyzing file: "+ root_file)
+            cinfo_filepath = root_filepath+".cinfo"
+            if args['full_file'] or os.path.isfile(cinfo_filepath):
+                log.info("Analyzing file: "+ root_filepath)
             else:
-                log.error("Cannot find a corresponding .cinfo file for root file:  %s", root_filename)
+                log.error("Cannot find a corresponding .cinfo file for root file:  %s", root_filepath)
             max_counter +=1
 
     #------ Real Run  -------------------------------------------------------------
     else:
         # For every root file
-        for root_file in root_files_dict:
+        for root_filepath in filepath_list:
             if args['max'] > 0 and max_counter >= args['max']:
                 break
-            # Verify that there is a corresponfing .cinfo file
-            root_filename  = root_files_dict[root_file]
-            cinfo_filename = root_filename+".cinfo"
-            if assume_full_file == True or os.path.isfile(cinfo_filename):
-            #if assume_full_file == True or root_file+".cinfo" in cinfo_files_dict:
-                log.info("Analyzing file: "+ root_file)
-                # The file could have disappeared from th emoment we listed it, and until
+            # Verify that there is a corresponfing .cinfo file or that we can assume the file is full
+            # so that we don't need a .cinfo file
+            root_filename  = os.path.basename(root_filepath)
+            cinfo_filepath = root_filepath+".cinfo"
+            if args['full_file'] == True or os.path.isfile(cinfo_filepath):
+                log.info("Analyzing file: "+ root_filename)
+                # The file could have disappeared from the moment we listed it, and until
                 # the moment it's its turn to be analyzed so let's check that it's still there
-                if not os.path.isfile(root_filename):
+                if not os.path.isfile(root_filepath):
                     log.info("File: "+ root_filename+" does not longer exist, skipping..")
                     continue
                 ### Step 1.0 Do I need to fully analyze this file or only verify the checksum?
                 db_file_id = None
                 # Get file's last modification date
-                last_modification_date = int(os.path.getmtime(root_filename))
-                db_file_id, db_last_check_ts, db_last_modification_date, db_checksum = get_file_from_db(conn, root_file)
+                last_modification_date = int(os.path.getmtime(root_filepath))
+                db_file_id, db_last_check_ts, db_last_modification_date, db_checksum = get_file_from_db(conn, root_filepath)
 
                 # if the file is in the DB and the last modification date registerd in the db
                 # is the same as the current one, it means that the file
                 # hasn't change since the last analisis, so we just need to verify the checksums.
                 ts = int(time.time())
                 if db_file_id is not None:
-                    if last_modification_date == db_last_modification_date:
-                        curr_checksum = calculate_checksum(root_filename)
+                    # If we have checked this file recently (less than 'last_check_threshold' secs ago), then we skip the check
+                    if ts - db_last_check_ts <= args['last_check_threshold']:
+                        log.info("file %s, was analyzed less than 'last_check_threshold' seconds ago, skipping", root_filename)
+                        continue
+                    # If the current last-modification-date and the last-modification-date stored in the db is the same
+                    # that means that the file hasn't changed (no new blocks have been downloaded) since the last check
+                    # so we can perform a quick comparison of checkusms
+                    elif last_modification_date == db_last_modification_date:
+                        curr_checksum = calculate_checksum(root_filepath)
                         if db_checksum == curr_checksum:
                             log.info("OK file's checksum:  %s", root_filename)
+                            # update last check timestamp of the file's record  to 'ts'
+                            update_last_check_ts(conn, root_filepath, ts)
                             continue
-                        # There are no new blocks added to the file but the file has changed
+                        # The modification date of the file hasn't changed  but somehow the file has
                         # that means the file is corrupted
                         else:
-                            log.info("CORRUPTED file's checksum:  %s, db:%s, curr:%s", root_filename, db_checksum, curr_checksum)
-                            # TODO:
-                            #remove_file(filename)
-                    # If file has changed but we have checked this file recently, then we skip the check
-                    elif ts - db_last_check_ts <= args['last_check_threshold']:
-                        log.debug("file %s, has changed since last analisis but last check is more recent than the threshold, skipping", root_filename)
-                        continue
+                            log.info("CORRUPTED file's checksum:  %s, db:%s, curr:%s", root_filepath, db_checksum, curr_checksum)
+                            if args['dont_remove']:
+                                log.info("File will not be removed, --dont-remove is set to True")
+                            else:
+                                log.info("Will attempt to remove file: %s", root_filepath)
+                                remove_file(root_filepath, args['remove_only_from'], args['full_file'])
+                                remove_from_db(conn, root_filepath)
+                                continue
                     else:
-                        log.debug("file %s, has changed since last analisis and last check less recent that the threshold")
+                        # We need to re-analyze this file, since it has changed and last check was more than 'last_check_threshold'
+                        # seconds ago.
+                        log.debug("file %s, has changed since last analysis and last check was more that 'last_check_treshold' seconds ago", root_filepath)
                 else:
-                    log.debug("file %s, not in the DB", root_filename)
+                    log.debug("file %s, not in the DB", root_filepath)
 
                 # Step 1.1 Calculate the byte ranges on the file unless the file is to be assumed
                 # fully downloaded (see option --full-file)
-                if assume_full_file == True:
+                if args['full_file'] == True:
                     is_full_file = True
                     byte_ranges = None
                 else:
                     log.debug("Starting to parse cinfo file")
-                    is_full_file, byte_ranges = parse_cinfo(cinfo_filename)
+                    is_full_file, byte_ranges = parse_cinfo(cinfo_filepath)
                 # Step 2. Create a list of baskets in the file
-                list_of_baskets = get_list_of_baskets_in_file(root_filename, byte_ranges, is_full_file)
+                list_of_baskets = get_list_of_baskets_in_file(root_filepath, byte_ranges, is_full_file)
 
                 # Step 3. Look for a corrupted basket within the list
                 chunk = 10
@@ -759,29 +1041,34 @@ def main():
                 num_workers = args['num_procs'] -1
                 process_list = []
                 for p in range(0, num_workers):
-                    p = Process(target=check_baskets, args=(list_of_baskets, basket_index, chunk, len(list_of_baskets), corrupted_flag, lock, root_filename))
+                    p = Process(target=check_baskets, args=(list_of_baskets, basket_index, chunk, len(list_of_baskets), corrupted_flag, lock, root_filepath))
                     p.start()
                     process_list.append(p)
 
                 # The parent process is also doing his part
-                check_baskets(list_of_baskets, basket_index, chunk, len(list_of_baskets), corrupted_flag, lock, root_filename)
+                check_baskets(list_of_baskets, basket_index, chunk, len(list_of_baskets), corrupted_flag, lock, root_filepath)
 
                 for p in process_list:
                     p.join()
 
                 if corrupted_flag.value ==True:
-                    log.info("CORRUPTED file:  %s", root_filename)
-                    #remove_file(root_filename)
-                else:
-                    log.info("OK file:  %s", root_filename)
-                    file_checksum = calculate_checksum(root_filename)
-                    if db_file_id == None:
-                        insert_in_db(conn, root_file, ts, last_modification_date, file_checksum)
+                    log.info("CORRUPTED file:  %s", root_filepath)
+                    if args['dont_remove']:
+                        log.info("File will not be removed, --dont-remove is set to True")
                     else:
-                        update_db(conn, root_file, ts, last_modification_date, file_checksum)
+                        log.info("Will attempt to remove file: %s", root_filepath)
+                        remove_file(root_filepath, args['remove_only_from'], args['full_file'])
+                        remove_from_db(conn, root_filepath)
+                else:
+                    log.info("OK file:  %s", root_filepath)
+                    file_checksum = calculate_checksum(root_filepath)
+                    if db_file_id == None:
+                        insert_in_db(conn, root_filepath, ts, last_modification_date, file_checksum)
+                    else:
+                        update_db(conn, root_filepath, ts, last_modification_date, file_checksum)
 
             else:
-                log.error("Cannot find a corresponding .cinfo file for root file:  %s", root_filename)
+                log.error("Cannot find a corresponding .cinfo file for root file:  %s", root_filepath)
 
             max_counter +=1
 
