@@ -69,6 +69,9 @@ def parse_cinfo(filename):
 
     # Process the cinfo file wih the command: xrdpfc_print
     lines = get_xrdpfc_print_ouput(filename)
+    if not lines:
+        log.error("Cannot get cinfo data from 'xrdpfc_print' command")
+        sys.exit(1)
 
     # Extract the block size from the output of "xrdpfc_print" command
     blocksize = get_block_size(lines)
@@ -157,11 +160,12 @@ def get_xrdpfc_print_ouput(filename):
         log.error("An exception was raised when trying to execute 'xrdpfc_print', exiting...")
         sys.exit(1)
     stdout, stderr = out.communicate()
-    if stderr is None:
+    if out.returncode != 0:
+        log.error("Something went wrong when parsing cinfo file: %s", filename)
+    else:
         log.debug("Parsing cinfo file: %s", filename)
         lines = stdout.split("\n")
-    else:
-        log.error("Something went wrong when parsing cinfo file: %s", filename)
+
     return lines
 
 # Return a list of files, with a given @extension, found under @path
@@ -533,42 +537,42 @@ def find_xrootd_config_file():
     # First get the configuration file being used by xrootd
     out = subprocess.Popen(['ps', '-u','xrootd', '-o', 'command='], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = out.communicate()
-    if stderr is None:
-        log.debug("Getting xrootd config file from ps")
-    else:
-        log.error("Something went wrong when executing ps")
-
-    xrootd_p = None
-    for p in stdout.split('\n'):
-        splitted = p.split()
-        if len(splitted) >0 and "xrootd" in splitted[0]:
-            xrootd_p = p
-            break
 
     xrootd_config_file = ""
-    if xrootd_p is not None:
-        # Look for the config file passed to xrootd, as either "-c foo.cfg"
-        # (two parts) or "-cfoo.cfg" (one part).
-        # Return the first match.
-
-        command_chunks = xrootd_p.split()
-        dash_c = False
-        for chunk in command_chunks:
-            if dash_c:
-                xrootd_config_file = chunk
-                break
-            if chunk == "-c":
-                dash_c = True
-            elif chunk[0:2] == "-c":
-                xrootd_config_file = chunk[2:]
-                break
-
-        if xrootd_config_file:
-            log.info("found xrootd configuration file:"+ xrootd_config_file)
-        else:
-            log.error("Cannot find the config file used by the xrootd running process")
+    if out.returncode != 0:
+        log.error("Something went wrong when executing ps")
     else:
-        log.error("Cannot find a running xrootd process from which obtain the configuration file used")
+        log.debug("Getting xrootd config file from ps")
+        xrootd_p = None
+        for p in stdout.split('\n'):
+            splitted = p.split()
+            if len(splitted) >0 and "xrootd" in splitted[0]:
+                xrootd_p = p
+                break
+
+        if xrootd_p is not None:
+            # Look for the config file passed to xrootd, as either "-c foo.cfg"
+            # (two parts) or "-cfoo.cfg" (one part).
+            # Return the first match.
+
+            command_chunks = xrootd_p.split()
+            dash_c = False
+            for chunk in command_chunks:
+                if dash_c:
+                    xrootd_config_file = chunk
+                    break
+                if chunk == "-c":
+                    dash_c = True
+                elif chunk[0:2] == "-c":
+                    xrootd_config_file = chunk[2:]
+                    break
+
+            if xrootd_config_file:
+                log.info("found xrootd configuration file:"+ xrootd_config_file)
+            else:
+                log.error("Cannot find the config file used by the xrootd running process")
+        else:
+            log.error("Cannot find a running xrootd process from which obtain the configuration file used")
 
     return xrootd_config_file
 
@@ -579,62 +583,65 @@ def get_localroot_from_xrootd_config_file(xrootd_config_file):
     # Use xrootd config file to find the 'oss.localroot' parameter
     out = subprocess.Popen(['cconfig', '-c', xrootd_config_file], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = out.communicate()
-    if stderr is None:
-        log.debug("Parsing cconfig output to get 'oss.localroot'")
-    else:
-        log.error("Something went wrong when executing cconfig -c "+ xrootd_config_file)
 
     path=""
-    for line in stdout.split('\n'):
-        if "oss.localroot" in line:
-            if len(line.split()) > 0:
-                path= line.split()[1]
-                # no break intentionally, it could be more than one
-                # we want to take the last one.
+    if out.returncode !=0:
+        log.error("Something went wrong when executing cconfig -c "+ xrootd_config_file)
+    else:
+        log.debug("Parsing cconfig output to get 'oss.localroot'")
+
+        for line in stdout.split('\n'):
+            if "oss.localroot" in line:
+                if len(line.split()) > 0:
+                    path= line.split()[1]
+                    # no break intentionally, it could be more than one
+                    # we want to take the last one.
     return path
 
 def get_pfc_spaces_from_xrootd_config_file(xrootd_config_file):
     # 1.  Use xrootd config file to find the 'pfc.spaces' parameter
     out = subprocess.Popen(['cconfig', '-c', xrootd_config_file], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = out.communicate()
-    if stderr is None:
-        log.debug("Parsing cconfig output to get 'pfc.spaces'")
-    else:
-        log.error("Something went wrong when executing cconfig -c "+ xrootd_config_file)
 
     pfc_spaces=""
-    for line in stdout.split('\n'):
-        if "pfc.spaces" in line:
-            if len(line.split()) == 3:
-                data= line.split()[1]
-                meta= line.split()[2]
-                # no break intentionally, it could be more than one
-                # we want to take the last one.
-            else:
-                log.error("pfc.spaces do not have the expected format: pfc.spaces data metadata")
+    if out.returncode != 0 :
+        log.error("Something went wrong when executing cconfig -c "+ xrootd_config_file)
+    else:
+        log.debug("Parsing cconfig output to get 'pfc.spaces'")
+        for line in stdout.split('\n'):
+            if "pfc.spaces" in line:
+                if len(line.split()) == 3:
+                    data= line.split()[1]
+                    meta= line.split()[2]
+                    # no break intentionally, it could be more than one
+                    # we want to take the last one.
+                else:
+                    log.error("pfc.spaces do not have the expected format: pfc.spaces data metadata")
 
-    # 2. for both data and meta look for all definitions of oss.space
-    set_of_paths=set()
-    for line in stdout.split('\n'):
-        if "oss.space "+data in line or "oss.space "+meta in line:
-            if len(line.split()) == 3:
-                path= line.split()[2]
-                set_of_paths.add(path)
-                # no break intentionally, it could be more than one
-                # we want them all
-            else:
-                log.error("oss.space does not have the expected format: oss.space data|metadata path")
+        # 2. for both data and meta look for all definitions of oss.space
+        set_of_paths=set()
+        for line in stdout.split('\n'):
+            if "oss.space "+data in line or "oss.space "+meta in line:
+                if len(line.split()) == 3:
+                    path= line.split()[2]
+                    set_of_paths.add(path)
+                    # no break intentionally, it could be more than one
+                    # we want them all
+                else:
+                    log.error("oss.space does not have the expected format: oss.space data|metadata path")
 
-    #Transform set to string of comma separated paths
-    string_of_paths=""
-    for path in set_of_paths:
-        # Make sure all paths ends with "/"
-        if path[-1] !=  "/":
-            path+="/"
-        string_of_paths+=path+","
+        #Transform set to string of comma separated paths
+        string_of_paths=""
+        for path in set_of_paths:
+            # Make sure all paths ends with "/"
+            if path[-1] !=  "/":
+                path+="/"
+            string_of_paths+=path+","
 
-    # Remove last comma
-    return string_of_paths[:-1]
+        # Remove last comma
+        pfc_spaces = string_of_paths[:-1]
+
+    return pfc_spaces
 
 
 # Argument parsing
@@ -870,20 +877,29 @@ def main():
     # If path is set to 'auto' try to find the path to the rootfiles
     if not args['rootfile'] and args['path'] == "auto":
         xrootd_config_file = find_xrootd_config_file()
+        if not find_xrootd_config_file:
+            log.error("Cannot get XRootD's configuration file from 'ps', is XRootD running?")
+            sys.exit(1)
         localroot = get_localroot_from_xrootd_config_file(xrootd_config_file)
-        if localroot and localroot[-1] != "/":
+        if not localroot:
+            log.error("Cannot get 'localroot' from XRootD's configuration file")
+            sys.exit(1)
+        if localroot[-1] != "/":
             localroot+="/"
         args['path'] = localroot
-        if args['path'] == None:
-            log.error("Cannot find 'path' automatically, please set it either on the configuration file or as an argument on the commandline")
-            sys.exit(1)
 
     # Figure out 'remove_only_from' and make sure all paths end with "/"
     if args['remove_only_from']:
         if args['remove_only_from'] == "auto":
             if not xrootd_config_file:
                 xrootd_config_file = find_xrootd_config_file()
+                if not xrootd_config_file:
+                    log.error("Cannot get XRootD's configuration file from 'ps', is XRootD running?")
+                    sys.exit(1)
             remove_paths = get_pfc_spaces_from_xrootd_config_file(xrootd_config_file)
+            if not xrootd_config_file:
+                log.error("Cannot get 'pfc_spacest' from XRootD's configuration file")
+                sys.exit(1)
         else:
             remove_paths=""
             for remove_path in args['remove_only_from'].split(","):
