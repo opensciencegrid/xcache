@@ -126,12 +126,14 @@ def get_block_size(lines):
     blocksize = -1
     log.debug("Extracting block size")
     for line in lines:
-        if "bufferSize" in line:
+        if "bufferSize" in line or "buffer_size" in line:
             log.debug("Found a line with 'bufferSize': %s", line)
             line_splitted = line.split()
             for i in range(0, len(line_splitted)):
-                if "bufferSize" in  line_splitted[i]:
+                if "bufferSize" in  line_splitted[i] or "buffer_size" in  line_splitted[i]:
                     blocksize = int(line_splitted[i+1])
+                    if line_splitted[i+2] == "kB,":
+                        blocksize = blocksize * 1024
                     log.debug("Found blocksize = %d", blocksize)
 
     if blocksize == -1:
@@ -148,15 +150,21 @@ def is_file_fully_downloaded(lines):
     is_fully_downloaded = False
     log.debug("Checking if file is fully downloaded")
     for line in lines:
-        if "bufferSize" in line:
+        if "bufferSize" in line or "buffer_size" in line:
             line_splitted = line.split()
             for i in range(0, len(line_splitted)):
-                if "nBlocks" in  line_splitted[i]:
-                    nBlocks = int(line_splitted[i+1])
+                if "nBlocks" in line_splitted[i] or "n_blocks" in  line_splitted[i]:
+                    if "nBlocks" in line_splitted[i]:
+                        nBlocks = int(line_splitted[i+1])
+                    else:
+                        nBlocks = int(line_splitted[i+1][:-1])
                     log.debug("Found nBlocks = %d", nBlocks)
 
-                elif "nDownloaded" in  line_splitted[i]:
-                    nDownloaded = int(line_splitted[i+1])
+                elif "nDownloaded" in line_splitted[i] or "n_downloaded" in  line_splitted[i]:
+                    if "nDownloaded" in line_splitted[i]:
+                        nDownloaded = int(line_splitted[i+1])
+                    else:
+                        nDownloaded = int(line_splitted[i+1][:-1])
                     log.debug("Found nDownloaded = %d", nDownloaded)
 
     if nBlocks == -1 or nDownloaded == -2:
