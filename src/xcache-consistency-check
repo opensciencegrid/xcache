@@ -19,7 +19,7 @@ import re
 import pdb
 
 def get_byte_ranges(byte_map_lines, blocksize):
-
+    error = 0
     xcounter = xcounter_aux =pcounter = pcounter_aux =0
 
     xflag = True
@@ -62,32 +62,39 @@ def get_byte_ranges(byte_map_lines, blocksize):
         xend = i-1
         range_list.append([xstart*blocksize, (xend+1)*blocksize])
 
-    return range_list
+    if not range_list:
+        log.error("Cannot get the byte_range or byte range is empty")
+        error = 1
+
+    return range_list, error
 
 
 def parse_cinfo(filename):
-
+    error = 0
+    full_file = byte_ranges = None
     # Process the cinfo file wih the command: xrdpfc_print
-    lines = get_xrdpfc_print_ouput(filename)
-    if not lines:
-        log.error("Cannot get cinfo data from 'xrdpfc_print' command")
-        sys.exit(1)
+    lines, error = get_xrdpfc_print_ouput(filename)
 
-    # Extract the block size from the output of "xrdpfc_print" command
-    blocksize = get_block_size(lines)
+    if error == 0:
+        # Extract the block size from the output of "xrdpfc_print" command
+        blocksize, error = get_block_size(lines)
 
-    # Check wheter the file is fully downloaded or its a partial file
-    full_file = is_file_fully_downloaded(lines)
+        if error == 0:
+            # Check wheter the file is fully downloaded or its a partial file
+            full_file, error = is_file_fully_downloaded(lines)
 
-    # Extract the lines containing the byte map
-    byte_map = get_byte_map(lines)
+            if error == 0:
+                # Extract the lines containing the byte map
+                byte_map, error = get_byte_map(lines)
 
-    # Use the bytemap to calculate byte ranges within the file
-    byte_ranges = get_byte_ranges(byte_map, blocksize)
+                if error == 0:
+                    # Use the bytemap to calculate byte ranges within the file
+                    byte_ranges, error = get_byte_ranges(byte_map, blocksize)
 
-    return full_file, byte_ranges
+    return full_file, byte_ranges, error
 
 def get_byte_map(lines):
+    error = 0
     byte_map = []
     flag_map_start = False
 
@@ -107,66 +114,86 @@ def get_byte_map(lines):
         else:
             continue
 
-    return byte_map
+    if not byte_map:
+        log.error("Cannot get byte_map or byte_map empty")
+        error = 1
+
+    return byte_map, error
 
 
 def get_block_size(lines):
+    error = 0
     blocksize = -1
     log.debug("Extracting block size")
     for line in lines:
-        if "bufferSize" in line:
+        if "bufferSize" in line or "buffer_size" in line:
             log.debug("Found a line with 'bufferSize': %s", line)
             line_splitted = line.split()
             for i in range(0, len(line_splitted)):
-                if "bufferSize" in  line_splitted[i]:
+                if "bufferSize" in  line_splitted[i] or "buffer_size" in  line_splitted[i]:
                     blocksize = int(line_splitted[i+1])
+                    if line_splitted[i+2] == "kB,":
+                        blocksize = blocksize * 1024
                     log.debug("Found blocksize = %d", blocksize)
 
-                elif "nBlocks" in  line_splitted[i]:
-                    nBlocks = int(line_splitted[i+1])
-                    log.debug("Found nBlocks = %d", nBlocks)
+    if blocksize == -1:
+        log.error("Cannot find blocksize in 'xrdpfc_print' output")
+        error = 1
 
-
-                elif "nDownloaded" in  line_splitted[i]:
-                    nDownloaded = int(line_splitted[i+1])
-                    log.debug("Found nDownloaded = %d", nDownloaded)
-
-    return blocksize
+    return blocksize, error
 
 # Chek whether the file is fully downloaded
 def is_file_fully_downloaded(lines):
+    error = 0
     nBlocks = -1
     nDownloaded = -2
     is_fully_downloaded = False
     log.debug("Checking if file is fully downloaded")
     for line in lines:
-        if "bufferSize" in line:
+        if "bufferSize" in line or "buffer_size" in line:
             line_splitted = line.split()
             for i in range(0, len(line_splitted)):
-                if "nBlocks" in  line_splitted[i]:
-                    nBlocks = int(line_splitted[i+1])
+                if "nBlocks" in line_splitted[i] or "n_blocks" in  line_splitted[i]:
+                    if "nBlocks" in line_splitted[i]:
+                        nBlocks = int(line_splitted[i+1])
+                    else:
+                        nBlocks = int(line_splitted[i+1][:-1])
+                    log.debug("Found nBlocks = %d", nBlocks)
 
-                elif "nDownloaded" in  line_splitted[i]:
-                    nDownloaded = int(line_splitted[i+1])
+                elif "nDownloaded" in line_splitted[i] or "n_downloaded" in  line_splitted[i]:
+                    if "nDownloaded" in line_splitted[i]:
+                        nDownloaded = int(line_splitted[i+1])
+                    else:
+                        nDownloaded = int(line_splitted[i+1][:-1])
+                    log.debug("Found nDownloaded = %d", nDownloaded)
+
+    if nBlocks == -1 or nDownloaded == -2:
+        error = 1
 
     # If nBlocks is equals to nDonwloaded then the file is fully downloaded
-    return (nBlocks == nDownloaded)
+    return (nBlocks == nDownloaded), error
 
 def get_xrdpfc_print_ouput(filename):
+    error = 0
     lines = []
     try:
         out = subprocess.Popen(['xrdpfc_print', '-v', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     except Exception, e:
-        log.error("An exception was raised when trying to execute 'xrdpfc_print', exiting...")
+        if "No such file or directory" in str(e):
+            log.error("Cannot find 'xrdpfc_print', exiting...")
+        else:
+            log.error("An exception was raised when trying to execute 'xrdpfc_print', exiting...")
         sys.exit(1)
+
     stdout, stderr = out.communicate()
-    if out.returncode != 0:
+    if "not cinfo file" in stdout:
         log.error("Something went wrong when parsing cinfo file: %s", filename)
+        error = 1
     else:
         log.debug("Parsing cinfo file: %s", filename)
         lines = stdout.split("\n")
 
-    return lines
+    return lines, error
 
 # Return a list of files, with a given @extension, found under @path
 def list_files_recursively(path, extension):
@@ -1026,7 +1053,10 @@ def main():
                     byte_ranges = None
                 else:
                     log.debug("Starting to parse cinfo file")
-                    is_full_file, byte_ranges = parse_cinfo(cinfo_filepath)
+                    is_full_file, byte_ranges, error = parse_cinfo(cinfo_filepath)
+                    if error != 0:
+                        log.error("Cannot parse cinfo file:" +cinfo_filepath+"\n skipping file")
+                        continue
                 # Step 2. Create a list of baskets in the file
                 list_of_baskets = get_list_of_baskets_in_file(root_filepath, byte_ranges, is_full_file)
 
