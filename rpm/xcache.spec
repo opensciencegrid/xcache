@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.3.0
+Version:   1.4.0
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -274,6 +274,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Tue May 12 2020 Diego Davila <didavila@ucsd.edu> - 1.4.0-1
+- Adding/Fixing functionality to the XCache Consistency Check tool (SOFTWARE-4047)
+
 * Mon Jan 27 2020 Diego Davila <didavila@ucsd.edu> - 1.3.0-1
 - Adding subpackage for consistency check (SOFTWARE-3976)
 
