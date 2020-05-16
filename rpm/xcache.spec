@@ -196,6 +196,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/xcache-reporter.timer
 %{_unitdir}/xrootd-renew-proxy.service
 %{_unitdir}/xrootd-renew-proxy.timer
+%config(noreplace) %{_sysconfdir}/condor/config.d/01-xcache-reporter-auth.conf
 %config %{_sysconfdir}/xrootd/config.d/40-xcache-auth.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/90-xcache-logging.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/digauth.cfg
