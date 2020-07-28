@@ -16,7 +16,6 @@ Source7:   https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/lz4-2.2.1-c
 Source8:   https://vdt.cs.wisc.edu/upstream/xcache/1.3.0/python-deps/pyliblzma-0.5.3.tar.bz2
 
 
-
 BuildRequires: systemd
 %{?systemd_requires}
 
@@ -106,6 +105,7 @@ Summary: The OSG data federation cache server
 Requires: %{name} = %{version}
 Requires: wget
 Requires: xrootd-lcmaps >= 1.5.1
+
 Provides: stashcache-cache-server = %{name}-%{version}
 Provides: stashcache-cache-server-auth = %{name}-%{version}
 Obsoletes: stashcache-cache-server < 1.0.0
