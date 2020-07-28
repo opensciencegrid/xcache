@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.4.0
+Version:   1.5.0
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -285,8 +285,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
-* Mon Jul 27 2020 Edgar Fajardo <emfajard@ucsd.edu> - 1.4.0-2
-- Adding support for el8 installation
+* Mon Jul 27 2020 Edgar Fajardo <emfajard@ucsd.edu> - 1.5.0-1
+- Adding support for el8 installation (SOFTWARE-4158)
+- Added SciTokens support (SOFTWARE-3562)
 
 * Tue May 12 2020 Diego Davila <didavila@ucsd.edu> - 1.4.0-1
 - Adding/Fixing functionality to the XCache Consistency Check tool (SOFTWARE-4047)
