@@ -37,6 +37,10 @@ Requires: fetch-crl
 Provides: stashcache-daemon = %{name}-%{version}
 Obsoletes: stashcache-daemon < 1.0.0
 
+%if 0%{?rhel} >= 8
+%define __python /usr/bin/python2
+%endif
+
 %description
 %{summary}
 
@@ -50,8 +54,8 @@ Obsoletes: stashcache-daemon < 1.0.0
 
 ########################################
 %package -n xcache-consistency-check
-BuildRequires: python-pip
-BuildRequires: python-devel
+BuildRequires: python2-pip
+BuildRequires: python2-devel
 BuildRequires: xz-devel
 Summary: Consistency check for root files
 AutoReq: no
@@ -176,6 +180,11 @@ Requires: %{name} = %{version}
 echo "*** This version does not build on EL 6 ***"
 exit 1
 %endif
+
+%if 0%{?rhel} >= 8
+find . -type f -exec sed -ri '1s,^#!/usr/bin/env python,#!%{__python},' '{}' +
+%endif
+
 mkdir -p %{buildroot}%{_sysconfdir}/xrootd
 mkdir -p %{buildroot}/usr/lib/xcache-consistency-check
 for whl in %{SOURCE1} %{SOURCE2} %{SOURCE3} %{SOURCE4} %{SOURCE5} %{SOURCE6} %{SOURCE7} %{SOURCE8} 
@@ -183,7 +192,7 @@ do
     pip2 install -I --no-deps "$whl" --root %{buildroot}/usr/lib/xcache-consistency-check
 done
 
-make install DESTDIR=%{buildroot}
+make install DESTDIR=%{buildroot} PYTHON=%{__python}
 
 # Create xrootd certificate directory
 mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
@@ -275,6 +284,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Mon Jul 27 2020 Edgar Fajardo <emfajard@ucsd.edu> - 1.4.0-2
+- Adding support for el8 installation
+
 * Tue May 12 2020 Diego Davila <didavila@ucsd.edu> - 1.4.0-1
 - Adding/Fixing functionality to the XCache Consistency Check tool (SOFTWARE-4047)
 
