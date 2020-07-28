@@ -45,6 +45,8 @@ if [[ $1 == --cache ]]; then
     ret=$(( $ret | $? ))
     fetch "${TOPOLOGY}/stashcache/authfile-public?cache_fqdn=${CACHE_FQDN}" /run/stash-cache/Authfile
     ret=$(( $ret | $? ))
+    fetch "${TOPOLOGY}/stashcache/scitokens?cache_fqdn=${CACHE_FQDN}"        /run/stash-cache-auth/scitokens.conf
+    ret=$(( $ret | $? ))
     exit $ret
 elif [[ $1 == --origin ]]; then
     ORIGIN_FQDN=${ORIGIN_FQDN:-$(hostname -f)}
@@ -52,6 +54,8 @@ elif [[ $1 == --origin ]]; then
     fetch "${TOPOLOGY}/stashcache/origin-authfile?fqdn=${ORIGIN_FQDN}"        /run/stash-origin-auth/Authfile
     ret=$(( $ret | $? ))
     fetch "${TOPOLOGY}/stashcache/origin-authfile-public?fqdn=${ORIGIN_FQDN}" /run/stash-origin/Authfile
+    ret=$(( $ret | $? ))
+    fetch "${TOPOLOGY}/stashcache/scitokens?origin_fqdn=${ORIGIN_FQDN}"        /run/stash-origin-auth/scitokens.conf
     ret=$(( $ret | $? ))
     exit $ret
 else
