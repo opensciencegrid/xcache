@@ -9,8 +9,10 @@ import math
 import time
 import errno
 import struct
-from urllib.parse import urlparse
 import collections
+
+import six
+from six.moves import urllib
 
 import classad
 import XRootD.client
