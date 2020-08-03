@@ -9,7 +9,7 @@ import math
 import time
 import errno
 import struct
-import urlparse
+from urllib.parse import urlparse
 import collections
 
 import classad
@@ -340,4 +340,4 @@ if __name__ == '__main__':
         args[2] = float(args[2])
     elif len(args) == 2:
         args.append(0.99) # max cache fraction
-    print collect_cache_stats(*args)
+    print(collect_cache_stats(*args))
