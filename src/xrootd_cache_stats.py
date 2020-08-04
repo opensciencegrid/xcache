@@ -290,7 +290,7 @@ def collect_cache_stats(url, rootdir, cache_max_fs_fraction=1.0):
     """ Collect stats on the cache server """
     start_time = time.time()
 
-    parsed_url = urlparse.urlparse(url)
+    parsed_url = urllib.parse.urlparse(url)
 
     # Python 2.6's urlparse returns a ParseResult object whereas
     # Python 2.4's urlparse returns a tuple that doesn't handle
