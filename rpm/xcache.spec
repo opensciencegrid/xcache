@@ -188,7 +188,7 @@ exit 1
 %endif
 
 %if 0%{?rhel} >= 8
-find . -type f -exec sed -ri '1s,^#!/usr/bin/env python,#!%{__python},' '{}' +
+find . -type f -exec sed -ri '1s,^#!\s*(/usr)?/bin/(env )?python,#!%{__python},' '{}' +
 %endif
 
 mkdir -p %{buildroot}%{_sysconfdir}/xrootd
