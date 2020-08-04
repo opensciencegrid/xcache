@@ -9,8 +9,10 @@ import math
 import time
 import errno
 import struct
-import urlparse
 import collections
+
+import six
+from six.moves import urllib
 
 import classad
 import XRootD.client
@@ -62,11 +64,11 @@ def scan_cache_dirs(rootdir):
                     vo_name = os.path.join('/', *path_components)
                     try:
                         results[vo_name] = scan_vo_dir(os.path.join(dirpath, name))
-                    except (OSError, IOError), ex:
+                    except (OSError, IOError) as ex:
                         results[vo_name] = {'scan_vo_dir_error': str(ex) }
                     dirnames.remove(name)
         return results
-    except (OSError, IOError), ex:
+    except (OSError, IOError) as ex:
         return { 'scan_cache_dirs_error' : { 'message' : str(ex) } } # error message?
 
 
@@ -87,20 +89,20 @@ def scan_vo_dir(vodir):
         for f, cinfo in ((f, f + '.cinfo') for f in fnames if f + '.cinfo' in fnames):
             try:
                 st = os.stat(os.path.join(root, f))
-            except OSError, ex:
+            except OSError as ex:
                 if ex.errno == errno.ENOENT:
                     # must have just been deleted
                     continue
                 else: raise
             try:
                 access_info = read_cinfo(os.path.join(root, cinfo), now)
-            except OSError, ex:
+            except OSError as ex:
                 if ex.errno == errno.ENOENT:
                     continue
                 else:
                     bad_cinfo_files += 1
                     access_info = { "naccesses" : 0, "last_access": 0, "by_hour" : {} }
-            except ReadCInfoError, ex:
+            except ReadCInfoError as ex:
                 bad_cinfo_files += 1
                 access_info = ex.access_info
 
@@ -231,7 +233,7 @@ def read_cinfo(cinfo_file, now):
             for interval in intervals:
                 result["by_hour"][interval] += 1
                 result["bytes_hr"][interval] += bytes_disk + bytes_ram
-    except struct.error, ex:
+    except struct.error as ex:
         # return what we've got
         raise ReadCInfoError("%s unable to decode access time data: %s" % (cinfo_file, str(ex)), result)
 
@@ -261,7 +263,7 @@ def test_xrootd_server(url):
 
         return result
 
-    except Exception, ex: # more specific exception would be better
+    except Exception as ex: # more specific exception would be better
         return {"ping_response_status" : "failed", "ping_response_code" : -1,
                 "ping_response_message" : str(ex), "ping_elapsed_time" : 0.0}
 
@@ -280,7 +282,7 @@ def get_cache_info(rootdir, cache_max_fs_fraction):
         result['free_cache_fraction'] = 1 - float(stat.f_blocks-stat.f_bfree)/int(stat.f_blocks*cache_max_fs_fraction)
 
         return result
-    except (OSError, IOError), ex:
+    except (OSError, IOError) as ex:
         return {}
 
 
@@ -288,7 +290,7 @@ def collect_cache_stats(url, rootdir, cache_max_fs_fraction=1.0):
     """ Collect stats on the cache server """
     start_time = time.time()
 
-    parsed_url = urlparse.urlparse(url)
+    parsed_url = urllib.parse.urlparse(url)
 
     # Python 2.6's urlparse returns a ParseResult object whereas
     # Python 2.4's urlparse returns a tuple that doesn't handle
@@ -340,4 +342,4 @@ if __name__ == '__main__':
         args[2] = float(args[2])
     elif len(args) == 2:
         args.append(0.99) # max cache fraction
-    print collect_cache_stats(*args)
+    print(collect_cache_stats(*args))

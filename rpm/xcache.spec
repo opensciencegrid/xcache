@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.5.0
+Version:   1.5.1
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -20,8 +20,14 @@ BuildRequires: systemd
 %{?systemd_requires}
 
 # Necessary for daemon to report back to the OSG Collector.
+%if 0%{?rhel} >= 8
+Requires: python3-condor
+Requires: python3-xrootd
+%else
 Requires: condor-python
 Requires: python-xrootd
+%endif
+
 Requires: voms-clients-cpp
 
 # We utilize a configuration directive (`continue`) introduced in XRootD 4.9.
@@ -39,7 +45,7 @@ Provides: stashcache-daemon = %{name}-%{version}
 Obsoletes: stashcache-daemon < 1.0.0
 
 %if 0%{?rhel} >= 8
-%define __python /usr/bin/python2
+%define __python /usr/bin/python3
 %endif
 
 %description
@@ -285,6 +291,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Fri Jul 30 2020 Edgar Fajardo <emfajard@ucsd.edu> - 1.5.1-1
+- Fixing some bugs for el8 suppport (SOFTWARE-4158)
+
 * Mon Jul 27 2020 Edgar Fajardo <emfajard@ucsd.edu> - 1.5.0-1
 - Adding support for el8 installation (SOFTWARE-4158)
 - Added SciTokens support (SOFTWARE-3562)
