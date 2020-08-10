@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.5.1
+Version:   1.5.2
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -189,7 +189,7 @@ exit 1
 %endif
 
 %if 0%{?rhel} >= 8
-find . -type f -exec sed -ri '1s,^#!/usr/bin/env python,#!%{__python},' '{}' +
+find . -type f -exec sed -ri '1s,^#!\s*(/usr)?/bin/(env )?python,#!%{__python},' '{}' +
 %endif
 
 mkdir -p %{buildroot}%{_sysconfdir}/xrootd
@@ -291,7 +291,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
-* Fri Jul 30 2020 Edgar Fajardo <emfajard@ucsd.edu> - 1.5.1-1
+* Fri Jul 30 2020 Edgar Fajardo <emfajard@ucsd.edu> - 1.5.2-1
 - Fixing some bugs for el8 suppport (SOFTWARE-4158)
 
 * Mon Jul 27 2020 Edgar Fajardo <emfajard@ucsd.edu> - 1.5.0-1
