@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
 Version:   1.5.2
-Release:   1%{?dist}
+Release:   2%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -90,6 +90,7 @@ Summary: The OSG Data Federation origin server
 Requires: %{name} = %{version}
 Requires: wget
 Requires: xrootd-lcmaps >= 1.5.1
+Requires: xrootd-client
 
 Provides: stashcache-origin-server = %{name}-%{version}
 Obsoletes: stashcache-origin-server < 1.0.0
@@ -291,6 +292,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Tue Nov 10 2020 Mátyás Selmeci <matyas@cs.wisc.edu> - 1.5.2-2
+- Include xrootd-client in stash-origin since it's used for validation (SOFTWARE-4353)
+
 * Fri Jul 30 2020 Edgar Fajardo <emfajard@ucsd.edu> - 1.5.2-1
 - Fixing some bugs for el8 suppport (SOFTWARE-4158)
 
