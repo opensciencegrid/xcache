@@ -269,6 +269,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/xrootd@atlas-xcache.service.d/10-atlas-xcache-overrides.conf
 %{_unitdir}/xrootd-renew-proxy.service.d/10-atlas-refresh-proxy-overrides.conf
 %config %{_sysconfdir}/xrootd/config.d/40-atlas-xcache-plugin.cfg
+%config %{_sysconfdir}/xrootd/config.d/45-atlas-xcache-plugin.cfg
 %config %{_sysconfdir}/xrootd/config.d/50-atlas-xcache-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/90-atlas-xcache-disks.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/95-atlas-xcache-logging.cfg
