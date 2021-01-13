@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.5.2
-Release:   2%{?dist}
+Version:   1.5.3
+Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -292,6 +292,13 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Wed Jan 13 2021 Brian Lin <blin@cs.wisc.edu> - 1.5.3-1
+- Add default values for the number of blocks and threads used for
+  writing in parallel
+- Add new ATLAS XCache default values for the write queue, block size,
+  and the number of prefetch blocks
+- Disable additional ATLAS debugging by default
+
 * Tue Nov 10 2020 Mátyás Selmeci <matyas@cs.wisc.edu> - 1.5.2-2
 - Include xrootd-client in stash-origin since it's used for validation (SOFTWARE-4353)
 
