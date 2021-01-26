@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.5.3
+Version:   1.5.4
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -292,6 +292,10 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Tue Jan 26 2021 Brian Lin <blin@cs.wisc.edu> - 1.5.4-1
+- Update configuration to append SciTokens to the auth list for XRootD
+  5+ (SOFTWARE-4431)
+
 * Wed Jan 13 2021 Brian Lin <blin@cs.wisc.edu> - 1.5.3-1
 - Add default values for the number of blocks and threads used for
   writing in parallel
