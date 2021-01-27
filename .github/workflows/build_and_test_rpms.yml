@@ -1,0 +1,24 @@
+name: Build and test RPMs
+on: [pull_request]
+
+jobs:
+  build-rpms-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Prepare Docker
+        run: |
+          echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -s devicemapper"' | sudo tee /etc/default/docker > /dev/null &&
+            sudo service docker restart
+
+      - name: Build RPMs
+        run: |
+          docker run -v $(pwd):/${GITHUB_REPOSITORY##*/} \
+                     -v $(pwd)/_build_dir:/u/_build_diir \
+                     --privileged \
+                     opensciencegrid/osg-build \
+                     osg-build --verbose mock --mock-config-from-koji=osg-upcoming-el7-build _build_dir
+
