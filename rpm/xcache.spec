@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.5.4
+Version:   1.5.5
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -292,6 +292,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Wed Jan 27 2021 Brian Lin <blin@cs.wisc.edu> - 1.5.5-1
+- Fix ofs.authlib append syntax (SOFTWARE-4431)
+
 * Tue Jan 26 2021 Brian Lin <blin@cs.wisc.edu> - 1.5.4-1
 - Update configuration to append SciTokens to the auth list for XRootD
   5+ (SOFTWARE-4431)
