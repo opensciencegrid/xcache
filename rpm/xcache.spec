@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.5.5
+Version:   1.5.6
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -30,8 +30,8 @@ Requires: python-xrootd
 
 Requires: voms-clients-cpp
 
-# We utilize a configuration directive (`continue`) introduced in XRootD 4.9.
-Requires: xrootd-server >= 1:4.9.0
+# We use authz library appending syntax for SciTokens, which requires 5.1.0+ (SOFTWARE-4431)
+Requires: xrootd-server >= 1:5.1.0
 
 # Use common OSG XRootD configuration
 Requires: osg-xrootd
@@ -292,6 +292,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Fri Jan 29 2021 Brian Lin <blin@cs.wisc.edu> - 1.5.6-1
+- Add requirement for XRootD 5.1 (SOFTWARE-4431)
+
 * Wed Jan 27 2021 Brian Lin <blin@cs.wisc.edu> - 1.5.5-1
 - Fix ofs.authlib append syntax (SOFTWARE-4431)
 
