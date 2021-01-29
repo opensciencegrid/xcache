@@ -22,3 +22,4 @@ jobs:
                      opensciencegrid/osg-build \
                      osg-build --verbose mock --mock-config-from-koji=osg-upcoming-el7-build _build_dir
 
+      # TODO add tests here! RPMs should be available in `_build_dir`
