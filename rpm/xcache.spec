@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   1.5.6
+Version:   2.0.0
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -292,7 +292,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
-* Fri Jan 29 2021 Brian Lin <blin@cs.wisc.edu> - 1.5.6-1
+* Mon Feb 1 2021 Brian Lin <blin@cs.wisc.edu> - 2.0.0-1
 - Add requirement for XRootD 5.1 (SOFTWARE-4431)
 
 * Wed Jan 27 2021 Brian Lin <blin@cs.wisc.edu> - 1.5.5-1
