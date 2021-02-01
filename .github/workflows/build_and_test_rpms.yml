@@ -16,8 +16,8 @@ jobs:
 
       - name: Build RPMs
         run: |
-          docker run -v $(pwd):/${GITHUB_REPOSITORY##*/} \
-                     -v $(pwd)/_build_dir:/u/_build_diir \
+          docker run -v "$PWD:/${GITHUB_REPOSITORY##*/}" \
+                     -v "$PWD/_build_dir:/u/_build_dir" \
                      --privileged \
                      opensciencegrid/osg-build \
                      osg-build --verbose mock --mock-config-from-koji=osg-upcoming-el7-build _build_dir
