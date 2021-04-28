@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#!/usr/bin/env python3
 """
 Monitoring functions for xrootd cache server, producing classads
 that can be handed to condor
