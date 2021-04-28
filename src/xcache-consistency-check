@@ -3,7 +3,7 @@ import os
 import sys
 import glob
 import argparse
-import ConfigParser
+import configparser
 import logging
 import logging.handlers
 import uproot
@@ -178,7 +178,7 @@ def get_xrdpfc_print_ouput(filename):
     lines = []
     try:
         out = subprocess.Popen(['xrdpfc_print', '-v', filename], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    except Exception, e:
+    except Exception as e:
         if "No such file or directory" in str(e):
             log.error("Cannot find 'xrdpfc_print', exiting...")
         else:
@@ -251,8 +251,8 @@ def get_list_of_baskets_in_branch(branch, byte_ranges, is_full_file):
 
 def recursive_branch(branch, byte_ranges, is_full_file):
     list_baskets = []
-    if len(branch.keys()) > 0:
-        for sub_branch in branch.itervalues():
+    if len(list(branch.keys())) > 0:
+        for sub_branch in branch.values():
             baskets_in_branch = recursive_branch(sub_branch, byte_ranges, is_full_file)
             list_baskets += baskets_in_branch
     else:
@@ -267,8 +267,8 @@ def get_list_of_baskets_in_file(filename,  byte_ranges, is_full_file):
     f = uproot.open(filename)
     list_baskets = []
 
-    for tree in f.itervalues():
-        for branch in tree.itervalues():
+    for tree in f.values():
+        for branch in tree.values():
             baskets_in_branch = recursive_branch(branch, byte_ranges, is_full_file)
             list_baskets += baskets_in_branch
 
@@ -283,14 +283,8 @@ def get_list_of_baskets_in_file(filename,  byte_ranges, is_full_file):
 
 
 def convert_checksum(checksum_8bytes):
-    checksum = 0
-    j=0
-    my_range =range(0, 64, 8)
-    my_range.reverse()
-    for i in my_range:
-        checksum += (int(ord(checksum_8bytes[j]))*pow(2, i))
-        j+=1
-    return checksum
+    return sum( ord(checksum_8bytes[j]) * pow(2, i)
+                for j, i in enumerate(reversed(range(0, 64, 8))) )
 
 
 def check_baskets(baskets_list, shrd_basket_index, chunk, num_baskets, shrd_corrupted, lock, filename):
@@ -332,7 +326,7 @@ def check_baskets(baskets_list, shrd_basket_index, chunk, num_baskets, shrd_corr
                 fd.seek(seek)
                 try:
                     zlib.decompress(fd.read(num_compressed_bytes))
-                except Exception, e:
+                except Exception as e:
                     corrupted = True
                     lock.acquire()
                     shrd_corrupted.value = 1
@@ -345,7 +339,7 @@ def check_baskets(baskets_list, shrd_basket_index, chunk, num_baskets, shrd_corr
                 fd.seek(seek)
                 try:
                     lzma.decompress(fd.read(num_uncompressed_bytes))
-                except Exception, e:
+                except Exception as e:
                     corrupted = True
                     lock.acquire()
                     shrd_corrupted.value = 1
@@ -508,7 +502,7 @@ def safe_remove(filename, allowed_paths, is_symlink):
                 log.info("Symlink removed: "+filename)
             else:
                 log.info("File removed: "+filename)
-        except Exception, e:
+        except Exception as e:
             log.error("Something went wrong when trying to remove: "+filename+"\n Exception message is:  "+str(e))
 
     ret = 0
@@ -761,7 +755,7 @@ def set_configuration():
     args['dry_run']     = False
 
     # Step 2. Read config file
-    config = ConfigParser.ConfigParser(args)
+    config = configparser.ConfigParser(args)
     config_file = cmdline_args.config_file
     if(config_file):
         print("configuration file: "+config_file)
