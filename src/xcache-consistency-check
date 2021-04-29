@@ -251,7 +251,7 @@ def get_list_of_baskets_in_branch(branch, byte_ranges, is_full_file):
 
 def recursive_branch(branch, byte_ranges, is_full_file):
     list_baskets = []
-    if len(list(branch.keys())) > 0:
+    if branch:
         for sub_branch in branch.values():
             baskets_in_branch = recursive_branch(sub_branch, byte_ranges, is_full_file)
             list_baskets += baskets_in_branch
