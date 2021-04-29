@@ -1,10 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import unittest
 import os
 import mock
 import xrootd_cache_stats
-import cStringIO
+import io
 
 good_cinfo_file = ('\x00\x00\x00\x00\x00\x00\x10\x00\x00\x00\x00\x00\t\x00\x00\x00\xff\x01\x03\x00\x00\x00\xa7\xf3\x1eU'
 '\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00m\xad\x81\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xb2\xf3\x1eU'
@@ -40,24 +40,24 @@ class TestStatsCollection(unittest.TestCase):
     def test_read_cinfo_file(self):
 
         mock_open = mock.MagicMock(spec=file)
-        mock_open.return_value = cStringIO.StringIO(good_cinfo_file)
+        mock_open.return_value = io.StringIO(good_cinfo_file)
         with mock.patch.object(xrootd_cache_stats, 'open' , mock_open, create=True):
             result = xrootd_cache_stats.read_cinfo('x.cinfo', 1432763080)
         self.assertEqual(result, {'naccesses': 3, 'last_access': 1432753804, 'by_hour': {'24': 1, '12': 1, '01': 0}})
 
         # empty input
         mock_open = mock.MagicMock(spec=file)
-        mock_open.return_value = cStringIO.StringIO('')
+        mock_open.return_value = io.StringIO('')
         with mock.patch.object(xrootd_cache_stats, 'open' , mock_open, create=True):
             self.assertRaises(xrootd_cache_stats.ReadCInfoError, xrootd_cache_stats.read_cinfo, 'x.cinfo', 1432763080)
 
         # mangled input
         mock_open = mock.MagicMock(spec=file)
-        mock_open.return_value = cStringIO.StringIO(good_cinfo_file[:-1])
+        mock_open.return_value = io.StringIO(good_cinfo_file[:-1])
         with mock.patch.object(xrootd_cache_stats, 'open' , mock_open, create=True):
             try:
                 result = xrootd_cache_stats.read_cinfo('x.cinfo', 1432763080)
-            except xrootd_cache_stats.ReadCInfoError, ex:
+            except xrootd_cache_stats.ReadCInfoError as ex:
                 result = ex.access_info
         self.assertEqual(result, {'naccesses': 3, 'last_access': 0, 'by_hour': {'24': 0, '12': 0, '01': 0}})
 
