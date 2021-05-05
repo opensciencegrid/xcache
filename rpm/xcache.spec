@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
 Version:   2.0.1
-Release:   1%{?dist}
+Release:   2%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -282,7 +282,10 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
-* Tue May 04 2021  <karo@cs.wisc.edu> - 2.0.1-1
+* Wed May 05 2021 Carl Edquist <edquist@cs.wisc.edu> - 2.0.1-2
+- Packaging fixes for el8 (SOFTWARE-4476)
+
+* Tue May 04 2021 Carl Edquist <edquist@cs.wisc.edu> - 2.0.1-1
 - Add Python3 support for scripts (SOFTWARE-4476)
 
 * Mon Feb 1 2021 Brian Lin <blin@cs.wisc.edu> - 2.0.0-1
