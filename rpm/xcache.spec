@@ -179,11 +179,6 @@ Requires: %{name} = %{version}
 %setup -n %{name}-%{version} -q
 
 %install
-%if 0%{?el6}
-echo "*** This version does not build on EL 6 ***"
-exit 1
-%endif
-
 %if 0%{?rhel} >= 8
 find . -type f -exec sed -ri '1s,^#!\s*(/usr)?/bin/(env )?python.*,#!%{__python},' '{}' +
 %endif
