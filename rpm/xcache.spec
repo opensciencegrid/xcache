@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
 Version:   2.0.1
-Release:   1%{?dist}
+Release:   2%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -20,13 +20,8 @@ BuildRequires: systemd
 %{?systemd_requires}
 
 # Necessary for daemon to report back to the OSG Collector.
-%if 0%{?rhel} >= 8
 Requires: python3-condor
 Requires: python3-xrootd
-%else
-Requires: condor-python
-Requires: python-xrootd
-%endif
 
 Requires: voms-clients-cpp
 
@@ -184,13 +179,8 @@ Requires: %{name} = %{version}
 %setup -n %{name}-%{version} -q
 
 %install
-%if 0%{?el6}
-echo "*** This version does not build on EL 6 ***"
-exit 1
-%endif
-
 %if 0%{?rhel} >= 8
-find . -type f -exec sed -ri '1s,^#!\s*(/usr)?/bin/(env )?python,#!%{__python},' '{}' +
+find . -type f -exec sed -ri '1s,^#!\s*(/usr)?/bin/(env )?python.*,#!%{__python},' '{}' +
 %endif
 
 mkdir -p %{buildroot}%{_sysconfdir}/xrootd
@@ -292,7 +282,10 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
-* Tue May 04 2021  <karo@cs.wisc.edu> - 2.0.1-1
+* Wed May 05 2021 Carl Edquist <edquist@cs.wisc.edu> - 2.0.1-2
+- Packaging fixes for el8 (SOFTWARE-4476)
+
+* Tue May 04 2021 Carl Edquist <edquist@cs.wisc.edu> - 2.0.1-1
 - Add Python3 support for scripts (SOFTWARE-4476)
 
 * Mon Feb 1 2021 Brian Lin <blin@cs.wisc.edu> - 2.0.0-1
