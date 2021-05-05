@@ -20,13 +20,8 @@ BuildRequires: systemd
 %{?systemd_requires}
 
 # Necessary for daemon to report back to the OSG Collector.
-%if 0%{?rhel} >= 8
 Requires: python3-condor
 Requires: python3-xrootd
-%else
-Requires: condor-python
-Requires: python-xrootd
-%endif
 
 Requires: voms-clients-cpp
 
