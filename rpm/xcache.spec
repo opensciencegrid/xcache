@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
 Version:   2.0.1
-Release:   2%{?dist}
+Release:   3%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -21,7 +21,7 @@ BuildRequires: systemd
 
 # Necessary for daemon to report back to the OSG Collector.
 Requires: python3-condor
-Requires: python3-xrootd
+Requires: python%{python3_pkgversion}-xrootd
 
 Requires: voms-clients-cpp
 
@@ -282,6 +282,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Thu May 06 2021  <karo@cs.wisc.edu> - 2.0.1-3
+- Packaging fixes for el7 (SOFTWARE-4476)
+
 * Wed May 05 2021 Carl Edquist <edquist@cs.wisc.edu> - 2.0.1-2
 - Packaging fixes for el8 (SOFTWARE-4476)
 
