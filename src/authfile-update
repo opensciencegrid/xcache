@@ -53,8 +53,16 @@ elif [[ $1 == --origin ]]; then
     ret=0
     fetch "${TOPOLOGY}/stashcache/origin-authfile?fqdn=${ORIGIN_FQDN}"        /run/stash-origin-auth/Authfile
     ret=$(( $ret | $? ))
+    if [ -f /run/stash-origin-auth/Authfile.local ] && [ -s /run/stash-origin-auth/Authfile.local ]; then
+        echo -e "\n# The following lines are from Authfile.local:" >> /run/stash-origin-auth/Authfile
+        cat /run/stash-origin-auth/Authfile.local >> /run/stash-origin-auth/Authfile
+    fi
     fetch "${TOPOLOGY}/stashcache/origin-authfile-public?fqdn=${ORIGIN_FQDN}" /run/stash-origin/Authfile
     ret=$(( $ret | $? ))
+    if [ -f /run/stash-origin/Authfile.local ] && [ -s /run/stash-origin/Authfile.local ]; then
+        echo -e "\n# The following lines are from Authfile.local:" >> /run/stash-origin/Authfile
+        cat /run/stash-origin/Authfile.local >> /run/stash-origin/Authfile
+    fi
     fetch "${TOPOLOGY}/stashcache/scitokens?origin_fqdn=${ORIGIN_FQDN}"        /run/stash-origin-auth/scitokens.conf
     ret=$(( $ret | $? ))
     exit $ret
