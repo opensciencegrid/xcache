@@ -111,9 +111,11 @@ install:
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache-auth.service.d
 	install -p -m 0644 configs/stash-cache/overrides/10-stash-cache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache.service.d/
 	install -p -m 0644 configs/stash-cache/overrides/10-stash-cache-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache-auth.service.d/
+	ln -s $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-cache-auth.service.d $(INSTALL_SYSTEMD_UNITDIR)/xrootd-privileged@stash-cache-auth.service.d
 	# stash-origin
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin.service.d
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin-auth.service.d
+	ln -s $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin-auth.service.d $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd-privileged@stash-origin-auth.service.d
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/cmsd@stash-origin.service.d
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/cmsd@stash-origin-auth.service.d
 	install -p -m 0644 configs/stash-origin/overrides/xrootd/10-stash-origin-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@stash-origin.service.d/

@@ -230,6 +230,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/stash-origin-authfile.timer
 %{_unitdir}/xrootd@stash-origin.service.d/10-stash-origin-overrides.conf
 %{_unitdir}/xrootd@stash-origin-auth.service.d/10-stash-origin-auth-overrides.conf
+%{_unitdir}/xrootd-privileged@stash-origin-auth.service.d
 %{_unitdir}/cmsd@stash-origin.service.d/10-stash-origin-overrides.conf
 %{_unitdir}/cmsd@stash-origin-auth.service.d/10-stash-origin-auth-overrides.conf
 %{_tmpfilesdir}/stash-origin.conf
@@ -250,6 +251,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/stash-cache-authfile.timer
 %{_unitdir}/xrootd@stash-cache.service.d/10-stash-cache-overrides.conf
 %{_unitdir}/xrootd@stash-cache-auth.service.d/10-stash-cache-auth-overrides.conf
+%{_unitdir}/xrootd-privilged@stash-cache-auth.service.d
 %{_tmpfilesdir}/stash-cache.conf
 %attr(0755, xrootd, xrootd) %dir /run/stash-cache/
 %attr(0755, xrootd, xrootd) %dir /run/stash-cache-auth/
