@@ -282,8 +282,13 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
-* Tue Oct 26 2021 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.0.0-1
+* Wed Oct 27 2021 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.0.0-1
 - Drop lcmaps config; use XrdVoms instead (from osg-xrootd 3.6)
+- Add overrides for xrootd-privileged@stash-origin-auth, and add
+  cmsd-multiuser@.service for running an auth stash-origin with multiuser (SOFTWARE-4792)
+- Append contents of /run/stash-origin/Authfile.local and /run/stash-origin-auth/Authfile.local
+  to generated /run/stash-origin/Authfile and /run/stash-origin-auth/Authfile,
+  respectively
 
 * Thu May 06 2021  <karo@cs.wisc.edu> - 2.0.1-3
 - Packaging fixes for el7 (SOFTWARE-4476)
