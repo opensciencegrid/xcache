@@ -123,12 +123,12 @@ install:
 	install -p -m 0644 configs/stash-origin/overrides/cmsd/10-stash-origin-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/cmsd@stash-origin.service.d/
 	install -p -m 0644 configs/stash-origin/overrides/cmsd/10-stash-origin-auth-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/cmsd@stash-origin-auth.service.d/
 	# atlas-xcache
-	mkdir -p mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@atlas-xcache.service.d
+	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@atlas-xcache.service.d
 	install -p -m 0644 configs/atlas-xcache/overrides/10-atlas-xcache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@atlas-xcache.service.d/
 	install -p -m 0644 configs/atlas-xcache/overrides/xrootd-renew-proxy/10-atlas-refresh-proxy-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd-renew-proxy.service.d/
 	# cms-xcache
-	mkdir -p mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@cms-xcache.service.d
-	mkdir -p mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/cmsd@cms-xcache.service.d
+	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@cms-xcache.service.d
+	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/cmsd@cms-xcache.service.d
 	install -p -m 0644 configs/cms-xcache/overrides/xrootd/10-cms-xcache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd@cms-xcache.service.d/
 	install -p -m 0644 configs/cms-xcache/overrides/cmsd/10-cms-xcache-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/cmsd@cms-xcache.service.d/
 	install -p -m 0644 configs/cms-xcache/overrides/xrootd-renew-proxy/10-cms-refresh-proxy-overrides.conf $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)/xrootd-renew-proxy.service.d/
