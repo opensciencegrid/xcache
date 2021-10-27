@@ -29,7 +29,7 @@ Requires: voms-clients-cpp
 Requires: xrootd-server >= 1:5.1.0
 
 # Use common OSG XRootD configuration
-Requires: osg-xrootd
+Requires: osg-xrootd >= 3.6
 
 Requires: grid-certificates >= 7
 Requires: vo-client
@@ -84,7 +84,6 @@ Summary: The OSG Data Federation origin server
 
 Requires: %{name} = %{version}
 Requires: wget
-Requires: xrootd-lcmaps >= 1.5.1
 Requires: xrootd-client
 
 Provides: stashcache-origin-server = %{name}-%{version}
@@ -107,7 +106,6 @@ Summary: The OSG data federation cache server
 
 Requires: %{name} = %{version}
 Requires: wget
-Requires: xrootd-lcmaps >= 1.5.1
 
 Provides: stashcache-cache-server = %{name}-%{version}
 Provides: stashcache-cache-server-auth = %{name}-%{version}
@@ -150,7 +148,6 @@ Summary: The CMS data federation cache server
 
 Requires: %{name} = %{version}
 Requires: wget
-Requires: xrootd-lcmaps >= 1.5.1
 %description -n cms-xcache
 %{summary}
 %post -n cms-xcache
@@ -284,6 +281,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Tue Oct 26 2021 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.0.0-1
+- Drop lcmaps config; use XrdVoms instead (from osg-xrootd 3.6)
+
 * Thu May 06 2021  <karo@cs.wisc.edu> - 2.0.1-3
 - Packaging fixes for el7 (SOFTWARE-4476)
 
