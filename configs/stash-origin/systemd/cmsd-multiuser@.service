@@ -1,0 +1,21 @@
+[Unit]
+Description=XRootD cmsd daemon instance %I with multiuser
+Documentation=man:cmsd(8)
+Documentation=http://xrootd.org/docs.html
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/cmsd -l /var/log/xrootd/cmsd.log -c /etc/xrootd/xrootd-%i.cfg -k fifo -s /run/xrootd/cmsd-%i.pid -n %i
+User=xrootd
+Group=xrootd
+Type=simple
+Restart=on-abort
+RestartSec=10
+KillMode=control-group
+LimitNOFILE=65536
+WorkingDirectory=/var/spool/xrootd
+
+[Install]
+RequiredBy=multi-user.target
+
