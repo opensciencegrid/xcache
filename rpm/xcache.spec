@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   2.0.1
-Release:   3%{?dist}
+Version:   3.0.0
+Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
