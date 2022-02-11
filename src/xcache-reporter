@@ -75,7 +75,7 @@ class StashCacheReporter(object):
     def load_state(self):
         '''Load previous run's state from JSON'''
         try:
-            with open(self.state_file, 'rb') as fptr:
+            with open(self.state_file, 'rt', encoding='utf-8') as fptr:
                 self.state.update(json.load(fptr))
                 self.logger.debug('Loaded cache state from %s', self.state_file)
                 return True
@@ -88,7 +88,7 @@ class StashCacheReporter(object):
 
     def save_state(self):
         '''Save current run's state to JSON'''
-        with open(self.state_file, 'wb') as fptr:
+        with open(self.state_file, 'wt', encoding='utf-8') as fptr:
             json.dump(dict(self.state), fptr)
             self.logger.debug('Wrote cache state for %s to %s', self.cache_path, self.state_file)
 
