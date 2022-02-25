@@ -6,6 +6,7 @@ PROXYFILE=/run/xcache-auth/x509_proxy
 /usr/bin/voms-proxy-init -cert "$HOSTCERT" \
                      -key "$HOSTKEY" \
                      -out "${PROXYFILE}.tmp" \
+                     -bits 2048 \
                      -valid 48:00 \
                      "$@" \
   &&
