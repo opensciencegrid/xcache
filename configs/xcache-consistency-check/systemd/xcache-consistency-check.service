@@ -5,7 +5,7 @@ Description=XCache consistency check
 User=xrootd
 Group=xrootd
 Type=simple
-Environment=PYTHONPATH=/usr/lib/xcache-consistency-check/usr/lib/python2.7/site-packages/:/usr/lib/xcache-consistency-check/usr/lib64/python2.7/site-packages/
+Environment=PYTHONPATH=/usr/lib/xcache-consistency-check/usr/lib/python3.6/site-packages/:/usr/lib/xcache-consistency-check/usr/lib64/python3.6/site-packages/
 ExecStart=/usr/bin/xcache-consistency-check --config /etc/xrootd/xcache-consistency-check.cfg
 
 [Install]
