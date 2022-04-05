@@ -3,9 +3,11 @@
 HOSTCERT=/etc/grid-security/xrd/xrdcert.pem
 HOSTKEY=/etc/grid-security/xrd/xrdkey.pem
 PROXYFILE=/run/xcache-auth/x509_proxy
+# TODO: Remove -bits parameter when https://opensciencegrid.atlassian.net/browse/SOFTWARE-4889 is released.
 /usr/bin/voms-proxy-init -cert "$HOSTCERT" \
                      -key "$HOSTKEY" \
                      -out "${PROXYFILE}.tmp" \
+                     -bits 2048 \
                      -valid 48:00 \
                      "$@" \
   &&
