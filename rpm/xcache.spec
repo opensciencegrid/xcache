@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   2.1.1
+Version:   2.2.0
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -280,6 +280,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Tue Apr 05 2022 Mátyás Selmeci <matyas@cs.wisc.edu> - 2.2.0-1
+- Make 2048-bit proxies in renew-proxy (SOFTWARE-5112)
+
 * Thu Mar 24 2022 Mátyás Selmeci <matyas@cs.wisc.edu> - 2.1.1-1
 - Fix PYTHONPATH in xcache-consistency-check service file
 - Fix Python 3 bytes/str conversion errors (SOFTWARE-5019)
