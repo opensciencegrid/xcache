@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
 Version:   3.0.1
-Release:   1%{?dist}
+Release:   2%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -23,7 +23,7 @@ BuildRequires: python3-devel
 
 # Necessary for daemon to report back to the OSG Collector.
 Requires: python3-condor
-Requires: python%{python3_pkgversion}-xrootd
+Requires: python3-xrootd
 
 Requires: voms-clients-cpp
 
@@ -60,7 +60,7 @@ AutoReq: no
 
 Requires: xz
 Requires: xrootd-server
-Requires: python3
+Requires: python36(x86-64)
 
 %description -n xcache-consistency-check
 %{summary}
@@ -277,6 +277,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Wed Apr 20 2022 Carl Edquist <edquist@cs.wisc.edu> - 3.0.1-2
+- Fix python and python-xrootd requirements (SOFTWARE-5126)
+
 * Thu Mar 24 2022 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.0.1-1
 - Fix PYTHONPATH in xcache-consistency-check service file
 
