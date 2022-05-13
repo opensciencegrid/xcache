@@ -163,6 +163,8 @@ def main():
 
     if args.debug:
         htcondor.enable_debug()
+        if 'TOOL_DEBUG' not in htcondor.param:
+            htcondor.param['TOOL_DEBUG'] = "D_ALL D_CATEGORY"
 
     # Check for existence of host cert/key pair
     for pki in 'cert', 'key':
