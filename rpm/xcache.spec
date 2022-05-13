@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   3.0.1
-Release:   2%{?dist}
+Version:   3.1.0
+Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -277,6 +277,10 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Fri May 13 2022 Carl Edquist <edquist@cs.wisc.edu> - 3.1.0-1
+- Drop GSI auth method (SOFTWARE-5121)
+- Add --debug option to xcache-reporter (SOFTWARE-5119)
+
 * Wed Apr 20 2022 Carl Edquist <edquist@cs.wisc.edu> - 3.0.1-2
 - Fix python and python-xrootd requirements (SOFTWARE-5126)
 
