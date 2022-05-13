@@ -84,6 +84,7 @@ Requires: xrootd-client
 
 Provides: stashcache-origin-server = %{name}-%{version}
 Obsoletes: stashcache-origin-server < 1.0.0
+Conflicts: osg-xrootd-standalone
 
 %description -n stash-origin
 %{summary}
@@ -107,6 +108,7 @@ Provides: stashcache-cache-server = %{name}-%{version}
 Provides: stashcache-cache-server-auth = %{name}-%{version}
 Obsoletes: stashcache-cache-server < 1.0.0
 Obsoletes: stashcache-cache-server-auth < 1.0.0
+Conflicts: osg-xrootd-standalone
 
 %description -n stash-cache
 %{summary}
@@ -280,6 +282,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 * Fri May 13 2022 Carl Edquist <edquist@cs.wisc.edu> - 3.1.0-1
 - Drop GSI auth method (SOFTWARE-5121)
 - Add --debug option to xcache-reporter (SOFTWARE-5119)
+
+* Mon May 09 2022 Carl Edquist <edquist@cs.wisc.edu> - 3.0.1-1.2
+- Add Conflicts for osg-xrootd-standalone (SOFTWARE-4668)
 
 * Wed Apr 20 2022 Carl Edquist <edquist@cs.wisc.edu> - 3.0.1-2
 - Fix python and python-xrootd requirements (SOFTWARE-5126)
