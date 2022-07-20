@@ -24,8 +24,8 @@ fetch () {
 }
 
 die_with_usage () {
-    echo >&2 "Usage: $(basename "$0") --cache|--origin OR"
-    echo >&2 "       $(basename "$0") stash-cache|stash-cache-auth|stash-origin|stash-origin-auth"
+    echo >&2 "Usage: $(basename "$0") --cache|--origin"
+    echo >&2 "   Or: $(basename "$0") stash-cache|stash-cache-auth|stash-origin|stash-origin-auth"
     echo >&2 "Environment variables used:"
     echo >&2 "CACHE_FQDN        FQDN used for cache authfile query (default `hostname -f`)"
     echo >&2 "ORIGIN_FQDN       FQDN used for origin authfile query (default `hostname -f`)"
