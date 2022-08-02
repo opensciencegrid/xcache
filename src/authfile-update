@@ -25,6 +25,7 @@ fetch () {
 
 die_with_usage () {
     echo >&2 "Usage: $(basename "$0") --cache|--origin"
+    echo >&2 "   Or: $(basename "$0") stash-cache|stash-cache-auth|stash-origin|stash-origin-auth"
     echo >&2 "Environment variables used:"
     echo >&2 "CACHE_FQDN        FQDN used for cache authfile query (default `hostname -f`)"
     echo >&2 "ORIGIN_FQDN       FQDN used for origin authfile query (default `hostname -f`)"
@@ -37,36 +38,91 @@ if [[ $# -ne 1 ]]; then
 fi
 
 TOPOLOGY=${TOPOLOGY:-https://topology.opensciencegrid.org}
+CACHE_FQDN=${CACHE_FQDN:-$(hostname -f)}
+ORIGIN_FQDN=${ORIGIN_FQDN:-$(hostname -f)}
 
-if [[ $1 == --cache ]]; then
-    CACHE_FQDN=${CACHE_FQDN:-$(hostname -f)}
-    ret=0
-    fetch "${TOPOLOGY}/stashcache/authfile?cache_fqdn=${CACHE_FQDN}"        /run/stash-cache-auth/Authfile
-    ret=$(( $ret | $? ))
-    fetch "${TOPOLOGY}/stashcache/authfile-public?cache_fqdn=${CACHE_FQDN}" /run/stash-cache/Authfile
-    ret=$(( $ret | $? ))
-    fetch "${TOPOLOGY}/stashcache/scitokens?cache_fqdn=${CACHE_FQDN}"        /run/stash-cache-auth/scitokens.conf
-    ret=$(( $ret | $? ))
-    exit $ret
-elif [[ $1 == --origin ]]; then
-    ORIGIN_FQDN=${ORIGIN_FQDN:-$(hostname -f)}
-    ret=0
-    fetch "${TOPOLOGY}/stashcache/origin-authfile?fqdn=${ORIGIN_FQDN}"        /run/stash-origin-auth/Authfile
-    ret=$(( $ret | $? ))
-    if [ -f /run/stash-origin-auth/Authfile.local ] && [ -s /run/stash-origin-auth/Authfile.local ]; then
-        echo -e "\n# The following lines are from Authfile.local:" >> /run/stash-origin-auth/Authfile
-        cat /run/stash-origin-auth/Authfile.local >> /run/stash-origin-auth/Authfile
-    fi
-    fetch "${TOPOLOGY}/stashcache/origin-authfile-public?fqdn=${ORIGIN_FQDN}" /run/stash-origin/Authfile
-    ret=$(( $ret | $? ))
-    if [ -f /run/stash-origin/Authfile.local ] && [ -s /run/stash-origin/Authfile.local ]; then
-        echo -e "\n# The following lines are from Authfile.local:" >> /run/stash-origin/Authfile
-        cat /run/stash-origin/Authfile.local >> /run/stash-origin/Authfile
-    fi
-    fetch "${TOPOLOGY}/stashcache/scitokens?origin_fqdn=${ORIGIN_FQDN}"        /run/stash-origin-auth/scitokens.conf
-    ret=$(( $ret | $? ))
-    exit $ret
-else
-    die_with_usage
-fi
+DESTDIR=${DESTDIR:-/run}
 
+
+append_authfile_local () {
+    local base="$1"
+    if [[ -s $base && -f ${base}.local ]]; then
+        echo -e "\n# The following lines are from $(basename "${base}.local"):" >> "$base"
+        cat "${base}.local" >> "$base"
+    fi
+}
+
+
+fetch_cache_data () {
+    mkdir -p "$DESTDIR/stash-cache"
+    fetch "${TOPOLOGY}/cache/Authfile-public?fqdn=${CACHE_FQDN}" "$DESTDIR/stash-cache/Authfile" && \
+        append_authfile_local "$DESTDIR/stash-cache/Authfile"
+}
+
+
+fetch_cache_auth_data () {
+    mkdir -p "$DESTDIR/stash-cache-auth"
+    local ret=0
+    fetch "${TOPOLOGY}/cache/Authfile?fqdn=${CACHE_FQDN}" "$DESTDIR/stash-cache-auth/Authfile" && \
+        append_authfile_local "$DESTDIR/stash-cache-auth/Authfile"
+    ret=$(( $ret | $? ))
+    fetch "${TOPOLOGY}/cache/scitokens.conf?fqdn=${CACHE_FQDN}" "$DESTDIR/stash-cache-auth/scitokens.conf"
+    ret=$(( $ret | $? ))
+    return $ret
+}
+
+
+fetch_origin_data () {
+    mkdir -p "$DESTDIR/stash-origin"
+    fetch "${TOPOLOGY}/origin/Authfile-public?fqdn=${ORIGIN_FQDN}" "$DESTDIR/stash-origin/Authfile" && \
+        append_authfile_local "$DESTDIR/stash-origin/Authfile"
+}
+
+
+fetch_origin_auth_data () {
+    mkdir -p "$DESTDIR/stash-origin-auth"
+    local ret=0
+    fetch "${TOPOLOGY}/origin/Authfile?fqdn=${ORIGIN_FQDN}" "$DESTDIR/stash-origin-auth/Authfile" && \
+        append_authfile_local "$DESTDIR/stash-origin-auth/Authfile"
+    ret=$(( $ret | $? ))
+    fetch "${TOPOLOGY}/origin/scitokens.conf?fqdn=${ORIGIN_FQDN}" "$DESTDIR/stash-origin-auth/scitokens.conf"
+    ret=$(( $ret | $? ))
+    return $ret
+}
+
+
+case $1 in
+    --cache)
+        ret=0
+        fetch_cache_data
+        ret=$(( $ret | $? ))
+        fetch_cache_auth_data
+        ret=$(( $ret | $? ))
+        ;;
+    --origin)
+        ret=0
+        fetch_origin_data
+        ret=$(( $ret | $? ))
+        fetch_origin_auth_data
+        ret=$(( $ret | $? ))
+        ;;
+    stash-cache)
+        fetch_cache_data
+        ret=$?
+        ;;
+    stash-cache-auth)
+        fetch_cache_auth_data
+        ret=$?
+        ;;
+    stash-origin)
+        fetch_origin_data
+        ret=$?
+        ;;
+    stash-origin-auth)
+        fetch_origin_auth_data
+        ret=$?
+        ;;
+    *)
+        die_with_usage
+esac
+exit $ret
