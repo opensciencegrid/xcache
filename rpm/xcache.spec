@@ -115,11 +115,11 @@ Conflicts: osg-xrootd-standalone
 
 %post -n stash-cache
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-%systemd_post xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer xrootd@stash-cache-auth.service
+%systemd_post xrootd@stash-cache.service stash-authfile@cache.service stash-authfile@cache.timer xrootd@stash-cache-auth.service
 %preun -n stash-cache
-%systemd_preun xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer xrootd@stash-cache-auth.service
+%systemd_preun xrootd@stash-cache.service stash-authfile@cache.service stash-authfile@cache.timer xrootd@stash-cache-auth.service
 %postun -n stash-cache
-%systemd_postun_with_restart xrootd@stash-cache.service stash-cache-authfile.service stash-cache-authfile.timer xrootd@stash-cache-auth.service
+%systemd_postun_with_restart xrootd@stash-cache.service stash-authfile@cache.service stash-authfile@cache.timer xrootd@stash-cache-auth.service
 
 ########################################
 %package -n atlas-xcache
@@ -220,8 +220,8 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/50-stash-origin-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/10-origin-site-local.cfg
 %{_libexecdir}/%{name}/authfile-update
-%{_unitdir}/stash-origin-authfile.service
-%{_unitdir}/stash-origin-authfile.timer
+%{_unitdir}/stash-authfile@.service
+%{_unitdir}/stash-authfile@.timer
 %{_unitdir}/xrootd@stash-origin.service.d/10-stash-origin-overrides.conf
 %{_unitdir}/xrootd@stash-origin-auth.service.d/10-stash-origin-auth-overrides.conf
 %{_unitdir}/xrootd-privileged@stash-origin-auth.service.d
@@ -243,8 +243,8 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/50-stash-cache-paths.cfg
 %config(noreplace) %{_sysconfdir}/xrootd/config.d/90-stash-cache-disks.cfg
 %{_libexecdir}/%{name}/authfile-update
-%{_unitdir}/stash-cache-authfile.service
-%{_unitdir}/stash-cache-authfile.timer
+%{_unitdir}/stash-authfile@.service
+%{_unitdir}/stash-authfile@.timer
 %{_unitdir}/xrootd@stash-cache.service.d/10-stash-cache-overrides.conf
 %{_unitdir}/xrootd@stash-cache-auth.service.d/10-stash-cache-auth-overrides.conf
 %{_tmpfilesdir}/stash-cache.conf
