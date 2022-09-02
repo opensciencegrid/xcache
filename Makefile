@@ -34,7 +34,7 @@ XROOTD_CONFIGD := $(wildcard configs/atlas-xcache/config.d/*) \
                   $(wildcard configs/xcache-redir/config.d/*) \
                   $(wildcard configs/stash-origin/config.d/*)
 
-SYSTEMD_UNITS := $(wildcard configs/stash-cache/systemd/*) \
+SYSTEMD_UNITS := $(wildcard configs/stash/systemd/*) \
                  $(wildcard configs/xcache/systemd/*) \
                  $(wildcard configs/stash-origin/systemd/*) \
                  $(wildcard configs/xcache-consistency-check/systemd/*)
