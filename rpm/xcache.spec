@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   3.1.0
+Version:   3.1.1
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -279,6 +279,10 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Fri Sep 02 2022 Carl Edquist <edquist@cs.wisc.edu> - 3.1.1-1
+- Generate authfile even if origin serves no public data (SOFTWARE-5028)
+- Refactor stash-authfile systemd files
+
 * Fri May 13 2022 Carl Edquist <edquist@cs.wisc.edu> - 3.1.0-1
 - Drop GSI auth method (SOFTWARE-5121)
 - Add --debug option to xcache-reporter (SOFTWARE-5119)
