@@ -1,12 +1,12 @@
 [Unit]
-Description=StashCache Authfile generator
+Description=StashCache/Origin Authfile generator
 After=network-online.target
 
 [Service]
 User=xrootd
 Group=xrootd
 Type=oneshot
-ExecStart=/usr/libexec/xcache/authfile-update --cache
+ExecStart=/usr/libexec/xcache/authfile-update %i
 
 [Install]
 WantedBy=multi-user.target
