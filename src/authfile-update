@@ -44,7 +44,7 @@ ORIGIN_FQDN=${ORIGIN_FQDN:-$(hostname -f)}
 DESTDIR=${DESTDIR:-/run}
 
 
-append_authfile_local () {
+append_local_additions () {
     local base="$1"
     if [[ -s $base && -f ${base}.local ]]; then
         echo -e "\n# The following lines are from $(basename "${base}.local"):" >> "$base"
@@ -56,7 +56,7 @@ append_authfile_local () {
 fetch_cache_data () {
     mkdir -p "$DESTDIR/stash-cache"
     fetch "${TOPOLOGY}/cache/Authfile-public?fqdn=${CACHE_FQDN}" "$DESTDIR/stash-cache/Authfile" && \
-        append_authfile_local "$DESTDIR/stash-cache/Authfile"
+        append_local_additions "$DESTDIR/stash-cache/Authfile"
 }
 
 
@@ -64,7 +64,7 @@ fetch_cache_auth_data () {
     mkdir -p "$DESTDIR/stash-cache-auth"
     local ret=0
     fetch "${TOPOLOGY}/cache/Authfile?fqdn=${CACHE_FQDN}" "$DESTDIR/stash-cache-auth/Authfile" && \
-        append_authfile_local "$DESTDIR/stash-cache-auth/Authfile"
+        append_local_additions "$DESTDIR/stash-cache-auth/Authfile"
     ret=$(( $ret | $? ))
     fetch "${TOPOLOGY}/cache/scitokens.conf?fqdn=${CACHE_FQDN}" "$DESTDIR/stash-cache-auth/scitokens.conf"
     ret=$(( $ret | $? ))
@@ -75,7 +75,7 @@ fetch_cache_auth_data () {
 fetch_origin_data () {
     mkdir -p "$DESTDIR/stash-origin"
     fetch "${TOPOLOGY}/origin/Authfile-public?fqdn=${ORIGIN_FQDN}" "$DESTDIR/stash-origin/Authfile" && \
-        append_authfile_local "$DESTDIR/stash-origin/Authfile"
+        append_local_additions "$DESTDIR/stash-origin/Authfile"
 }
 
 
@@ -83,9 +83,10 @@ fetch_origin_auth_data () {
     mkdir -p "$DESTDIR/stash-origin-auth"
     local ret=0
     fetch "${TOPOLOGY}/origin/Authfile?fqdn=${ORIGIN_FQDN}" "$DESTDIR/stash-origin-auth/Authfile" && \
-        append_authfile_local "$DESTDIR/stash-origin-auth/Authfile"
+        append_local_additions "$DESTDIR/stash-origin-auth/Authfile"
     ret=$(( $ret | $? ))
-    fetch "${TOPOLOGY}/origin/scitokens.conf?fqdn=${ORIGIN_FQDN}" "$DESTDIR/stash-origin-auth/scitokens.conf"
+    fetch "${TOPOLOGY}/origin/scitokens.conf?fqdn=${ORIGIN_FQDN}" "$DESTDIR/stash-origin-auth/scitokens.conf" && \
+        append_local_additions "$DESTDIR/stash-origin-auth/scitokens.conf"
     ret=$(( $ret | $? ))
     return $ret
 }
