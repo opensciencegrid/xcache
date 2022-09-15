@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   3.1.1
+Version:   3.2.0
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -279,9 +279,15 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
-* Fri Sep 02 2022 Carl Edquist <edquist@cs.wisc.edu> - 3.1.1-1
-- Generate authfile even if origin serves no public data (SOFTWARE-5028)
-- Refactor stash-authfile systemd files
+* Thu Sep 15 2022 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.2.0-1
+- Allow specifying the xrootd instance (e.g. stash-cache, stash-origin-auth) to
+  authfile-update (SOFTWARE-5028)
+- Split stash-origin's "originexport" var into "PublicOriginExport" and
+  "AuthOriginExport" (SOFTWARE-5303)
+- Append contents of a "scitokens.conf.local" file to generated scitokens.conf (SOFTWARE-5315)
+- Includes Fri Sep 02 2022 Carl Edquist <edquist@cs.wisc.edu>:
+    - Generate authfile even if origin serves no public data (SOFTWARE-5028)
+    - Refactor stash-authfile systemd files
 
 * Fri May 13 2022 Carl Edquist <edquist@cs.wisc.edu> - 3.1.0-1
 - Drop GSI auth method (SOFTWARE-5121)
