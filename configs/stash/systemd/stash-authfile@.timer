@@ -6,7 +6,7 @@ After=network-online.target
 OnBootSec=15min
 OnUnitActiveSec=15min
 RandomizedDelaySec=3min
-Unit=stash-authfile.service@%i
+Unit=stash-authfile@%i.service
 
 [Install]
 WantedBy=timers.target
