@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   3.2.0
+Version:   3.2.1
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -279,7 +279,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
-* Thu Sep 15 2022 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.2.0-1
+* Thu Sep 15 2022 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.2.1-1
 - Allow specifying the xrootd instance (e.g. stash-cache, stash-origin-auth) to
   authfile-update (SOFTWARE-5028)
 - Split stash-origin's "originexport" var into "PublicOriginExport" and
