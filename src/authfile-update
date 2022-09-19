@@ -66,7 +66,8 @@ fetch_cache_auth_data () {
     fetch "${TOPOLOGY}/cache/Authfile?fqdn=${CACHE_FQDN}" "$DESTDIR/stash-cache-auth/Authfile" && \
         append_local_additions "$DESTDIR/stash-cache-auth/Authfile"
     ret=$(( $ret | $? ))
-    fetch "${TOPOLOGY}/cache/scitokens.conf?fqdn=${CACHE_FQDN}" "$DESTDIR/stash-cache-auth/scitokens.conf"
+    fetch "${TOPOLOGY}/cache/scitokens.conf?fqdn=${CACHE_FQDN}" "$DESTDIR/stash-cache-auth/scitokens.conf" && \
+        append_local_additions "$DESTDIR/stash-cache-auth/scitokens.conf"
     ret=$(( $ret | $? ))
     return $ret
 }
