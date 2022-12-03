@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   3.2.3
+Version:   3.3.0
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -279,6 +279,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Fri Dec 02 2022 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.3.0-1
+- Remove X.509 proxy requirement for stash-cache xrootd instance (SOFTWARE-5366)
+
 * Mon Oct 10 2022 Carl Edquist <edquist@cs.wisc.edu> - 3.2.3-1
 - Replace cmsd-multiuser overrides with cmsd-privileged (SOFTWARE-5338)
 
