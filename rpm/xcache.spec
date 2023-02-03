@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   3.3.0
+Version:   3.4.0
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -103,6 +103,7 @@ Summary: The OSG data federation cache server
 
 Requires: %{name} = %{version}
 Requires: wget
+Requires: xrootd-tcp-stats
 
 Provides: stashcache-cache-server = %{name}-%{version}
 Provides: stashcache-cache-server-auth = %{name}-%{version}
@@ -279,6 +280,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Fri Feb 03 2023 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.4.0-1
+- Enable XRootD TCP Stats for stash-cache and stash-cache-auth (SOFTWARE-5373)
+
 * Fri Dec 02 2022 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.3.0-1
 - Remove X.509 proxy requirement for stash-cache xrootd instance (SOFTWARE-5366)
 
