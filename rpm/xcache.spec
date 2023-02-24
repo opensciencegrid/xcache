@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
 Version:   3.4.0
-Release:   2%{?dist}
+Release:   3%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -14,12 +14,25 @@ Source5:   https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/uproot-3.11
 Source6:   https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/xxhash-1.4.4-cp36-cp36m-manylinux1_x86_64.whl
 Source7:   https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/lz4-2.2.1-cp36-cp36m-manylinux1_x86_64.whl
 
+Source11:  https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/el9/awkward-0.14.0-py2.py3-none-any.whl
+Source12:  https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/el9/awkward-2.0.7-py3-none-any.whl
+Source13:  https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/el9/awkward_cpp-8-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+Source14:  https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/el9/cachetools-5.3.0-py3-none-any.whl
+Source15:  https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/el9/lz4-4.3.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+Source16:  https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/el9/numpy-1.24.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+Source17:  https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/el9/packaging-23.0-py3-none-any.whl
+Source18:  https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/el9/typing_extensions-4.4.0-py3-none-any.whl
+Source19:  https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/el9/uproot-5.0.2-py3-none-any.whl
+Source20:  https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/el9/uproot_methods-0.9.2-py3-none-any.whl
+Source21:  https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/el9/xxhash-3.2.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+
 
 BuildRequires: systemd
 %{?systemd_requires}
 
 %define __python /usr/bin/python3
 BuildRequires: python3-devel
+BuildRequires: python3-pip
 
 # Necessary for daemon to report back to the OSG Collector.
 BuildRequires: python3-condor
@@ -62,7 +75,11 @@ AutoReq: no
 
 Requires: xz
 Requires: xrootd-server
+%if 0%{?el9}
+Requires: python39(x86-64)
+%else
 Requires: python36(x86-64)
+%endif
 
 %description -n xcache-consistency-check
 %{summary}
@@ -181,7 +198,14 @@ Requires: %{name} = %{version}
 
 mkdir -p %{buildroot}%{_sysconfdir}/xrootd
 mkdir -p %{buildroot}/usr/lib/xcache-consistency-check
-for whl in %{SOURCE1} %{SOURCE2} %{SOURCE3} %{SOURCE4} %{SOURCE5} %{SOURCE6} %{SOURCE7}
+%if 0%{?el9}
+for whl in %{SOURCE11} %{SOURCE12} %{SOURCE13} %{SOURCE14} %{SOURCE15} \
+           %{SOURCE16} %{SOURCE17} %{SOURCE18} %{SOURCE19} %{SOURCE20} \
+           %{SOURCE21}
+%else
+for whl in %{SOURCE1} %{SOURCE2} %{SOURCE3} %{SOURCE4} %{SOURCE5} %{SOURCE6} \
+           %{SOURCE7}
+%endif
 do
     %{__python} -m pip install -I --no-deps "$whl" --root %{buildroot}/usr/lib/xcache-consistency-check
 done
@@ -282,12 +306,18 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Fri Feb 24 2023 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.4.0-3
+- Merge changes for building on el9
+
 * Fri Feb 24 2023 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.4.0-2
 - Add python3-condor and python3-xrootd build dependencies so we don't build RPMs for repos
   which they can't be installed from.
 
 * Fri Feb 03 2023 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.4.0-1
 - Enable XRootD TCP Stats for stash-cache and stash-cache-auth (SOFTWARE-5373)
+
+* Fri Feb 03 2023 Carl Edquist <edquist@cs.wisc.edu> - 3.3.0-1.1
+- Add python3-pip build requirement for el9 (SOFTWARE-5416)
 
 * Fri Dec 02 2022 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.3.0-1
 - Remove X.509 proxy requirement for stash-cache xrootd instance (SOFTWARE-5366)
