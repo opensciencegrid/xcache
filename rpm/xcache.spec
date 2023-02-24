@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
 Version:   3.4.0
-Release:   1%{?dist}
+Release:   2%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -22,6 +22,8 @@ BuildRequires: systemd
 BuildRequires: python3-devel
 
 # Necessary for daemon to report back to the OSG Collector.
+BuildRequires: python3-condor
+BuildRequires: python3-xrootd
 Requires: python3-condor
 Requires: python3-xrootd
 
@@ -280,6 +282,10 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Fri Feb 24 2023 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.4.0-2
+- Add python3-condor and python3-xrootd build dependencies so we don't build RPMs for repos
+  which they can't be installed from.
+
 * Fri Feb 03 2023 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.4.0-1
 - Enable XRootD TCP Stats for stash-cache and stash-cache-auth (SOFTWARE-5373)
 
