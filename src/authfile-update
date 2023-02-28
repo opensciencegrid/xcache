@@ -69,6 +69,9 @@ fetch_cache_auth_data () {
     fetch "${TOPOLOGY}/cache/scitokens.conf?fqdn=${CACHE_FQDN}" "$DESTDIR/stash-cache-auth/scitokens.conf" && \
         append_local_additions "$DESTDIR/stash-cache-auth/scitokens.conf"
     ret=$(( $ret | $? ))
+    fetch "${TOPOLOGY}/cache/grid-mapfile?fqdn=${CACHE_FQDN}" "$DESTDIR/stash-cache-auth/grid-mapfile" && \
+        append_local_additions "$DESTDIR/stash-cache-auth/grid-mapfile"
+    ret=$(( $ret | $? ))
     return $ret
 }
 
@@ -88,6 +91,9 @@ fetch_origin_auth_data () {
     ret=$(( $ret | $? ))
     fetch "${TOPOLOGY}/origin/scitokens.conf?fqdn=${ORIGIN_FQDN}" "$DESTDIR/stash-origin-auth/scitokens.conf" && \
         append_local_additions "$DESTDIR/stash-origin-auth/scitokens.conf"
+    ret=$(( $ret | $? ))
+    fetch "${TOPOLOGY}/origin/grid-mapfile?fqdn=${ORIGIN_FQDN}" "$DESTDIR/stash-origin-auth/grid-mapfile" && \
+        append_local_additions "$DESTDIR/stash-origin-auth/grid-mapfile"
     ret=$(( $ret | $? ))
     return $ret
 }
