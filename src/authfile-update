@@ -44,6 +44,19 @@ ORIGIN_FQDN=${ORIGIN_FQDN:-$(hostname -f)}
 DESTDIR=${DESTDIR:-/run}
 
 
+prepend_local_additions () {
+    local base="$1"
+    local tmp="${base}.$$"
+    if [[ -s $base && -f ${base}.local ]]; then
+        echo -e "\n# The following lines are from $(basename "${base}.local"):" > "$tmp"  && \
+            cat "${base}.local" >> "$tmp"  && \
+            echo -e "\n# The following lines are from topology:" >> "$tmp"  && \
+            cat "${base}" >> "$tmp"  && \
+            cp -f "$tmp" "$base"
+    fi
+}
+
+
 append_local_additions () {
     local base="$1"
     if [[ -s $base && -f ${base}.local ]]; then
@@ -70,7 +83,7 @@ fetch_cache_auth_data () {
         append_local_additions "$DESTDIR/stash-cache-auth/scitokens.conf"
     ret=$(( $ret | $? ))
     fetch "${TOPOLOGY}/cache/grid-mapfile?fqdn=${CACHE_FQDN}" "$DESTDIR/stash-cache-auth/grid-mapfile" && \
-        append_local_additions "$DESTDIR/stash-cache-auth/grid-mapfile"
+        prepend_local_additions "$DESTDIR/stash-cache-auth/grid-mapfile"
     ret=$(( $ret | $? ))
     return $ret
 }
@@ -93,7 +106,7 @@ fetch_origin_auth_data () {
         append_local_additions "$DESTDIR/stash-origin-auth/scitokens.conf"
     ret=$(( $ret | $? ))
     fetch "${TOPOLOGY}/origin/grid-mapfile?fqdn=${ORIGIN_FQDN}" "$DESTDIR/stash-origin-auth/grid-mapfile" && \
-        append_local_additions "$DESTDIR/stash-origin-auth/grid-mapfile"
+        prepend_local_additions "$DESTDIR/stash-origin-auth/grid-mapfile"
     ret=$(( $ret | $? ))
     return $ret
 }
