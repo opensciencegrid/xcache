@@ -47,13 +47,17 @@ DESTDIR=${DESTDIR:-/run}
 prepend_local_additions () {
     local base="$1"
     local tmp="${base}.$$"
+    local ret=0
     if [[ -s $base && -f ${base}.local ]]; then
         echo -e "\n# The following lines are from $(basename "${base}.local"):" > "$tmp"  && \
             cat "${base}.local" >> "$tmp"  && \
             echo -e "\n# The following lines are from topology:" >> "$tmp"  && \
             cat "${base}" >> "$tmp"  && \
-            cp -f "$tmp" "$base"
+            mv -f "$tmp" "$base"
+        ret=$?
     fi
+    rm -f "$tmp"
+    return $ret
 }
 
 
