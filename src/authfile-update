@@ -51,7 +51,7 @@ prepend_local_additions () {
     if [[ -s $base && -f ${base}.local ]]; then
         echo -e "\n# The following lines are from $(basename "${base}.local"):" > "$tmp"  && \
             cat "${base}.local" >> "$tmp"  && \
-            echo -e "\n# The following lines are from topology:" >> "$tmp"  && \
+            echo -e "\n# The following lines are from OSG Topology:" >> "$tmp"  && \
             cat "${base}" >> "$tmp"  && \
             mv -f "$tmp" "$base"
         ret=$?
