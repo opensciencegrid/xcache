@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   3.4.0
-Release:   3%{?dist}
+Version:   3.5.0
+Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -306,6 +306,10 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Tue May 16 2023 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.5.0-1
+- Have the authfile updater get a grid-mapfile from Topology for
+  stash-cache-auth and stash-origin-auth (SOFTWARE-5467)
+
 * Fri Feb 24 2023 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.4.0-3
 - Merge changes for building on el9
 
