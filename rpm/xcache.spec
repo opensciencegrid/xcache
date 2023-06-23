@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
 Version:   3.5.0
-Release:   1%{?dist}
+Release:   2%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -122,6 +122,7 @@ Summary: The OSG data federation cache server
 
 Requires: %{name} = %{version}
 Requires: wget
+Requires: xrdcl-http
 Requires: xrootd-tcp-stats
 
 Provides: stashcache-cache-server = %{name}-%{version}
@@ -306,6 +307,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Fri Jun 23 2023 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.5.0-2
+- Add xrdcl-http dependency for stash-cache (SOFTWARE-5606)
+
 * Tue May 16 2023 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.5.0-1
 - Have the authfile updater get a grid-mapfile from Topology for
   stash-cache-auth and stash-origin-auth (SOFTWARE-5467)
