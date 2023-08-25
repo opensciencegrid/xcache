@@ -177,7 +177,7 @@ def main():
     if 'AUTH_SSL_CLIENT_CADIR' not in htcondor.param:
         htcondor.param['AUTH_SSL_CLIENT_CADIR'] = '/etc/grid-security/certificates'
 
-    # Check for existence of host cert/key pair
+    # Check for existence of xrootd cert/key pair
     for certfile in htcondor.param['AUTH_SSL_CLIENT_CERTFILE'], htcondor.param['AUTH_SSL_CLIENT_KEYFILE']:
         if not os.path.exists(certfile):
             logging.error('Could not find client SSL file %s', certfile)
