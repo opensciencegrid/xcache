@@ -166,11 +166,21 @@ def main():
         if 'TOOL_DEBUG' not in htcondor.param:
             htcondor.param['TOOL_DEBUG'] = "D_ALL D_CATEGORY"
 
+    # Advertise to the central collector with SSL (SOFTWARE-3940)
+    htcondor.param['SEC_CLIENT_AUTHENTICATION_METHODS'] = 'SSL'
+
+    # Set SSL client config if not defined
+    if 'AUTH_SSL_CLIENT_CERTFILE' not in htcondor.param:
+        htcondor.param['AUTH_SSL_CLIENT_CERTFILE'] = '/etc/grid-security/xrd/xrdcert.pem'
+    if 'AUTH_SSL_CLIENT_KEYFILE' not in htcondor.param:
+        htcondor.param['AUTH_SSL_CLIENT_KEYFILE'] = '/etc/grid-security/xrd/xrdkey.pem'
+    if 'AUTH_SSL_CLIENT_CADIR' not in htcondor.param:
+        htcondor.param['AUTH_SSL_CLIENT_CADIR'] = '/etc/grid-security/certificates'
+
     # Check for existence of host cert/key pair
-    for pki in 'cert', 'key':
-        pki_path = '/etc/grid-security/host%s.pem' % pki
-        if not os.path.exists(pki_path):
-            logging.error('Could not find host %s at %s', pki, pki_path)
+    for certfile in htcondor.param['AUTH_SSL_CLIENT_CERTFILE'], htcondor.param['AUTH_SSL_CLIENT_KEYFILE']:
+        if not os.path.exists(certfile):
+            logging.error('Could not find client SSL file %s', certfile)
             sys.exit(1)
 
     scr = StashCacheReporter(cache_path=args.cache_path, collectors=args.collectors,
