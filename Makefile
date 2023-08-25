@@ -93,9 +93,6 @@ install:
 	ln -srf $(DESTDIR)/$(INSTALL_XROOTD_DIR)/xrootd-stash-origin.cfg $(DESTDIR)/$(INSTALL_XROOTD_DIR)/xrootd-stash-origin-auth.cfg
 	mkdir -p $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d
 	install -p -m 0644 $(XROOTD_CONFIGD) $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d
-	# Condor config files
-	mkdir -p $(DESTDIR)/etc/condor/config.d
-	install -p -m 0644 configs/xcache/condor/01-xcache-reporter-auth.conf $(DESTDIR)/etc/condor/config.d/01-xcache-reporter-auth.conf
 	# XCache Consistency Check
 	mkdir -p $(DESTDIR)/usr/bin
 	mkdir -p $(DESTDIR)/var/lib/xcache-consistency-check
