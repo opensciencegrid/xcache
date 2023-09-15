@@ -135,7 +135,7 @@ class Download:
                 with open(local_file, "rt", encoding="utf-8", errors="replace") as fh:
                     new_text += (
                         f"## The following lines are from {local_file}:\n"
-                        + fh.read()
+                        + fh.read().rstrip("\n")
                         + "\n\n"
                     )
             except FileNotFoundError:
@@ -145,10 +145,10 @@ class Download:
 
         if new_text:
             if self.prepend_local:
-                new_text += "\n## The following lines are from OSG Topology:\n" + text
+                new_text += "## The following lines are from OSG Topology:\n" + text
             else:
-                new_text = text + "\n\n" + new_text + "\n"
-            return new_text
+                new_text = text + "\n\n" + new_text
+            return new_text.rstrip("\n") + "\n"  # have exactly one final newline
         else:
             return text
 
