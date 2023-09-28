@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
 Version:   3.5.0
-Release:   2%{?dist}
+Release:   4%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -76,7 +76,7 @@ AutoReq: no
 Requires: xz
 Requires: xrootd-server
 %if 0%{?el9}
-Requires: python39(x86-64)
+Requires: python3.9(x86-64)
 %else
 Requires: python36(x86-64)
 %endif
@@ -306,6 +306,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Thu Sep 28 2023 Brian Lin <blin@cs.wisc.edu> - 3.5.0-4
+- Fix EL9 python dependency
+
 * Fri Jun 23 2023 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.5.0-2
 - Add xrdcl-http dependency for stash-cache (SOFTWARE-5606)
 
