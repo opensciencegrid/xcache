@@ -11,7 +11,7 @@ import urllib.error
 import urllib.request
 
 
-INSTANCES = [
+KNOWN_INSTANCES = [
     "stash-origin",
     "stash-origin-auth",
     "stash-cache",
@@ -56,12 +56,17 @@ def die_with_usage(prog):
     print(
         f"""
 Usage: {prog} <instance>
+   or  {prog} --cache
+   or  {prog} --origin
 
 where <instance> is one of:
     stash-cache
     stash-cache-auth
     stash-origin
     stash-origin-auth
+
+--cache is equivalent to running it for stash-cache and stash-cache-auth
+--origin is equivalent to running it for stash-origin and stash-origin-auth
 
 Environment variables used:
     CACHE_FQDN      FQDN used for cache authfile query (default: the full hostname)
@@ -170,24 +175,15 @@ class Download:
         print(f"{lines} lines written successfully to {self.dest_file}.")
 
 
-def main(argv):
-    topology = os.environ.get("TOPOLOGY", "https://topology.opensciencegrid.org")
-    destdir = os.environ.get("DESTDIR", "/run")
-    ret = 0
-
-    if len(argv) != 2:
-        die_with_usage(argv[0])
-
-    instance = argv[1]
-    if instance not in INSTANCES:
-        complain(f"Unknown instance {instance}")
-        die_with_usage(argv[0])
+def handle_instance(instance, topology, destdir):
     if "cache" in instance:
         fqdn = os.environ.get("CACHE_FQDN", socket.getfqdn())
     elif "origin" in instance:
         fqdn = os.environ.get("ORIGIN_FQDN", socket.getfqdn())
     else:
         assert False, f"bad instance {instance} should have been caught"
+
+    ret = 0
 
     for config_file in CONFIG_FILES:
         dl = Download(
@@ -228,5 +224,33 @@ def main(argv):
     return ret
 
 
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
+
+    topology = os.environ.get("TOPOLOGY", "https://topology.opensciencegrid.org")
+    destdir = os.environ.get("DESTDIR", "/run")
+    ret = 0
+
+    if len(argv) != 2:
+        die_with_usage(argv[0])
+
+    if argv[1] == "--cache":
+        instances = ["stash-cache", "stash-cache-auth"]
+    elif argv[1] == "--origin":
+        instances = ["stash-origin", "stash-origin-auth"]
+    else:
+        if argv[1] not in KNOWN_INSTANCES:
+            complain(f"Unknown instance {argv[1]}")
+            die_with_usage(argv[0])
+        else:
+            instances = [argv[1]]
+
+    for instance in instances:
+        ret |= handle_instance(instance, topology=topology, destdir=destdir)
+
+    return ret
+
+
 if __name__ == "__main__":
-    sys.exit(main(sys.argv))
+    sys.exit(main())
