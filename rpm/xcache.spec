@@ -1,7 +1,7 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   3.5.0
-Release:   4%{?dist}
+Version:   3.6.0
+Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://opensciencegrid.org/docs/
@@ -306,6 +306,10 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Tue Dec 12 2023 Matt Westphall <westphall@wisc.edu> - 3.6.0-1
+- Make redirector line in cache config customizable (SOFTWARE-5641)
+- check for *.local files in /etc/xrootd in authfile-updater (SOFTWARE-5597)
+
 * Thu Sep 28 2023 Brian Lin <blin@cs.wisc.edu> - 3.5.0-4
 - Fix EL9 python dependency
 
