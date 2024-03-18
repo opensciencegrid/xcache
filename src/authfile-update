@@ -144,6 +144,10 @@ class Download:
         new_text = ""
         for local_file in self.local_files:
             try:
+                if os.path.samefile(os.path.realpath(local_file), os.path.realpath(self.dest_file)):
+                    # The local file is a symlink to the destination file or something similar.
+                    # Skip it to avoid a loop.
+                    continue
                 with open(local_file, "rt", encoding="utf-8", errors="replace") as fh:
                     new_text += (
                         f"## The following lines are from {local_file}:\n"
