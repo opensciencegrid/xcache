@@ -89,13 +89,20 @@ class Download:
 
         self.full_destdir = f"{self.destdir}/{self.instance}"
         self.dest_file = f"{self.full_destdir}/{self.config_file}"
-        self.local_files = [
+        self.local_files = []
+        if config_file == "grid-mapfile":
+            # Local additions to the grid-mapfile are prepended, not appended
+            # to what's downloaded from topology because we want them to "win"
+            self.prepend_local = True
+
+            # Backward compat: also read /etc/grid-security/grid-mapfile
+            self.local_files.append("/etc/grid-security/grid-mapfile")
+        else:
+            self.prepend_local = False
+        self.local_files += [
             f"{self.destdir}/{self.instance}/{self.config_file}.local",
             f"/etc/xrootd/{self.instance}-{self.config_file}.local",
         ]
-        self.prepend_local = config_file == "grid-mapfile"
-        # ^^ local additions to the grid-mapfile are prepended, not appended
-        #    to what's downloaded from topology
 
     def fetch(self) -> Tuple[Optional[str], bool]:
         """Download the data for this config file from Topology and return
@@ -137,6 +144,10 @@ class Download:
         new_text = ""
         for local_file in self.local_files:
             try:
+                if os.path.samefile(os.path.realpath(local_file), os.path.realpath(self.dest_file)):
+                    # The local file is a symlink to the destination file or something similar.
+                    # Skip it to avoid a loop.
+                    continue
                 with open(local_file, "rt", encoding="utf-8", errors="replace") as fh:
                     new_text += (
                         f"## The following lines are from {local_file}:\n"
