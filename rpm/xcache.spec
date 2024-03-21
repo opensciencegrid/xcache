@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   3.6.0
+Version:   3.7.0
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -306,6 +306,10 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Fri Mar 22 2024 Mátyás Selmeci <matyas@cs.wisc.edu> - 3.7.0-1
+- Make use of grid-mapfile downloaded from Topology.
+  Requires osg-xrootd >= 3.6-24 (for OSG 3.6) or >= 23-6 (for OSG 23)
+
 * Tue Dec 12 2023 Matt Westphall <westphall@wisc.edu> - 3.6.0-1
 - Make redirector line in cache config customizable (SOFTWARE-5641)
 - check for *.local files in /etc/xrootd in authfile-updater (SOFTWARE-5597)
