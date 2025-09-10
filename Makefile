@@ -1,12 +1,13 @@
 # Makefile for xcache
 
+BUILD_XCACHE_CONSISTENCY_CHECK ?= 1
 
 # ------------------------------------------------------------------------------
 # Release information: Update for each release
 # ------------------------------------------------------------------------------
 
 PACKAGE := xcache
-VERSION := 4.0.0
+VERSION := 4.1.0
 
 
 # ------------------------------------------------------------------------------
@@ -29,8 +30,12 @@ XROOTD_CONFIGD := $(wildcard configs/atlas-xcache/config.d/*) \
                   $(wildcard configs/xcache/config.d/*) \
                   $(wildcard configs/xcache-redir/config.d/*) \
 
+ifeq ($(BUILD_XCACHE_CONSISTENCY_CHECK), 1)
 SYSTEMD_UNITS := $(wildcard configs/xcache/systemd/*) \
                  $(wildcard configs/xcache-consistency-check/systemd/*)
+else
+SYSTEMD_UNITS := $(wildcard configs/xcache/systemd/*)
+endif
 
 TMPFILES_D := configs/xcache/tmpfiles/xcache.conf
 
@@ -50,7 +55,7 @@ TARBALL_DIR := $(PACKAGE)-$(VERSION)
 TARBALL_NAME := $(PACKAGE)-$(VERSION).tar.gz
 UPSTREAM := /p/vdt/public/html/upstream
 UPSTREAM_DIR := $(UPSTREAM)/$(PACKAGE)/$(VERSION)
-INSTALL_PYTHON_DIR := $(shell $(PYTHON) -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib())')
+INSTALL_PYTHON_DIR := $(shell $(PYTHON) -c 'from sysconfig import get_path; print(get_path("purelib"))')
 
 
 # ------------------------------------------------------------------------------
@@ -63,6 +68,8 @@ _default:
 	@echo "make dist                     -- make a distribution source tarball"
 	@echo "make upstream [UPSTREAM=path] -- install source tarball to upstream cache rooted at path"
 	@echo "make check                    -- use pylint to check for errors"
+	@echo
+	@echo "Add BUILD_XCACHE_CONSISTENCY_CHECK=0 to skip building xcache-consistency-check"
 
 
 distclean:
@@ -82,11 +89,13 @@ install:
 	install -p -m 0644 $(XROOTD_CONFIG) $(DESTDIR)/$(INSTALL_XROOTD_DIR)
 	mkdir -p $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d
 	install -p -m 0644 $(XROOTD_CONFIGD) $(DESTDIR)/$(INSTALL_XROOTD_DIR)/config.d
+ifeq ($(BUILD_XCACHE_CONSISTENCY_CHECK),1)
 	# XCache Consistency Check
 	mkdir -p $(DESTDIR)/usr/bin
 	mkdir -p $(DESTDIR)/var/lib/xcache-consistency-check
 	install -p -m 0755 src/xcache-consistency-check $(DESTDIR)/usr/bin/xcache-consistency-check
 	install -p -m 0644 configs/xcache-consistency-check/xrootd/xcache-consistency-check.cfg $(DESTDIR)/etc/xrootd/xcache-consistency-check.cfg
+endif
 	# systemd unit files
 	mkdir -p $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)
 	install -p -m 0644 $(SYSTEMD_UNITS) $(DESTDIR)/$(INSTALL_SYSTEMD_UNITDIR)
