@@ -1,15 +1,13 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   4.0.0
-Release:   0.2%{?dist}
+Version:   4.1.0
+Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
 URL:       https://osg-htc.org/docs/
 
-# TODO: Find wheels for aarch64
-ExclusiveArch: x86_64
-
 Source0:   %{name}-%{version}.tar.gz
+%if 0%{?el8}
 Source1:   https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/numpy-1.16.6-cp36-cp36m-manylinux1_x86_64.whl
 Source2:   https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/cachetools-3.1.1-py2.py3-none-any.whl
 Source3:   https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/awkward-0.12.22-py2.py3-none-any.whl
@@ -17,7 +15,9 @@ Source4:   https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/uproot_meth
 Source5:   https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/uproot-3.11.7-py2.py3-none-any.whl
 Source6:   https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/xxhash-1.4.4-cp36-cp36m-manylinux1_x86_64.whl
 Source7:   https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/lz4-2.2.1-cp36-cp36m-manylinux1_x86_64.whl
+%endif
 
+%if 0%{?el9}
 Source11:  https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/el9/awkward-0.14.0-py2.py3-none-any.whl
 Source12:  https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/el9/awkward-2.0.7-py3-none-any.whl
 Source13:  https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/el9/awkward_cpp-8-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
@@ -29,7 +29,24 @@ Source18:  https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/el9/typing_
 Source19:  https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/el9/uproot-5.0.2-py3-none-any.whl
 Source20:  https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/el9/uproot_methods-0.9.2-py3-none-any.whl
 Source21:  https://vdt.cs.wisc.edu/upstream/xcache/3.0.0/python-deps/el9/xxhash-3.2.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+%endif
 
+# We're dropping support for xcache-consistency-check on OSG 25.
+# What to do with the xcache-consistency-check subpackage depends on platform and arch:
+# EL8, EL9 x86_64 on OSG 24: build the real subpackage
+# EL8, EL9 x86_64 on OSG 25: build a transitional dummy package
+# EL10 and/or ARM: do not build a subpackage at all
+%if "%{_arch}" != "x86_64" || 0%{?rhel} >= 10
+%define omit_xcache_consistency_check 1
+%define build_xcache_consistency_check 0
+%else
+%define omit_xcache_consistency_check 0
+%if 0%{?osg} >= 25
+%define build_xcache_consistency_check 0
+%else
+%define build_xcache_consistency_check 1
+%endif
+%endif
 
 BuildRequires: systemd
 %{?systemd_requires}
@@ -70,7 +87,11 @@ Requires: xrootd-scitokens
 %systemd_postun_with_restart xcache-reporter.service xcache-reporter.timer xrootd-renew-proxy.service xrootd-renew-proxy.timer
 
 ########################################
+%if ! 0%{?omit_xcache_consistency_check}
 %package -n xcache-consistency-check
+
+%if 0%{?build_xcache_consistency_check}
+
 Summary: Consistency check for root files
 AutoReq: no
 %global __provides_exclude ^libgfortran.*\\.so.*$|^libopenblasp.*\\.so.*$
@@ -79,21 +100,32 @@ Requires: xz
 Requires: xrootd-server
 %if 0%{?el9}
 Requires: python3.9(x86-64)
-%else
+%endif
+%if 0%{?el8}
 Requires: python36(x86-64)
 %endif
 
-%description -n xcache-consistency-check
-%{summary}
-
 %post -n xcache-consistency-check
-
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 %systemd_post xcache-consistency-check.service xcache-consistency-check.timer
 %preun -n xcache-consistency-check
 %systemd_preun xcache-consistency-check.service xcache-consistency-check.timer
 %postun -n xcache-consistency-check
 %systemd_postun_with_restart xcache-consistency-check.service xcache-consistency-check.timer
+
+%else
+
+Summary: This is a transitional dummy package to ease upgrades; it can be removed.
+
+%endif
+# ^^ build_xcache_consistency_check
+
+%description -n xcache-consistency-check
+%{summary}
+
+
+%endif
+# ^^ omit_xcache_consistency_check
 
 ########################################
 %package -n atlas-xcache
@@ -151,20 +183,25 @@ Requires: %{name} = %{version}
 #find . -type f -exec sed -ri '1s,^#!\s*(/usr)?/bin/(env )?python.*,#!%{__python},' '{}' +
 
 mkdir -p %{buildroot}%{_sysconfdir}/xrootd
+
+%if %build_xcache_consistency_check
 mkdir -p %{buildroot}/usr/lib/xcache-consistency-check
 %if 0%{?el9}
 for whl in %{SOURCE11} %{SOURCE12} %{SOURCE13} %{SOURCE14} %{SOURCE15} \
            %{SOURCE16} %{SOURCE17} %{SOURCE18} %{SOURCE19} %{SOURCE20} \
            %{SOURCE21}
-%else
+%endif
+%if 0%{?el8}
 for whl in %{SOURCE1} %{SOURCE2} %{SOURCE3} %{SOURCE4} %{SOURCE5} %{SOURCE6} \
            %{SOURCE7}
 %endif
 do
     %{__python} -m pip install -I --no-deps "$whl" --root %{buildroot}/usr/lib/xcache-consistency-check
 done
+%endif
+# ^^ build_xcache_consistency_check
 
-make install DESTDIR=%{buildroot} PYTHON=%{__python}
+make install DESTDIR=%{buildroot} PYTHON=%{__python} BUILD_XCACHE_CONSISTENCY_CHECK=%{build_xcache_consistency_check}
 
 # Create xrootd certificate directory
 mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
@@ -172,8 +209,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %files
 %{_libexecdir}/%{name}/xcache-reporter
 %{_libexecdir}/%{name}/renew-proxy
-%{python3_sitelib}/xrootd_cache_stats.py*
-%{python3_sitelib}/__pycache__/xrootd_cache_stats.*
+%pycached %{python3_sitelib}/xrootd_cache_stats.py
 %{_unitdir}/xcache-reporter.service
 %{_unitdir}/xcache-reporter.timer
 %{_unitdir}/xrootd-renew-proxy.service
@@ -185,6 +221,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %attr(0755, xrootd, xrootd) %dir /run/xcache-auth
 %{_tmpfilesdir}/xcache.conf
 
+%if 0%{?build_xcache_consistency_check}
 %files -n xcache-consistency-check
 %attr(0755, xrootd, xrootd) %{_bindir}/xcache-consistency-check
 %dir %attr(0755, xrootd, xrootd) /var/lib/xcache-consistency-check
@@ -192,6 +229,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %{_unitdir}/xcache-consistency-check.timer
 %config(noreplace) %{_sysconfdir}/xrootd/xcache-consistency-check.cfg
 /usr/lib/xcache-consistency-check/*
+%endif
 
 %files -n atlas-xcache
 %config %{_sysconfdir}/xrootd/xrootd-atlas-xcache.cfg
@@ -221,6 +259,11 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Thu Sep 11 2025 Mátyás Selmeci <mselmeci@wisc.edu> - 4.1.0-1
+- Enable ARM builds (except for xcache-consistency-check) (SOFTWARE-6057)
+- Dummy out xcache-consistency-check on OSG 25 and newer (SOFTWARE-6054)
+- Fix makefile for EL10 (Python 3.12) support
+
 * Thu Jan 9 2025 Matt Westphall <westphall@wisc.edu> - 4.0.0-0.2
 - Add suggests: osg-ca-certs to satisfy grid-certificates (SOFTWARE-6051)
 
