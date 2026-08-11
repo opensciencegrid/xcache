@@ -78,7 +78,7 @@ class TestStatsCollection(unittest.TestCase):
         ospathisdir = mock.Mock(side_effect=lambda path: os.path.basename(path) in ['a','b','c','d'])
         osstat = mock.Mock(return_value=mock.Mock(st_blocks=256))
 
-        import classad
+        import classad2 as classad
         scan_vo_dir = mock.Mock(return_value=classad.ClassAd("""
     [
         bytes_hr_24 = 524288;
@@ -117,7 +117,7 @@ class TestStatsCollection(unittest.TestCase):
 
     def test_collect_cache_stats(self):
 
-        import classad
+        import classad2 as classad
 
         mock_scan_cache_dirs = mock.Mock(return_value=classad.ClassAd({}))
         mock_test_xrootd_server = mock.Mock(return_value=classad.ClassAd({}))
@@ -135,4 +135,3 @@ class TestStatsCollection(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
