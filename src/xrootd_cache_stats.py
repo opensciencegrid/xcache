@@ -14,7 +14,7 @@ import collections
 import six
 from six.moves import urllib
 
-import classad
+import classad2 as classad
 import XRootD.client
 
 __all__ = ['collect_cache_stats']

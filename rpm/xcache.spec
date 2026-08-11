@@ -1,6 +1,6 @@
 Name:      xcache
 Summary:   XCache scripts and configurations
-Version:   4.1.0
+Version:   4.1.1
 Release:   1%{?dist}
 License:   Apache 2.0
 Group:     Grid
@@ -259,6 +259,9 @@ mkdir -p %{buildroot}%{_sysconfdir}/grid-security/xrd
 %config %{_sysconfdir}/xrootd/config.d/03-redir-tuning.cfg
 
 %changelog
+* Tue Aug 11 2026 Matt Westphall <westphall@wisc.edu> - 4.1.1-1
+- Use HTCondor v2 python bindings (SOFTWARE-6233)
+
 * Thu Sep 11 2025 Mátyás Selmeci <mselmeci@wisc.edu> - 4.1.0-1
 - Enable ARM builds (except for xcache-consistency-check) (SOFTWARE-6057)
 - Dummy out xcache-consistency-check on OSG 25 and newer (SOFTWARE-6054)
